@@ -9,8 +9,17 @@ class Producto {
     }
 
     public function obtenerTodos() {
-        $resultado = $this->db->query("SELECT * FROM productos");
-        return $resultado->fetch_all(MYSQLI_ASSOC);
+        return [
+            [
+                'id_producto' => 1,
+                'nombre' => 'Sudadera',
+                'descripcion' => 'Sudadera de algodón unisex',
+                'precio' => 250.00,
+                'imagen' => 'sudadera.png',
+                'stock' => 10
+            ],
+            
+        ];
     }
 
     public function obtenerPorId($id) {
