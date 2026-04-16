@@ -15,7 +15,7 @@ session_start();
 </head>
 <body>
     <?php include 'incluir/encabezado.php'; ?>
-
+--$_POST <?php include 'incluir/encabezado.php'; ?>
     <div class="container mt-5">
         <h1 class="text-center mb-5">Bienvenido a nuestra tienda en línea</h1>
         
@@ -33,7 +33,7 @@ session_start();
             <?php
             // Consultar productos de la base de datos
             $consulta = "SELECT * FROM productos ORDER BY fecha_creacion DESC";
-            $resultado = $conexion->query($consulta);
+            $resultado = $conexion->query($consulta);   
 
             if ($resultado->num_rows > 0) {
                 while ($producto = $resultado->fetch_assoc()) {
