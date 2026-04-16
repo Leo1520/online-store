@@ -2,7 +2,7 @@
 require_once __DIR__ . '/Controlador.php';
 require_once __DIR__ . '/../Models/Cuenta.php';
 require_once __DIR__ . '/../Models/Cliente.php';
-require_once __DIR__ . '/../config/Utilidades.php';
+require_once __DIR__ . '/../../config/Utilidades.php';
 
 /**
  * Controlador de Autenticación

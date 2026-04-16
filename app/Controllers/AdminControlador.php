@@ -3,6 +3,8 @@ require_once __DIR__ . '/Controlador.php';
 require_once __DIR__ . '/../Models/Marca.php';
 require_once __DIR__ . '/../Models/Categoria.php';
 require_once __DIR__ . '/../Models/Industria.php';
+require_once __DIR__ . '/../Models/Producto.php';
+require_once __DIR__ . '/../Models/NotaVenta.php';
 
 /**
  * Controlador para administración de Marcas, Categorías e Industrias
