@@ -15,7 +15,7 @@ session_start();
 </head>
 <body>
     <?php include 'incluir/encabezado.php'; ?>
---$_POST <?php include 'incluir/encabezado.php'; ?>
+
     <div class="container mt-5">
         <h1 class="text-center mb-5">Bienvenido a nuestra tienda en línea</h1>
         
