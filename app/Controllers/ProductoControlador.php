@@ -18,9 +18,17 @@ class ProductoControlador extends Controlador {
         $modelo = new Producto($this->conexion);
         $productos = $modelo->obtenerTodos();
         
-        $this->cargarVista('Productos/listar', [
-            'productos' => $productos
-        ]);
+        // Si es admin o trabajador, mostrar vista de administración
+        if (isset($_SESSION['rol']) && in_array($_SESSION['rol'], ['admin', 'trabajador'])) {
+            $this->cargarVista('Productos/listarAdmin', [
+                'productos' => $productos
+            ]);
+        } else {
+            // Si es cliente, mostrar vista de tienda
+            $this->cargarVista('Productos/listar', [
+                'productos' => $productos
+            ]);
+        }
     }
 
     /**

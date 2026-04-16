@@ -66,6 +66,12 @@
                         </a>
                         <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">
                             <a class="dropdown-item" href="?controlador=autenticacion&accion=perfil">Mi Perfil</a>
+                            <?php if (isset($_SESSION['rol']) && in_array($_SESSION['rol'], ['admin', 'trabajador'])): ?>
+                                <div class="dropdown-divider"></div>
+                                <a class="dropdown-item" href="?controlador=admin&accion=panel">
+                                    <i class="bi bi-speedometer2"></i> Panel Admin
+                                </a>
+                            <?php endif; ?>
                             <div class="dropdown-divider"></div>
                             <a class="dropdown-item" href="?controlador=autenticacion&accion=cerrarSesion">Cerrar Sesión</a>
                         </div>

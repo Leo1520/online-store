@@ -42,7 +42,7 @@ class Controlador {
      */
     protected function verificarAutenticacion() {
         if (!isset($_SESSION['usuario'])) {
-            $this->redirigir('../Admin/inicio_sesion.php');
+            $this->redirigir('?controlador=autenticacion&accion=mostrarLogin');
         }
     }
 
@@ -50,8 +50,19 @@ class Controlador {
      * Verifica si es administrador
      */
     protected function verificarAdmin() {
-        if (!isset($_SESSION['admin'])) {
-            $this->redirigir('../Admin/inicio_sesion.php');
+        if (!isset($_SESSION['usuario']) || $_SESSION['rol'] !== 'admin') {
+            $_SESSION['error'] = 'No tienes permiso para acceder a esta sección.';
+            $this->redirigir('?controlador=productos&accion=listar');
+        }
+    }
+
+    /**
+     * Verifica si es trabajador (trabajador o admin)
+     */
+    protected function verificarTrabajador() {
+        if (!isset($_SESSION['usuario']) || ($_SESSION['rol'] !== 'trabajador' && $_SESSION['rol'] !== 'admin')) {
+            $_SESSION['error'] = 'No tienes permiso para acceder a esta sección.';
+            $this->redirigir('?controlador=productos&accion=listar');
         }
     }
 }

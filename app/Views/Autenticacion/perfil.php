@@ -13,7 +13,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
 </head>
 <body>
-    <?php include __DIR__ . '/../layout.php'; ?>
+    <?php include __DIR__ . '/../header.php'; ?>
 
     <main class="container my-5">
         <div class="row justify-content-center">
@@ -91,7 +91,4 @@
         </div>
     </main>
 
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-</body>
-</html>
+    <?php include __DIR__ . '/../footer.php'; ?>

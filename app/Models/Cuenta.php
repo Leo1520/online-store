@@ -12,10 +12,10 @@ class Cuenta extends Modelo {
     }
 
     /**
-     * Obtiene una cuenta por usuario
+     * Obtiene una cuenta por usuario con su rol
      */
     public function obtenerPorUsuario($usuario) {
-        $query = "SELECT * FROM " . $this->tabla . " WHERE usuario = ?";
+        $query = "SELECT usuario, rol, estado FROM " . $this->tabla . " WHERE usuario = ?";
         $stmt = $this->conexion->prepare($query);
         $stmt->bind_param("s", $usuario);
         $stmt->execute();
@@ -24,13 +24,29 @@ class Cuenta extends Modelo {
     }
 
     /**
+     * Verifica si un usuario es admin
+     */
+    public function esAdmin($usuario) {
+        $cuenta = $this->obtenerPorUsuario($usuario);
+        return $cuenta && $cuenta['rol'] === 'admin';
+    }
+
+    /**
+     * Verifica si un usuario es trabajador
+     */
+    public function esTrabajador($usuario) {
+        $cuenta = $this->obtenerPorUsuario($usuario);
+        return $cuenta && ($cuenta['rol'] === 'trabajador' || $cuenta['rol'] === 'admin');
+    }
+
+    /**
      * Crea una nueva cuenta
      */
-    public function crear($usuario, $password) {
-        $query = "INSERT INTO " . $this->tabla . " (usuario, password) VALUES (?, ?)";
+    public function crear($usuario, $password, $rol = 'cliente') {
+        $query = "INSERT INTO " . $this->tabla . " (usuario, password, rol) VALUES (?, ?, ?)";
         $passwordHasheada = password_hash($password, PASSWORD_BCRYPT);
         $stmt = $this->conexion->prepare($query);
-        $stmt->bind_param("ss", $usuario, $passwordHasheada);
+        $stmt->bind_param("sss", $usuario, $passwordHasheada, $rol);
         return $stmt->execute();
     }
 

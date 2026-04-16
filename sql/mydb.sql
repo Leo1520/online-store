@@ -11,6 +11,9 @@ USE mydb;
 CREATE TABLE Cuenta (
   usuario VARCHAR(40) NOT NULL,
   password VARCHAR(100) NOT NULL,
+  rol VARCHAR(20) NOT NULL DEFAULT 'cliente' COMMENT 'admin, trabajador, cliente',
+  fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  estado VARCHAR(20) DEFAULT 'activo',
   PRIMARY KEY (usuario)
 ) ENGINE=InnoDB;
 

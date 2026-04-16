@@ -79,12 +79,16 @@ try {
     }
 
     // 7. Crear cuenta de administrador
-    $admin_password = password_hash('admin123', PASSWORD_BCRYPT);
-    $conexion->query("INSERT INTO Cuenta (usuario, password) VALUES ('admin', '$admin_password')");
+    $admin_password = password_hash('admin123456', PASSWORD_BCRYPT);
+    $conexion->query("INSERT INTO Cuenta (usuario, password, rol) VALUES ('admin', '$admin_password', 'admin')");
 
-    // 8. Crear cuenta de cliente de prueba
+    // 8. Crear cuenta de trabajador
+    $trabajador_password = password_hash('trabajador123', PASSWORD_BCRYPT);
+    $conexion->query("INSERT INTO Cuenta (usuario, password, rol) VALUES ('trabajador', '$trabajador_password', 'trabajador')");
+
+    // 9. Crear cuenta de cliente de prueba
     $cliente_password = password_hash('cliente123', PASSWORD_BCRYPT);
-    $conexion->query("INSERT INTO Cuenta (usuario, password) VALUES ('cliente1', '$cliente_password')");
+    $conexion->query("INSERT INTO Cuenta (usuario, password, rol) VALUES ('cliente1', '$cliente_password', 'cliente')");
     $conexion->query("INSERT INTO Cliente (ci, nombres, apPaterno, apMaterno, correo, direccion, nroCelular, usuarioCuenta) 
                      VALUES ('1234567', 'Juan', 'Pérez', 'García', 'juan@example.com', 'Calle 123 Apt 4', '555-1234', 'cliente1')");
 
@@ -97,7 +101,12 @@ try {
         <div style='background: #f5f5f5; padding: 20px; border-radius: 5px; margin: 20px 0;'>
             <p><strong>Usuario Administrador:</strong><br>
                Usuario: <code>admin</code><br>
-               Contraseña: <code>admin123</code>
+               Contraseña: <code>admin123456</code>
+            </p>
+            <hr>
+            <p><strong>Usuario Trabajador:</strong><br>
+               Usuario: <code>trabajador</code><br>
+               Contraseña: <code>trabajador123</code>
             </p>
             <hr>
             <p><strong>Usuario Cliente:</strong><br>

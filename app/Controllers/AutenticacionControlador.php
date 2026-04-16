@@ -25,7 +25,7 @@ class AutenticacionControlador extends Controlador {
      */
     public function iniciarSesion() {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-            $this->redirigir('?accion=login');
+            $this->redirigir('?accion=mostrarLogin');
         }
 
         $usuario = Utilidades::obtenerDato('usuario');
@@ -33,27 +33,42 @@ class AutenticacionControlador extends Controlador {
 
         if (empty($usuario) || empty($password)) {
             $_SESSION['error'] = 'Usuario y contraseña son requeridos.';
-            $this->redirigir('?accion=login');
+            $this->redirigir('?accion=mostrarLogin');
         }
 
         $modeloCuenta = new Cuenta($this->conexion);
         $cuenta = $modeloCuenta->obtenerPorUsuario($usuario);
 
         if ($cuenta && Utilidades::verificarPassword($password, $cuenta['password'])) {
-            Utilidades::establecerSesion('usuario', $usuario);
-            
-            $modeloCliente = new Cliente($this->conexion);
-            $cliente = $modeloCliente->obtenerPorUsuario($usuario);
-            
-            if ($cliente) {
-                Utilidades::establecerSesion('cliente', $cliente);
+            // Verificar si la cuenta está activa
+            if ($cuenta['estado'] !== 'activo') {
+                $_SESSION['error'] = 'Tu cuenta ha sido desactivada.';
+                $this->redirigir('?accion=mostrarLogin');
             }
 
-            $_SESSION['mensaje'] = '¡Bienvenido!';
-            $this->redirigir('index.php');
+            Utilidades::establecerSesion('usuario', $usuario);
+            Utilidades::establecerSesion('rol', $cuenta['rol']);
+            
+            // Si es cliente, obtener sus datos
+            if ($cuenta['rol'] === 'cliente') {
+                $modeloCliente = new Cliente($this->conexion);
+                $cliente = $modeloCliente->obtenerPorUsuario($usuario);
+                if ($cliente) {
+                    Utilidades::establecerSesion('cliente', $cliente);
+                }
+            }
+
+            $_SESSION['mensaje'] = '¡Bienvenido ' . htmlspecialchars($usuario) . '!';
+            
+            // Redirigir según el rol
+            if ($cuenta['rol'] === 'admin' || $cuenta['rol'] === 'trabajador') {
+                $this->redirigir('?controlador=admin&accion=panel');
+            } else {
+                $this->redirigir('?controlador=productos&accion=listar');
+            }
         } else {
             $_SESSION['error'] = 'Usuario o contraseña incorrectos.';
-            $this->redirigir('?accion=login');
+            $this->redirigir('?accion=mostrarLogin');
         }
     }
 
