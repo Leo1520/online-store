@@ -1,103 +1,228 @@
-# 🛒 Tienda en Línea - Guía de Uso
+# 🏪 Tienda en Línea - E-Commerce MVC
 
-## ✅ Cambios Realizados
+> **Sistema completo de comercio electrónico con arquitectura Model-View-Controller**
 
-### 1. **Seguridad SQL (Prepared Statements)**
-- ✅ Todos los archivos PHP ahora usan **prepared statements** en lugar de SQL directo
-- ✅ Previene inyección SQL
-- Archivos actualizados:
-  - `Admin/inicio_sesion.php`
-  - `Admin/agregar_producto.php`
-  - `Admin/editar_producto.php`
-  - `Admin/gestion_productos.php`
-  - `carrito.php`
-  - `pago.php`
-  - `index.php`
+## 📦 Proyecto Actualizado
 
-### 2. **Seguridad de Contraseñas**
-- ✅ Contraseñas ahora usan **bcrypt (password_hash)**
-- ✅ Verificación con `password_verify()`
-- Usuario admin:
-  - **Usuario:** `administrador`
-  - **Contraseña:** `12345`
+Este proyecto ha sido **totalmente refactorizado** desde la estructura original a una **arquitectura MVC profesional**, siguiendo las mejores prácticas de desarrollo web.
 
-### 3. **Base de Datos Mejorada**
-- ✅ Nuevas tablas:
-  - `ordenes` - guarda todas las compras
-  - `detalles_orden` - detalles por producto de cada orden
-- ✅ Relaciones con claves foráneas
-- ✅ Transacciones para garantizar integridad
+## ✨ Características Principales
 
-### 4. **Carrito y Stock**
-- ✅ Validación de stock antes de agregar
-- ✅ Carrito persiste en sesión
-- ✅ Actualización automática de stock al completar compra
+### Para Clientes
+- 🛍️ Catálogo de productos con búsqueda
+- 🛒 Carrito de compras funcional
+- 👤 Sistema de registro e inicio de sesión
+- 💳 Módulo de pagos (simulado)
+- 📋 Historial de compras
+- 👨‍💼 Gestión de perfil
 
-### 5. **Sistema de Órdenes**
-- ✅ Guardado de órdenes con datos del cliente
-- ✅ Número de orden único
-- ✅ Detalles de cada producto pagado
-- ✅ Transacciones para evitar inconsistencias
+### Para Administradores
+- 📊 Panel de control
+- 🔧 CRUD de productos
+- 🏷️ Gestión de marcas y categorías
+- 📦 Control de inventario
+- 🏢 Gestión de sucursales
+- 📈 Reportes de ventas
 
-### 6. **Estructura de Carpetas**
-- ✅ `recursos/imagenes/` - para guardar imágenes de productos
-- ✅ `recursos/css/estilos.css` - estilos personalizados
+## 🏗️ Arquitectura MVC
 
-### 7. **Validaciones**
-- ✅ Validación de extensiones de imagen (jpg, jpeg, png, gif, webp)
-- ✅ Campos requeridos en formularios
-- ✅ Prevención de caracteres especiales en nombres de archivo
-- ✅ Escapado de HTML con `htmlspecialchars()`
+```
+Models (M)
+    ↓ Lógica de datos
+Controllers (C)
+    ↓ Lógica de negocio
+Views (V)
+    ↓ Interfaz de usuario
+Browser
+```
 
-### 8. **Mensajes de Usuario**
-- ✅ Mensajes de éxito/error en sesión
-- ✅ Alertas Bootstrap desplegables
+## 🚀 Inicio Rápido
 
----
-
-## 🚀 Cómo Usar
-
-### **1. Base de Datos**
+### 1. Importar Base de Datos
 ```bash
-1. Abre phpMyAdmin o MySQL Workbench
-2. Crea una nueva base de datos
-3. Ejecuta el archivo: sql/comercio_electronico.sql
+mysql -u root -p mydb < sql/mydb.sql
 ```
 
-### **2. Panel de Administración**
+### 2. Ejecutar Setup
 ```
-URL: http://localhost/online-store/Admin/inicio_sesion.php
-Usuario: administrador
-Contraseña: 12345
+http://localhost/online-store/setup.php
 ```
 
-**Funciones del Admin:**
-- Agregar productos
-- Editar productos
-- Eliminar productos
-- Visualizar lista de productos
-
-### **3. Tienda (Cliente)**
+### 3. Acceder a la Tienda
 ```
-URL: http://localhost/online-store/index.php
+http://localhost/online-store/public/index.php
 ```
 
-**Flujo de compra:**
-1. Ver productos disponibles
-2. Agregar al carrito (con validación de stock)
-3. Ver carrito y eliminar si es necesario
-4. Proceder al pago
-5. Completar datos de envío
-6. Ver confirmación de compra
+### Credenciales de Prueba
+- **Admin**: usuario: `admin` / contraseña: `admin123`
+- **Cliente**: usuario: `cliente1` / contraseña: `cliente123`
 
----
+## 📚 Documentación
 
-## 📦 Estructura del Proyecto
+- **[ARQUITECTURA_MVC.md](ARQUITECTURA_MVC.md)** - Documentación completa del proyecto
+- **[GUIA_RAPIDA.md](GUIA_RAPIDA.md)** - Guía de inicio rápido
+
+## 📂 Estructura del Proyecto
 
 ```
 online-store/
-├── Admin/
-│   ├── inicio_sesion.php      ← Login admin
+├── public/
+│   └── index.php                 ← Punto de entrada principal
+├── app/
+│   ├── Models/                   ← Modelos de datos (8 modelos)
+│   ├── Controllers/              ← Controladores (5 controladores)
+│   └── Views/                    ← Vistas (Bootstrap 4)
+├── config/
+│   ├── Database.php              ← Conexión a BD
+│   └── Utilidades.php            ← Funciones auxiliares
+├── sql/
+│   └── mydb.sql                  ← Script de BD
+├── Recursos/
+│   ├── css/
+│   └── imagenes/                 ← Imágenes de productos
+├── setup.php                     ← Crear datos de prueba
+├── ARQUITECTURA_MVC.md           ← Documentación técnica
+└── GUIA_RAPIDA.md                ← Guía de inicio rápido
+```
+
+## 🗄️ Base de Datos
+
+**11 tablas completamente normalizadas:**
+
+| Tabla | Propósito |
+|-------|-----------|
+| Cuenta | Autenticación |
+| Cliente | Información de clientes |
+| Producto | Catálogo |
+| Marca | Clasificación de productos |
+| Categoria | Clasificación de productos |
+| Industria | Clasificación de productos |
+| NotaVenta | Órdenes de compra |
+| DetalleNotaVenta | Líneas de órdenes |
+| Sucursal | Ubicaciones |
+| DetalleProductoSucursal | Inventario |
+
+## 🔧 Tecnologías Utilizadas
+
+| Componente | Tecnología |
+|------------|-----------|
+| Backend | PHP 7.4+ |
+| BD | MySQL 5.7+ |
+| Frontend | HTML5, CSS3, Bootstrap 4 |
+| Patrón | MVC |
+| Seguridad | bcrypt, Prepared Statements |
+
+## 📊 Modelos Implementados
+
+### Base
+- `Modelo` - Clase base para todos los modelos
+
+### Productos
+- `Producto` - Gestión de productos
+- `Marca` - Gestión de marcas
+- `Categoria` - Gestión de categorías
+- `Industria` - Gestión de industrias
+
+### Usuarios y Ventas
+- `Cuenta` - Autenticación
+- `Cliente` - Información de clientes
+- `NotaVenta` - Órdenes
+- `DetalleNotaVenta` - Detalles de órdenes
+
+### Inventario
+- `Sucursal` - Ubicaciones
+- `DetalleProductoSucursal` - Stock por sucursal
+
+## 🎮 Controladores Implementados
+
+| Controlador | Responsabilidad |
+|-------------|-----------------|
+| ProductoControlador | Gestión de catálogo |
+| AutenticacionControlador | Login, registro, perfil |
+| CarritoControlador | Carrito de compras |
+| PagoControlador | Procesamiento de pagos |
+| AdminControlador | Panel administrativo |
+
+## 🔐 Características de Seguridad
+
+✅ **Implementadas:**
+- Encriptación bcrypt para contraseñas
+- Prepared Statements contra inyección SQL
+- Sanitización de entrada/salida
+- Validación de emails
+- Autenticación por sesiones
+- Control de acceso por roles
+
+## 🎨 Interfaz de Usuario
+
+- ✅ Responsive design con Bootstrap 4
+- ✅ Iconos con Bootstrap Icons
+- ✅ Formularios validados
+- ✅ Navegación intuitiva
+- ✅ Alertas de usuario
+
+## 🔄 Flujo de Datos Típico
+
+```
+Usuario → Controlador → Modelo → BD
+                ↓
+            Validación
+                ↓
+    Actualiza Vista → Bootstrap HTML → Navegador
+```
+
+## 📋 Checklist de Funcionalidades
+
+### Tienda
+- [x] Listar productos
+- [x] Ver detalles de producto
+- [x] Buscar productos
+- [x] Carrito de compras
+- [x] Agregar/editar/quitar items
+- [x] Procesar pago (simulado)
+- [x] Comprobante de compra
+
+### Usuarios
+- [x] Registro
+- [x] Inicio de sesión
+- [x] Perfil de usuario
+- [x] Actualizar datos
+- [x] Historial de compras
+- [x] Cerrar sesión
+
+### Admin
+- [x] Panel de control
+- [x] CRUD de productos
+- [x] CRUD de marcas
+- [x] CRUD de categorías
+- [x] CRUD de industrias
+- [x] Gestión de sucursales
+
+## 🚀 Deployment
+
+Para producción:
+1. Cambiar credenciales de BD en `config/Database.php`
+2. Habilitar HTTPS
+3. Configurar variables de entorno
+4. Implementar gateway de pago real
+5. Hacer backup regular de BD
+
+## 📞 Soporte
+
+Para problemas o sugerencias:
+1. Revisar [ARQUITECTURA_MVC.md](ARQUITECTURA_MVC.md)
+2. Verificar [GUIA_RAPIDA.md](GUIA_RAPIDA.md)
+3. Revisar logs de BD
+
+## 📄 Licencia
+
+Proyecto educativo para demostración de patrones MVC.
+
+---
+
+**Versión**: 1.0.0 (MVC)  
+**Última actualización**: 16 de abril de 2026  
+**Estado**: ✅ Producción
 │   ├── panel_control.php      ← Panel principal admin
 │   ├── gestion_productos.php  ← Lista de productos
 │   ├── agregar_producto.php   ← Crear producto
