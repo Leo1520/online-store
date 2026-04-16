@@ -39,7 +39,7 @@ class AutenticacionControlador extends Controlador {
         $modeloCuenta = new Cuenta($this->conexion);
         $cuenta = $modeloCuenta->obtenerPorUsuario($usuario);
 
-        if ($cuenta && Utilidades::verificarPassword($password, $cuenta['password'])) {
+        if ($cuenta && Utilidades::verificarPassword($password, $cuenta['password_hash'])) {
             // Verificar si la cuenta está activa
             if ($cuenta['estado'] !== 'activo') {
                 $_SESSION['error'] = 'Tu cuenta ha sido desactivada.';

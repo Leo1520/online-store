@@ -10,7 +10,7 @@ USE mydb;
 -- =========================================
 CREATE TABLE Cuenta (
   usuario VARCHAR(40) NOT NULL,
-  password VARCHAR(100) NOT NULL,
+  password_hash VARCHAR(255) NOT NULL,
   rol VARCHAR(20) NOT NULL DEFAULT 'cliente' COMMENT 'admin, trabajador, cliente',
   fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   estado VARCHAR(20) DEFAULT 'activo',
@@ -136,3 +136,18 @@ CREATE TABLE DetalleProductoSucursal (
   CONSTRAINT fk_dps_sucursal
     FOREIGN KEY (codSucursal) REFERENCES Sucursal(cod)
 ) ENGINE=InnoDB;
+-- =========================================
+-- DATOS DE USUARIOS (Cuentas)
+-- =========================================
+INSERT INTO Cuenta (usuario, password_hash, rol, estado) 
+VALUES 
+  ('admin', 'admin123456', 'admin', 'activo'),
+  ('trabajador', 'trabajador123', 'trabajador', 'activo'),
+  ('cliente1', 'cliente123', 'cliente', 'activo');
+
+-- =========================================
+-- DATOS DE CLIENTE DE PRUEBA
+-- =========================================
+INSERT INTO Cliente (ci, nombres, apPaterno, apMaterno, correo, direccion, nroCelular, usuarioCuenta) 
+VALUES 
+  ('1234567', 'Juan', 'Pérez', 'García', 'juan@example.com', 'Calle 123 Apt 4', '555-1234', 'cliente1');

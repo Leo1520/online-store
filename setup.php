@@ -78,20 +78,6 @@ try {
         }
     }
 
-    // 7. Crear cuenta de administrador
-    $admin_password = password_hash('admin123456', PASSWORD_BCRYPT);
-    $conexion->query("INSERT INTO Cuenta (usuario, password, rol) VALUES ('admin', '$admin_password', 'admin')");
-
-    // 8. Crear cuenta de trabajador
-    $trabajador_password = password_hash('trabajador123', PASSWORD_BCRYPT);
-    $conexion->query("INSERT INTO Cuenta (usuario, password, rol) VALUES ('trabajador', '$trabajador_password', 'trabajador')");
-
-    // 9. Crear cuenta de cliente de prueba
-    $cliente_password = password_hash('cliente123', PASSWORD_BCRYPT);
-    $conexion->query("INSERT INTO Cuenta (usuario, password, rol) VALUES ('cliente1', '$cliente_password', 'cliente')");
-    $conexion->query("INSERT INTO Cliente (ci, nombres, apPaterno, apMaterno, correo, direccion, nroCelular, usuarioCuenta) 
-                     VALUES ('1234567', 'Juan', 'Pérez', 'García', 'juan@example.com', 'Calle 123 Apt 4', '555-1234', 'cliente1')");
-
     echo "
     <div style='font-family: Arial; padding: 50px; text-align: center;'>
         <h2 style='color: #4CAF50;'>✅ ¡Datos de prueba cargados correctamente!</h2>

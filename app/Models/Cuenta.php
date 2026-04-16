@@ -15,7 +15,7 @@ class Cuenta extends Modelo {
      * Obtiene una cuenta por usuario con su rol
      */
     public function obtenerPorUsuario($usuario) {
-        $query = "SELECT usuario, rol, estado FROM " . $this->tabla . " WHERE usuario = ?";
+        $query = "SELECT usuario, password_hash, rol, estado FROM " . $this->tabla . " WHERE usuario = ?";
         $stmt = $this->conexion->prepare($query);
         $stmt->bind_param("s", $usuario);
         $stmt->execute();
@@ -43,7 +43,7 @@ class Cuenta extends Modelo {
      * Crea una nueva cuenta
      */
     public function crear($usuario, $password, $rol = 'cliente') {
-        $query = "INSERT INTO " . $this->tabla . " (usuario, password, rol) VALUES (?, ?, ?)";
+        $query = "INSERT INTO " . $this->tabla . " (usuario, password_hash, rol) VALUES (?, ?, ?)";
         $passwordHasheada = password_hash($password, PASSWORD_BCRYPT);
         $stmt = $this->conexion->prepare($query);
         $stmt->bind_param("sss", $usuario, $passwordHasheada, $rol);
@@ -54,7 +54,7 @@ class Cuenta extends Modelo {
      * Actualiza la contraseña
      */
     public function actualizarPassword($usuario, $password) {
-        $query = "UPDATE " . $this->tabla . " SET password = ? WHERE usuario = ?";
+        $query = "UPDATE " . $this->tabla . " SET password_hash = ? WHERE usuario = ?";
         $passwordHasheada = password_hash($password, PASSWORD_BCRYPT);
         $stmt = $this->conexion->prepare($query);
         $stmt->bind_param("ss", $passwordHasheada, $usuario);
