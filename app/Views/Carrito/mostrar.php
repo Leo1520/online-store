@@ -13,7 +13,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
 </head>
 <body>
-    <?php include __DIR__ . '/../../../app/Views/layout.php'; ?>
+    <?php include __DIR__ . '/../layout.php'; ?>
 
     <main class="container my-5">
         <h1 class="mb-4">Carrito de Compras</h1>

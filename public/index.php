@@ -7,8 +7,8 @@
 session_start();
 
 // Incluir configuración y utilidades
-require_once __DIR__ . '/config/Database.php';
-require_once __DIR__ . '/config/Utilidades.php';
+require_once __DIR__ . '/../config/Database.php';
+require_once __DIR__ . '/../config/Utilidades.php';
 
 // Instanciar la base de datos
 $db = new Database();
@@ -35,7 +35,7 @@ if (!isset($controladores[$controlador])) {
 
 // Incluir el controlador
 $nombreClase = $controladores[$controlador];
-require_once __DIR__ . '/app/Controllers/' . $nombreClase . '.php';
+require_once __DIR__ . '/../app/Controllers/' . $nombreClase . '.php';
 
 // Instanciar el controlador
 $controladorObj = new $nombreClase($conexion);
