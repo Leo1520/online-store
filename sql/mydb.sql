@@ -159,9 +159,9 @@ CREATE TABLE DetalleProductoSucursal (
 -- =========================================
 INSERT INTO Cuenta (usuario, password_hash, idRol, estado) 
 VALUES 
-('admin', 'admin123456', 1, 'activo'),
-('trabajador', 'trabajador123', 2, 'activo'),
-('cliente1', 'cliente123', 3, 'activo');
+('admin', '$2y$12$C87UolQBUHa6YmY96JagYeMXMpxunkaceU2yLY0/JhCAzt2xZu7.m', 1, 'activo'),
+('trabajador', '$2y$12$g3IYWWgTDzZbs3EB27uz6O/pvjbza2g9lsp7sCKqrshtDh0304S96', 2, 'activo'),
+('cliente1', '$2y$12$6hIlFtuYtT9P8Tuon/iIdeaCyuuo5qYKW7Msv0UAzHgwT9YZxl.4y', 3, 'activo');
 
 INSERT INTO Cliente (
   ci, nombres, apPaterno, apMaterno, correo, direccion, nroCelular, usuarioCuenta
