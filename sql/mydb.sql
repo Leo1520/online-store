@@ -15,7 +15,6 @@ CREATE TABLE Rol (
   UNIQUE KEY uk_nombre (nombre)
 ) ENGINE=InnoDB;
 
--- Insertar roles
 INSERT INTO Rol (nombre) VALUES 
 ('admin'),
 ('trabajador'),
@@ -27,7 +26,7 @@ INSERT INTO Rol (nombre) VALUES
 CREATE TABLE Cuenta (
   usuario VARCHAR(40) NOT NULL,
   password_hash VARCHAR(255) NOT NULL,
-  idRol INT NOT NULL DEFAULT 3 COMMENT 'Referencia a la tabla Rol',
+  idRol INT NOT NULL DEFAULT 3,
   fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   estado VARCHAR(20) DEFAULT 'activo',
   PRIMARY KEY (usuario),
@@ -154,18 +153,19 @@ CREATE TABLE DetalleProductoSucursal (
   CONSTRAINT fk_dps_sucursal
     FOREIGN KEY (codSucursal) REFERENCES Sucursal(cod)
 ) ENGINE=InnoDB;
+
 -- =========================================
--- DATOS DE USUARIOS (Cuentas)
+-- DATOS INICIALES
 -- =========================================
 INSERT INTO Cuenta (usuario, password_hash, idRol, estado) 
 VALUES 
-  ('admin', 'admin123456', 1, 'activo'),
-  ('trabajador', 'trabajador123', 2, 'activo'),
-  ('cliente1', 'cliente123', 3, 'activo');
+('admin', 'admin123456', 1, 'activo'),
+('trabajador', 'trabajador123', 2, 'activo'),
+('cliente1', 'cliente123', 3, 'activo');
 
--- =========================================
--- DATOS DE CLIENTE DE PRUEBA
--- =========================================
-INSERT INTO Cliente (ci, nombres, apPaterno, apMaterno, correo, direccion, nroCelular, usuarioCuenta) 
-VALUES 
-  ('1234567', 'Juan', 'Pérez', 'García', 'juan@example.com', 'Calle 123 Apt 4', '555-1234', 'cliente1');
+INSERT INTO Cliente (
+  ci, nombres, apPaterno, apMaterno, correo, direccion, nroCelular, usuarioCuenta
+) 
+VALUES (
+  '1234567', 'Juan', 'Pérez', 'García', 'juan@example.com', 'Calle 123 Apt 4', '555-1234', 'cliente1'
+);
