@@ -37,18 +37,77 @@
             width: 20%;
             left: 0;
             top: 60px;
+            transition: all 0.3s ease;
+            overflow-y: auto;
+        }
+        .sidebar.collapsed {
+            width: 70px;
+        }
+        .sidebar.collapsed .sidebar-text {
+            display: none;
+        }
+        .sidebar.collapsed .nav-link span {
+            display: none;
+        }
+        .sidebar.collapsed .section-title {
+            display: none;
+        }
+        .sidebar-toggle {
+            background: none;
+            border: none;
+            color: #ffffff;
+            cursor: pointer;
+            padding: 10px 20px;
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+            transition: all 0.3s ease;
+        }
+        .sidebar-toggle:hover {
+            background-color: #495057;
+            border-radius: 5px;
+            transform: scale(1.1);
+        }
+        .sidebar-text {
+            transition: all 0.3s ease;
         }
         .sidebar .nav-link {
             color: #ffffff;
             padding: 10px 20px;
+            transition: all 0.2s ease;
         }
         .sidebar .nav-link:hover {
             background-color: #495057;
             border-radius: 5px;
+            padding-left: 25px;
         }
         .sidebar .nav-link.active {
             background-color: #667eea;
             border-radius: 5px;
+        }
+        .section-title {
+            font-size: 0.85rem;
+            font-weight: bold;
+            padding: 10px 20px;
+            margin-top: 15px;
+            margin-bottom: 5px;
+            color: #b0bec5;
+            cursor: pointer;
+            user-select: none;
+            transition: all 0.2s ease;
+        }
+        .section-title:hover {
+            color: #ffffff;
+            padding-left: 25px;
+        }
+        .section-title .collapse-icon {
+            float: right;
+            transition: transform 0.3s ease;
+        }
+        .section-title[aria-expanded="false"] .collapse-icon {
+            transform: rotate(-90deg);
+        }
+        .submenu-collapse {
+            transition: all 0.3s ease;
         }
         .stat-card {
             border-left: 4px solid #667eea;
@@ -58,6 +117,10 @@
         .main-content {
             margin-left: 20%;
             padding: 20px;
+            transition: all 0.3s ease;
+        }
+        body.sidebar-collapsed .main-content {
+            margin-left: 70px;
         }
     </style>
 </head>
@@ -90,40 +153,66 @@
     <div class="container-fluid">
         <div class="row">
             <!-- Sidebar -->
-            <nav class="col-md-3 sidebar">
-                <h5 class="text-white mb-4">Panel Admin</h5>
+            <nav class="col-md-3 sidebar" id="sidebar">
+                <button class="sidebar-toggle" id="sidebarToggle" title="Contraer/Expandir menú">
+                    <i class="bi bi-list"></i>
+                </button>
+                <h5 class="text-white mb-4 sidebar-text">Panel Admin</h5>
                 <nav class="nav flex-column">
                     <a class="nav-link active" href="?controlador=admin&accion=panel">
-                        <i class="bi bi-speedometer2"></i> Dashboard
+                        <i class="bi bi-speedometer2"></i> <span>Dashboard</span>
                     </a>
                     <hr class="bg-secondary">
-                    <h6 class="text-white px-3">Productos</h6>
-                    <a class="nav-link" href="?controlador=productos&accion=listar">
-                        <i class="bi bi-box"></i> Ver Productos
-                    </a>
-                    <a class="nav-link" href="?controlador=productos&accion=crear">
-                        <i class="bi bi-plus-circle"></i> Crear Producto
-                    </a>
+                    
+                    <!-- Sección Productos (Colapsible) -->
+                    <h6 class="section-title" data-toggle="collapse" data-target="#productosMenu" aria-expanded="true">
+                        <i class="bi bi-box"></i> <span>Productos</span>
+                        <i class="bi bi-chevron-right collapse-icon"></i>
+                    </h6>
+                    <nav class="nav flex-column collapse show submenu-collapse" id="productosMenu">
+                        <a class="nav-link pl-4" href="?controlador=productos&accion=listar">
+                            <i class="bi bi-eye"></i> <span>Ver Productos</span>
+                        </a>
+                        <a class="nav-link pl-4" href="?controlador=productos&accion=crear">
+                            <i class="bi bi-plus-circle"></i> <span>Crear Producto</span>
+                        </a>
+                    </nav>
+                    
                     <hr class="bg-secondary">
-                    <h6 class="text-white px-3">Catálogo</h6>
-                    <a class="nav-link" href="?controlador=admin&accion=listarMarcas">
-                        <i class="bi bi-tag"></i> Marcas
-                    </a>
-                    <a class="nav-link" href="?controlador=admin&accion=listarCategorias">
-                        <i class="bi bi-collection"></i> Categorías
-                    </a>
-                    <a class="nav-link" href="?controlador=admin&accion=listarIndustrias">
-                        <i class="bi bi-diagram-3"></i> Industrias
-                    </a>
+                    
+                    <!-- Sección Catálogo (Colapsible) -->
+                    <h6 class="section-title" data-toggle="collapse" data-target="#catalogoMenu" aria-expanded="false">
+                        <i class="bi bi-collection"></i> <span>Catálogo</span>
+                        <i class="bi bi-chevron-right collapse-icon"></i>
+                    </h6>
+                    <nav class="nav flex-column collapse submenu-collapse" id="catalogoMenu">
+                        <a class="nav-link pl-4" href="?controlador=admin&accion=listarMarcas">
+                            <i class="bi bi-tag"></i> <span>Marcas</span>
+                        </a>
+                        <a class="nav-link pl-4" href="?controlador=admin&accion=listarCategorias">
+                            <i class="bi bi-collection"></i> <span>Categorías</span>
+                        </a>
+                        <a class="nav-link pl-4" href="?controlador=admin&accion=listarIndustrias">
+                            <i class="bi bi-diagram-3"></i> <span>Industrias</span>
+                        </a>
+                    </nav>
+                    
                     <?php if (isset($_SESSION['rol']) && $_SESSION['rol'] === 'admin'): ?>
                         <hr class="bg-secondary">
-                        <h6 class="text-white px-3">Administración</h6>
-                        <a class="nav-link" href="?controlador=admin&accion=listarSucursales">
-                            <i class="bi bi-shop"></i> Sucursales
-                        </a>
-                        <a class="nav-link" href="?controlador=admin&accion=reportes">
-                            <i class="bi bi-graph-up"></i> Reportes
-                        </a>
+                        
+                        <!-- Sección Administración (Colapsible) -->
+                        <h6 class="section-title" data-toggle="collapse" data-target="#adminMenu" aria-expanded="false">
+                            <i class="bi bi-gear"></i> <span>Administración</span>
+                            <i class="bi bi-chevron-right collapse-icon"></i>
+                        </h6>
+                        <nav class="nav flex-column collapse submenu-collapse" id="adminMenu">
+                            <a class="nav-link pl-4" href="?controlador=admin&accion=listarSucursales">
+                                <i class="bi bi-shop"></i> <span>Sucursales</span>
+                            </a>
+                            <a class="nav-link pl-4" href="?controlador=admin&accion=reportes">
+                                <i class="bi bi-graph-up"></i> <span>Reportes</span>
+                            </a>
+                        </nav>
                     <?php endif; ?>
                 </nav>
             </nav>
@@ -175,5 +264,37 @@
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    
+    <script>
+        // Toggle del sidebar (contraer/expandir)
+        document.getElementById('sidebarToggle').addEventListener('click', function() {
+            const sidebar = document.getElementById('sidebar');
+            const mainContent = document.querySelector('.main-content');
+            const body = document.body;
+            
+            sidebar.classList.toggle('collapsed');
+            body.classList.toggle('sidebar-collapsed');
+            
+            // Guardar estado en localStorage
+            localStorage.setItem('sidebarCollapsed', sidebar.classList.contains('collapsed'));
+        });
+        
+        // Restaurar estado del sidebar
+        if (localStorage.getItem('sidebarCollapsed') === 'true') {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.add('collapsed');
+            document.body.classList.add('sidebar-collapsed');
+        }
+        
+        // Manejar los collapsibles de secciones
+        document.querySelectorAll('.section-title').forEach(function(title) {
+            title.addEventListener('click', function(e) {
+                // Evitar que se ejecute el data-toggle de Bootstrap
+                if (e.target.closest('.collapse-icon')) {
+                    return;
+                }
+            });
+        });
+    </script>
 </body>
 </html>
