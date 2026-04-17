@@ -6,15 +6,33 @@ CREATE DATABASE mydb CHARACTER SET utf8mb4;
 USE mydb;
 
 -- =========================================
+-- TABLA: Rol
+-- =========================================
+CREATE TABLE Rol (
+  id INT AUTO_INCREMENT,
+  nombre VARCHAR(20) NOT NULL,
+  PRIMARY KEY (id),
+  UNIQUE KEY uk_nombre (nombre)
+) ENGINE=InnoDB;
+
+-- Insertar roles
+INSERT INTO Rol (nombre) VALUES 
+('admin'),
+('trabajador'),
+('cliente');
+
+-- =========================================
 -- TABLA: Cuenta
 -- =========================================
 CREATE TABLE Cuenta (
   usuario VARCHAR(40) NOT NULL,
   password_hash VARCHAR(255) NOT NULL,
-  rol VARCHAR(20) NOT NULL DEFAULT 'cliente' COMMENT 'admin, trabajador, cliente',
+  idRol INT NOT NULL DEFAULT 3 COMMENT 'Referencia a la tabla Rol',
   fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   estado VARCHAR(20) DEFAULT 'activo',
-  PRIMARY KEY (usuario)
+  PRIMARY KEY (usuario),
+  CONSTRAINT fk_cuenta_rol
+    FOREIGN KEY (idRol) REFERENCES Rol(id)
 ) ENGINE=InnoDB;
 
 -- =========================================
@@ -139,11 +157,11 @@ CREATE TABLE DetalleProductoSucursal (
 -- =========================================
 -- DATOS DE USUARIOS (Cuentas)
 -- =========================================
-INSERT INTO Cuenta (usuario, password_hash, rol, estado) 
+INSERT INTO Cuenta (usuario, password_hash, idRol, estado) 
 VALUES 
-  ('admin', 'admin123456', 'admin', 'activo'),
-  ('trabajador', 'trabajador123', 'trabajador', 'activo'),
-  ('cliente1', 'cliente123', 'cliente', 'activo');
+  ('admin', 'admin123456', 1, 'activo'),
+  ('trabajador', 'trabajador123', 2, 'activo'),
+  ('cliente1', 'cliente123', 3, 'activo');
 
 -- =========================================
 -- DATOS DE CLIENTE DE PRUEBA

@@ -20,6 +20,14 @@ define('DB_CHARSET', 'utf8mb4');
 define('SESSION_TIMEOUT', 3600); // 1 hora en segundos
 define('SESSION_NAME', 'tienda_online');
 
+// ===== CONFIGURACIÓN DE ROLES =====
+define('ROLE_ID_ADMIN', 1);
+define('ROLE_ID_TRABAJADOR', 2);
+define('ROLE_ID_CLIENTE', 3);
+define('ROLE_NAME_ADMIN', 'admin');
+define('ROLE_NAME_TRABAJADOR', 'trabajador');
+define('ROLE_NAME_CLIENTE', 'cliente');
+
 // ===== CONFIGURACIÓN DE SEGURIDAD =====
 define('PASSWORD_HASH_ALGO', PASSWORD_BCRYPT);
 define('PASSWORD_HASH_COST', 10);

@@ -3,6 +3,7 @@ require_once __DIR__ . '/Controlador.php';
 require_once __DIR__ . '/../Models/Cuenta.php';
 require_once __DIR__ . '/../Models/Cliente.php';
 require_once __DIR__ . '/../../config/Utilidades.php';
+require_once __DIR__ . '/../../config/config.php';
 
 /**
  * Controlador de Autenticación
@@ -140,8 +141,8 @@ class AutenticacionControlador extends Controlador {
             $this->redirigir('?accion=registro');
         }
 
-        // Crear la cuenta
-        if (!$modeloCuenta->crear($usuario, $password)) {
+        // Crear la cuenta con rol cliente
+        if (!$modeloCuenta->crear($usuario, $password, ROLE_ID_CLIENTE)) {
             $_SESSION['error'] = 'Error al crear la cuenta.';
             $this->redirigir('?accion=registro');
         }

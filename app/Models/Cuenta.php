@@ -15,7 +15,10 @@ class Cuenta extends Modelo {
      * Obtiene una cuenta por usuario con su rol
      */
     public function obtenerPorUsuario($usuario) {
-        $query = "SELECT usuario, password_hash, rol, estado FROM " . $this->tabla . " WHERE usuario = ?";
+        $query = "SELECT c.usuario, c.password_hash, c.idRol, c.estado, r.nombre as rol 
+                  FROM " . $this->tabla . " c
+                  JOIN Rol r ON c.idRol = r.id
+                  WHERE c.usuario = ?";
         $stmt = $this->conexion->prepare($query);
         $stmt->bind_param("s", $usuario);
         $stmt->execute();
@@ -41,12 +44,15 @@ class Cuenta extends Modelo {
 
     /**
      * Crea una nueva cuenta
+     * @param $usuario string Nombre de usuario
+     * @param $password string Contraseña en texto plano
+     * @param $idRol int ID del rol (1=admin, 2=trabajador, 3=cliente)
      */
-    public function crear($usuario, $password, $rol = 'cliente') {
-        $query = "INSERT INTO " . $this->tabla . " (usuario, password_hash, rol) VALUES (?, ?, ?)";
+    public function crear($usuario, $password, $idRol = 3) {
+        $query = "INSERT INTO " . $this->tabla . " (usuario, password_hash, idRol) VALUES (?, ?, ?)";
         $passwordHasheada = password_hash($password, PASSWORD_BCRYPT);
         $stmt = $this->conexion->prepare($query);
-        $stmt->bind_param("sss", $usuario, $passwordHasheada, $rol);
+        $stmt->bind_param("ssi", $usuario, $passwordHasheada, $idRol);
         return $stmt->execute();
     }
 
