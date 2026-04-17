@@ -15,7 +15,7 @@ $db = new Database();
 $conexion = $db->conectar();
 
 // Obtener parámetros de la URL
-$controlador = isset($_GET['controlador']) ? Utilidades::sanitizar($_GET['controlador']) : 'productos';
+$controlador = isset($_GET['controlador']) ? Utilidades::sanitizar($_GET['controlador']) : null;
 $accion = isset($_GET['accion']) ? Utilidades::sanitizar($_GET['accion']) : 'listar';
 $id = isset($_GET['id']) ? intval($_GET['id']) : null;
 
@@ -27,6 +27,24 @@ $controladores = [
     'pago' => 'PagoControlador',
     'admin' => 'AdminControlador'
 ];
+
+// Mapeo de acciones a controladores por defecto
+$accionesAutenticacion = ['mostrarLogin', 'iniciarSesion', 'mostrarRegistro', 'registrar', 'perfil', 'actualizarPerfil', 'cerrarSesion'];
+$accionesAdmin = ['panel', 'listarMarcas', 'crearMarca', 'guardarMarca', 'editarMarca', 'actualizarMarca', 'eliminarMarca',
+    'listarCategorias', 'crearCategoria', 'guardarCategoria', 'editarCategoria', 'actualizarCategoria', 'eliminarCategoria',
+    'listarIndustrias', 'crearIndustria', 'guardarIndustria', 'editarIndustria', 'actualizarIndustria', 'eliminarIndustria',
+    'listarSucursales', 'reportes'];
+
+// Si no se especifica controlador, intentar detectarlo por la acción
+if (!$controlador) {
+    if (in_array($accion, $accionesAutenticacion)) {
+        $controlador = 'autenticacion';
+    } elseif (in_array($accion, $accionesAdmin)) {
+        $controlador = 'admin';
+    } else {
+        $controlador = 'productos'; // Controlador por defecto
+    }
+}
 
 // Validar controlador
 if (!isset($controladores[$controlador])) {
