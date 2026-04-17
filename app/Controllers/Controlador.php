@@ -18,6 +18,16 @@ class Controlador {
     }
 
     /**
+     * Carga una vista dentro del layout admin
+     */
+    protected function cargarVistaAdmin($vista, $datos = [], $titulo = '') {
+        extract($datos);
+        $vistaContenido = __DIR__ . '/../Views/' . $vista . '.php';
+        $titulo = $titulo;
+        require __DIR__ . '/../Views/Admin/layoutAdmin.php';
+    }
+
+    /**
      * Envía respuesta JSON
      */
     protected function respuestaJSON($datos = [], $exito = true) {

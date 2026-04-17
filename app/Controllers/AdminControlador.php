@@ -11,21 +11,35 @@ require_once __DIR__ . '/../Models/NotaVenta.php';
  */
 class AdminControlador extends Controlador {
 
-    // ===== MARCAS =====
+    public function panel() {
+        $this->verificarAdmin();
+        
+        $modelo = new Producto($this->conexion);
+        $totalProductos = $modelo->obtenerTodos() ? count($modelo->obtenerTodos()) : 0;
+        
+        $modeloNota = new NotaVenta($this->conexion);
+        $totalVentas = 0; // Implementar lógica real si es necesario
+        
+        $this->cargarVistaAdmin('Admin/panel', [
+            'totalProductos' => $totalProductos,
+            'totalVentas' => $totalVentas
+        ], 'Dashboard');
+    }
+
     public function listarMarcas() {
         $this->verificarAdmin();
         
         $modelo = new Marca($this->conexion);
         $marcas = $modelo->obtenerTodos();
         
-        $this->cargarVista('Admin/Marcas/listar', [
+        $this->cargarVistaAdmin('Admin/Marcas/listar', [
             'marcas' => $marcas
-        ]);
+        ], 'Marcas');
     }
 
     public function crearMarca() {
         $this->verificarAdmin();
-        $this->cargarVista('Admin/Marcas/crear');
+        $this->cargarVistaAdmin('Admin/Marcas/crear', [], 'Crear Marca');
     }
 
     public function guardarMarca() {
@@ -63,9 +77,9 @@ class AdminControlador extends Controlador {
             $this->redirigir('?controlador=admin&accion=listarMarcas');
         }
 
-        $this->cargarVista('Admin/Marcas/editar', [
+        $this->cargarVistaAdmin('Admin/Marcas/editar', [
             'marca' => $marca
-        ]);
+        ], 'Editar Marca');
     }
 
     public function actualizarMarca($cod) {
@@ -112,14 +126,14 @@ class AdminControlador extends Controlador {
         $modelo = new Categoria($this->conexion);
         $categorias = $modelo->obtenerTodos();
         
-        $this->cargarVista('Admin/Categorias/listar', [
+        $this->cargarVistaAdmin('Admin/Categorias/listar', [
             'categorias' => $categorias
-        ]);
+        ], 'Categorías');
     }
 
     public function crearCategoria() {
         $this->verificarAdmin();
-        $this->cargarVista('Admin/Categorias/crear');
+        $this->cargarVistaAdmin('Admin/Categorias/crear', [], 'Crear Categoría');
     }
 
     public function guardarCategoria() {
@@ -157,9 +171,9 @@ class AdminControlador extends Controlador {
             $this->redirigir('?controlador=admin&accion=listarCategorias');
         }
 
-        $this->cargarVista('Admin/Categorias/editar', [
+        $this->cargarVistaAdmin('Admin/Categorias/editar', [
             'categoria' => $categoria
-        ]);
+        ], 'Editar Categoría');
     }
 
     public function actualizarCategoria($cod) {
@@ -206,14 +220,14 @@ class AdminControlador extends Controlador {
         $modelo = new Industria($this->conexion);
         $industrias = $modelo->obtenerTodos();
         
-        $this->cargarVista('Admin/Industrias/listar', [
+        $this->cargarVistaAdmin('Admin/Industrias/listar', [
             'industrias' => $industrias
-        ]);
+        ], 'Industrias');
     }
 
     public function crearIndustria() {
         $this->verificarAdmin();
-        $this->cargarVista('Admin/Industrias/crear');
+        $this->cargarVistaAdmin('Admin/Industrias/crear', [], 'Crear Industria');
     }
 
     public function guardarIndustria() {
@@ -251,9 +265,9 @@ class AdminControlador extends Controlador {
             $this->redirigir('?controlador=admin&accion=listarIndustrias');
         }
 
-        $this->cargarVista('Admin/Industrias/editar', [
+        $this->cargarVistaAdmin('Admin/Industrias/editar', [
             'industria' => $industria
-        ]);
+        ], 'Editar Industria');
     }
 
     public function actualizarIndustria($cod) {
@@ -293,23 +307,5 @@ class AdminControlador extends Controlador {
         $this->redirigir('?controlador=admin&accion=listarIndustrias');
     }
 
-    /**
-     * Panel de control principal
-     */
-    public function panel() {
-        $this->verificarAdmin();
-        
-        // Obtener estadísticas
-        $modeloProducto = new Producto($this->conexion);
-        $modeloNotaVenta = new NotaVenta($this->conexion);
-        
-        $totalProductos = count($modeloProducto->obtenerTodos());
-        $totalVentas = count($modeloNotaVenta->obtenerTodos());
-
-        $this->cargarVista('Admin/panel', [
-            'totalProductos' => $totalProductos,
-            'totalVentas' => $totalVentas
-        ]);
-    }
 }
 ?>
