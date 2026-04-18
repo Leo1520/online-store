@@ -42,9 +42,9 @@ INSERT INTO `Sucursal` (`cod`, `nombre`, `direccion`, `nroTelefono`) VALUES
 (2, 'Sucursal Norte', 'Calle siempre viva', 68779130);
 
 -- Cuentas y clientes base (incluye el cliente_demo usado por el checkout)
-INSERT INTO `Cuenta` (`usuario`, `password`) VALUES
-('cliente_demo', '$2y$10$ROGQKafhG0ZaDGJWPBe5rOqLNrvQ/W3Y86DScwo1l1eLP3v4Hc/0S'),
-('admin', '$2y$10$VDqBzxfDKBXmB8p/OHx0G.NBf0PEBmD9AQFfeY.KYsQa7myy/y38e');
+INSERT INTO `Cuenta` (`usuario`, `password_hash`, `idRol`, `estado`) VALUES
+('cliente_demo', '$2y$10$ROGQKafhG0ZaDGJWPBe5rOqLNrvQ/W3Y86DScwo1l1eLP3v4Hc/0S', 3, 'activo'),
+('admin', '$2y$10$VDqBzxfDKBXmB8p/OHx0G.NBf0PEBmD9AQFfeY.KYsQa7myy/y38e', 1, 'activo');
 
 INSERT INTO `Cliente` (`ci`, `nombres`, `apPaterno`, `apMaterno`, `correo`, `direccion`, `nroCelular`, `usuarioCuenta`) VALUES
 ('0000000000', 'Consumidor', 'Final', 'Demo', 'demo@tienda.local', 'Sin direccion', '00000000', 'cliente_demo'),
