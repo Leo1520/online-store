@@ -9,7 +9,7 @@
 </head>
 <body>
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
-        <a class="navbar-brand" href="index.php">
+        <a class="navbar-brand" href="index.php?pagina=inicio">
             <img src="https://getbootstrap.com/docs/4.5/assets/brand/bootstrap-solid.svg" width="30" height="30" alt="Logo" class="d-inline-block align-top">
             Tienda en Línea
         </a>
@@ -20,7 +20,7 @@
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ml-auto">
                 <li class="nav-item">
-                    <a class="nav-link" href="index.php">Inicio</a>
+                    <a class="nav-link" href="index.php?pagina=inicio">Inicio</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="index.php?pagina=carrito">Carrito</a>
@@ -28,6 +28,39 @@
                 <li class="nav-item">
                     <a class="nav-link" href="index.php?pagina=pago">Pagar</a>
                 </li>
+                
+                <?php if (isset($_SESSION['es_admin']) && $_SESSION['es_admin']): ?>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="adminDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            Administración
+                        </a>
+                        <div class="dropdown-menu dropdown-menu-right" aria-labelledby="adminDropdown">
+                            <a class="dropdown-item" href="index.php?pagina=admin_catalogos">Catálogos</a>
+                            <a class="dropdown-item" href="index.php?pagina=admin_productos">Productos</a>
+                            <a class="dropdown-item" href="index.php?pagina=admin_sucursales">Sucursales</a>
+                            <a class="dropdown-item" href="index.php?pagina=admin_clientes">Clientes</a>
+                            <a class="dropdown-item" href="index.php?pagina=admin_ventas">Ventas</a>
+                        </div>
+                    </li>
+                <?php endif; ?>
+
+                <?php if (isset($_SESSION['usuario'])): ?>
+                    <li class="nav-item">
+                        <span class="nav-link disabled">
+                            <strong><?php echo htmlspecialchars($_SESSION['usuario']); ?></strong>
+                            <?php if (isset($_SESSION['es_admin']) && $_SESSION['es_admin']): ?>
+                                <span class="badge badge-success">Admin</span>
+                            <?php endif; ?>
+                        </span>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="index.php?pagina=logout">Salir</a>
+                    </li>
+                <?php else: ?>
+                    <li class="nav-item">
+                        <a class="nav-link" href="index.php?pagina=login">Login</a>
+                    </li>
+                <?php endif; ?>
             </ul>
         </div>
     </nav>
