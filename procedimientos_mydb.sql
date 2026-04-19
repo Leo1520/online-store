@@ -568,6 +568,133 @@ BEGIN
 END//
 
 -- =============================================
+-- VENDEDOR
+-- =============================================
+
+DROP PROCEDURE IF EXISTS sp_listar_vendedores//
+CREATE PROCEDURE sp_listar_vendedores()
+BEGIN
+    SELECT `ci`, `nombres`, `apPaterno`, `apMaterno`, `correo`, `nroCelular`, `usuarioCuenta`
+    FROM `Vendedor`
+    ORDER BY `ci` DESC;
+END//
+
+DROP PROCEDURE IF EXISTS sp_obtener_vendedor_por_clave//
+CREATE PROCEDURE sp_obtener_vendedor_por_clave(
+    IN p_ci VARCHAR(20),
+    IN p_usuario VARCHAR(40)
+)
+BEGIN
+    SELECT `ci`, `nombres`, `apPaterno`, `apMaterno`, `correo`, `nroCelular`, `usuarioCuenta`
+    FROM `Vendedor`
+    WHERE `ci` = p_ci AND `usuarioCuenta` = p_usuario
+    LIMIT 1;
+END//
+
+DROP PROCEDURE IF EXISTS sp_crear_vendedor_con_cuenta//
+CREATE PROCEDURE sp_crear_vendedor_con_cuenta(
+    IN p_usuario VARCHAR(40),
+    IN p_password VARCHAR(255),
+    IN p_ci VARCHAR(20),
+    IN p_nombres VARCHAR(50),
+    IN p_ap_paterno VARCHAR(20),
+    IN p_ap_materno VARCHAR(20),
+    IN p_correo VARCHAR(50),
+    IN p_nro_celular VARCHAR(30)
+)
+BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        ROLLBACK;
+        RESIGNAL;
+    END;
+
+    START TRANSACTION;
+
+    INSERT INTO `Cuenta` (`usuario`, `password`)
+    VALUES (p_usuario, p_password);
+
+    INSERT INTO `Vendedor` (`ci`, `nombres`, `apPaterno`, `apMaterno`, `correo`, `nroCelular`, `usuarioCuenta`)
+    VALUES (p_ci, p_nombres, p_ap_paterno, p_ap_materno, p_correo, p_nro_celular, p_usuario);
+
+    COMMIT;
+END//
+
+DROP PROCEDURE IF EXISTS sp_actualizar_vendedor//
+CREATE PROCEDURE sp_actualizar_vendedor(
+    IN p_ci VARCHAR(20),
+    IN p_usuario VARCHAR(40),
+    IN p_nombres VARCHAR(50),
+    IN p_ap_paterno VARCHAR(20),
+    IN p_ap_materno VARCHAR(20),
+    IN p_correo VARCHAR(50),
+    IN p_nro_celular VARCHAR(30)
+)
+BEGIN
+    UPDATE `Vendedor`
+    SET `nombres` = p_nombres,
+        `apPaterno` = p_ap_paterno,
+        `apMaterno` = p_ap_materno,
+        `correo` = p_correo,
+        `nroCelular` = p_nro_celular
+    WHERE `ci` = p_ci AND `usuarioCuenta` = p_usuario;
+END//
+
+DROP PROCEDURE IF EXISTS sp_actualizar_vendedor_y_password//
+CREATE PROCEDURE sp_actualizar_vendedor_y_password(
+    IN p_ci VARCHAR(20),
+    IN p_usuario VARCHAR(40),
+    IN p_nombres VARCHAR(50),
+    IN p_ap_paterno VARCHAR(20),
+    IN p_ap_materno VARCHAR(20),
+    IN p_correo VARCHAR(50),
+    IN p_nro_celular VARCHAR(30),
+    IN p_password VARCHAR(255)
+)
+BEGIN
+    UPDATE `Vendedor`
+    SET `nombres` = p_nombres,
+        `apPaterno` = p_ap_paterno,
+        `apMaterno` = p_ap_materno,
+        `correo` = p_correo,
+        `nroCelular` = p_nro_celular
+    WHERE `ci` = p_ci AND `usuarioCuenta` = p_usuario;
+
+    IF p_password IS NOT NULL AND p_password <> '' THEN
+        UPDATE `Cuenta`
+        SET `password` = p_password
+        WHERE `usuario` = p_usuario;
+    END IF;
+END//
+
+DROP PROCEDURE IF EXISTS sp_eliminar_vendedor_y_cuenta//
+CREATE PROCEDURE sp_eliminar_vendedor_y_cuenta(
+    IN p_ci VARCHAR(20),
+    IN p_usuario VARCHAR(40)
+)
+BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        ROLLBACK;
+        RESIGNAL;
+    END;
+
+    IF p_usuario = 'admin' THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Cuenta protegida';
+    END IF;
+
+    START TRANSACTION;
+
+    DELETE FROM `Vendedor`
+    WHERE `ci` = p_ci AND `usuarioCuenta` = p_usuario;
+
+    DELETE FROM `Cuenta`
+    WHERE `usuario` = p_usuario;
+
+    COMMIT;
+END//
+
+-- =============================================
 -- DETALLE PRODUCTO SUCURSAL
 -- =============================================
 

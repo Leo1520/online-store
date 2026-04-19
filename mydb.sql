@@ -184,6 +184,27 @@ CREATE TABLE IF NOT EXISTS `mydb`.`DetalleProductoSucursal` (
 ENGINE = InnoDB;
 
 
+-- -----------------------------------------------------
+-- Table `mydb`.`Vendedor`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `mydb`.`Vendedor` (
+  `ci` VARCHAR(20) NOT NULL,
+  `nombres` VARCHAR(50) NOT NULL,
+  `apPaterno` VARCHAR(20) NOT NULL,
+  `apMaterno` VARCHAR(20) NOT NULL,
+  `correo` VARCHAR(50) NOT NULL,
+  `nroCelular` VARCHAR(30) NOT NULL,
+  `usuarioCuenta` VARCHAR(40) NOT NULL,
+  PRIMARY KEY (`ci`, `usuarioCuenta`),
+  INDEX `fk_Vendedor_Cuenta_idx` (`usuarioCuenta`),
+  CONSTRAINT `fk_Vendedor_Cuenta`
+    FOREIGN KEY (`usuarioCuenta`)
+    REFERENCES `mydb`.`Cuenta` (`usuario`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
 SET SQL_MODE=@OLD_SQL_MODE;
 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;

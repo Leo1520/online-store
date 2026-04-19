@@ -40,6 +40,7 @@
                             <a class="dropdown-item" href="index.php?pagina=admin_sucursales">Sucursales</a>
                             <a class="dropdown-item" href="index.php?pagina=admin_clientes">Clientes</a>
                             <a class="dropdown-item" href="index.php?pagina=admin_ventas">Ventas</a>
+                            <a class="dropdown-item" href="index.php?pagina=admin_vendedores">Vendedores</a>
                         </div>
                     </li>
                 <?php endif; ?>

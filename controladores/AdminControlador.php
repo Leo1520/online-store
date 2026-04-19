@@ -8,6 +8,7 @@ require_once __DIR__ . '/../modelos/Cliente.php';
 require_once __DIR__ . '/../modelos/Producto.php';
 require_once __DIR__ . '/../modelos/DetalleProductoSucursal.php';
 require_once __DIR__ . '/../modelos/NotaVenta.php';
+require_once __DIR__ . '/../modelos/Vendedor.php';
 
 class AdminControlador {
     private function validarAutenticacion() {
@@ -366,5 +367,65 @@ class AdminControlador {
 
         $titulo = 'Administracion - Ventas';
         require_once __DIR__ . '/../vistas/admin_ventas.php';
+    }
+
+    public function vendedores() {
+        $this->validarAutenticacion();
+
+        $vendedorModel = new Vendedor();
+        $mensaje = isset($_GET['msg']) ? trim($_GET['msg']) : null;
+        $vendedorEditar = null;
+
+        if (isset($_GET['eliminar_ci'], $_GET['eliminar_usuario'])) {
+            $ci      = trim($_GET['eliminar_ci']);
+            $usuario = trim($_GET['eliminar_usuario']);
+
+            if ($usuario === 'admin') {
+                header('Location: index.php?pagina=admin_vendedores&msg=' . urlencode('No se puede eliminar la cuenta admin.'));
+                exit();
+            }
+
+            $ok = $vendedorModel->eliminarVendedorYCuenta($ci, $usuario);
+            $msg = $ok ? 'Vendedor eliminado correctamente.' : 'No se pudo eliminar el vendedor.';
+            header('Location: index.php?pagina=admin_vendedores&msg=' . urlencode($msg));
+            exit();
+        }
+
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $accion       = $_POST['accion'] ?? 'crear';
+            $ci           = trim($_POST['ci'] ?? '');
+            $nombres      = trim($_POST['nombres'] ?? '');
+            $apPaterno    = trim($_POST['apPaterno'] ?? '');
+            $apMaterno    = trim($_POST['apMaterno'] ?? '');
+            $correo       = trim($_POST['correo'] ?? '');
+            $nroCelular   = trim($_POST['nroCelular'] ?? '');
+            $password     = trim($_POST['password'] ?? '');
+
+            if ($accion === 'crear') {
+                $usuario = trim($_POST['usuario'] ?? '');
+                if ($usuario !== '' && $password !== '' && $ci !== '' && $nombres !== '' && $apPaterno !== '' && $apMaterno !== '' && $correo !== '' && $nroCelular !== '') {
+                    $hash = password_hash($password, PASSWORD_DEFAULT);
+                    $ok   = $vendedorModel->crearConCuenta($usuario, $hash, $ci, $nombres, $apPaterno, $apMaterno, $correo, $nroCelular);
+                    $mensaje = $ok ? 'Vendedor creado correctamente.' : 'No se pudo crear el vendedor (usuario o CI ya existe).';
+                }
+            }
+
+            if ($accion === 'editar') {
+                $usuarioCuenta = trim($_POST['usuarioCuenta'] ?? '');
+                if ($usuarioCuenta !== '' && $ci !== '' && $nombres !== '' && $apPaterno !== '' && $apMaterno !== '' && $correo !== '' && $nroCelular !== '') {
+                    $hash = $password !== '' ? password_hash($password, PASSWORD_DEFAULT) : '';
+                    $ok   = $vendedorModel->actualizarConPassword($ci, $usuarioCuenta, $nombres, $apPaterno, $apMaterno, $correo, $nroCelular, $hash);
+                    $mensaje = $ok ? 'Vendedor actualizado correctamente.' : 'No se pudo actualizar el vendedor.';
+                }
+            }
+        }
+
+        if (isset($_GET['editar_ci'], $_GET['editar_usuario'])) {
+            $vendedorEditar = $vendedorModel->obtenerPorClave($_GET['editar_ci'], $_GET['editar_usuario']);
+        }
+
+        $vendedores = $vendedorModel->obtenerTodos();
+        $titulo = 'Administracion - Vendedores';
+        require_once __DIR__ . '/../vistas/admin_vendedores.php';
     }
 }
