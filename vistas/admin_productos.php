@@ -6,7 +6,7 @@
         <div class="alert alert-success"><?php echo htmlspecialchars($mensaje); ?></div>
     <?php endif; ?>
 
-    <form method="POST" action="index.php?pagina=admin_productos" class="card card-body mb-4">
+    <form id="formProducto" method="POST" action="index.php?pagina=admin_productos" class="card card-body mb-4">
         <h5><?php echo !empty($productoEditar) ? 'Editar producto' : 'Nuevo producto'; ?></h5>
         <input type="hidden" name="accion" value="<?php echo !empty($productoEditar) ? 'editar_producto' : 'crear_producto'; ?>">
         <input type="hidden" name="id_producto" value="<?php echo !empty($productoEditar) ? (int)$productoEditar['id_producto'] : 0; ?>">
@@ -161,4 +161,18 @@
         </table>
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    Validacion.iniciar(document.getElementById('formProducto'), {
+        nombre:       [Validacion.reglas.requerido, Validacion.reglas.minLen(3), Validacion.reglas.maxLen(50)],
+        descripcion:  [Validacion.reglas.requerido, Validacion.reglas.minLen(10)],
+        precio:       [Validacion.reglas.requerido, Validacion.reglas.numeroPositivo],
+        imagen:       [Validacion.reglas.requerido],
+        codMarca:     [Validacion.reglas.seleccionValida],
+        codIndustria: [Validacion.reglas.seleccionValida],
+        codCategoria: [Validacion.reglas.seleccionValida],
+    });
+});
+</script>
 <?php require_once __DIR__ . '/layout/pie.php'; ?>

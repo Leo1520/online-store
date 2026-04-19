@@ -80,6 +80,26 @@
         </div>
     </form>
 
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var form    = document.querySelector('form[method="POST"]');
+        var esEditar = form.querySelector('[name="accion"]').value === 'editar';
+        var reglas  = {
+            nombres:    [Validacion.reglas.requerido, Validacion.reglas.soloLetrasEspacios, Validacion.reglas.minLen(2)],
+            apPaterno:  [Validacion.reglas.requerido, Validacion.reglas.soloLetrasEspacios, Validacion.reglas.minLen(2)],
+            apMaterno:  [Validacion.reglas.requerido, Validacion.reglas.soloLetrasEspacios, Validacion.reglas.minLen(2)],
+            correo:     [Validacion.reglas.requerido, Validacion.reglas.email],
+            nroCelular: [Validacion.reglas.requerido, Validacion.reglas.soloDigitos, Validacion.reglas.minLen(7)],
+            ci:         [Validacion.reglas.requerido, Validacion.reglas.minLen(5)],
+        };
+        if (!esEditar) {
+            reglas.usuario  = [Validacion.reglas.requerido, Validacion.reglas.alphanumerico, Validacion.reglas.minLen(3)];
+            reglas.password = [Validacion.reglas.requerido, Validacion.reglas.minLen(6)];
+        }
+        Validacion.iniciar(form, reglas);
+    });
+    </script>
+
     <h5>Lista de Vendedores</h5>
     <div class="table-responsive">
         <table class="table table-bordered table-sm">

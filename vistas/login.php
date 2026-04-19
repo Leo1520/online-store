@@ -11,7 +11,7 @@
                         </div>
                     <?php endif; ?>
 
-                    <form method="POST" action="index.php?pagina=login">
+                    <form id="formLogin" method="POST" action="index.php?pagina=login">
                         <div class="form-group">
                             <label for="usuario">Usuario:</label>
                             <input type="text" class="form-control" id="usuario" name="usuario" required>
@@ -24,6 +24,15 @@
                     </form>
 
                     <hr>
+
+                    <script>
+                    document.addEventListener('DOMContentLoaded', function () {
+                        Validacion.iniciar(document.getElementById('formLogin'), {
+                            usuario:  [Validacion.reglas.requerido, Validacion.reglas.minLen(3)],
+                            password: [Validacion.reglas.requerido, Validacion.reglas.minLen(4)],
+                        });
+                    });
+                    </script>
 
                     <div class="alert alert-info" role="alert">
                         <strong>Credenciales:</strong><br>

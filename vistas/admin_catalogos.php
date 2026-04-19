@@ -83,4 +83,14 @@
         </div>
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('form[method="POST"]').forEach(function (form) {
+        Validacion.iniciar(form, {
+            nombre: [Validacion.reglas.requerido, Validacion.reglas.minLen(2), Validacion.reglas.maxLen(30)],
+        });
+    });
+});
+</script>
 <?php require_once __DIR__ . '/layout/pie.php'; ?>

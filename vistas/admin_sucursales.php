@@ -6,7 +6,7 @@
         <div class="alert alert-success"><?php echo htmlspecialchars($mensaje); ?></div>
     <?php endif; ?>
 
-    <form method="POST" action="index.php?pagina=admin_sucursales" class="card card-body mb-4">
+    <form id="formSucursal" method="POST" action="index.php?pagina=admin_sucursales" class="card card-body mb-4">
         <input type="hidden" name="accion" value="<?php echo !empty($sucursalEditar) ? 'editar' : 'crear'; ?>">
         <input type="hidden" name="cod" value="<?php echo !empty($sucursalEditar) ? (int)$sucursalEditar['cod'] : 0; ?>">
         <div class="form-row">
@@ -28,6 +28,16 @@
             <a href="index.php?pagina=admin_sucursales" class="btn btn-secondary mt-2">Cancelar edicion</a>
         <?php endif; ?>
     </form>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        Validacion.iniciar(document.getElementById('formSucursal'), {
+            nombre:       [Validacion.reglas.requerido, Validacion.reglas.minLen(2), Validacion.reglas.maxLen(30)],
+            direccion:    [Validacion.reglas.requerido, Validacion.reglas.minLen(5)],
+            nroTelefono:  [Validacion.reglas.requerido, Validacion.reglas.soloDigitos],
+        });
+    });
+    </script>
 
     <div class="table-responsive">
         <table class="table table-bordered">

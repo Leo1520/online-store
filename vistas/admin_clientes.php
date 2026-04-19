@@ -6,7 +6,7 @@
         <div class="alert alert-info"><?php echo htmlspecialchars($mensaje); ?></div>
     <?php endif; ?>
 
-    <form method="POST" action="index.php?pagina=admin_clientes" class="card card-body mb-4">
+    <form id="formCliente" method="POST" action="index.php?pagina=admin_clientes" class="card card-body mb-4">
         <input type="hidden" name="accion" value="<?php echo !empty($clienteEditar) ? 'editar' : 'crear'; ?>">
         <h5 class="mb-3"><?php echo !empty($clienteEditar) ? 'Editar cliente' : 'Nueva cuenta + cliente'; ?></h5>
         <div class="form-row">
@@ -64,6 +64,27 @@
             <a href="index.php?pagina=admin_clientes" class="btn btn-secondary mt-2">Cancelar edicion</a>
         <?php endif; ?>
     </form>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var form    = document.getElementById('formCliente');
+        var esEditar = form.querySelector('[name="accion"]').value === 'editar';
+        var reglas  = {
+            nombres:    [Validacion.reglas.requerido, Validacion.reglas.soloLetrasEspacios, Validacion.reglas.minLen(2)],
+            apPaterno:  [Validacion.reglas.requerido, Validacion.reglas.soloLetrasEspacios, Validacion.reglas.minLen(2)],
+            apMaterno:  [Validacion.reglas.requerido, Validacion.reglas.soloLetrasEspacios, Validacion.reglas.minLen(2)],
+            correo:     [Validacion.reglas.requerido, Validacion.reglas.email],
+            direccion:  [Validacion.reglas.requerido, Validacion.reglas.minLen(5)],
+            nroCelular: [Validacion.reglas.requerido, Validacion.reglas.soloDigitos, Validacion.reglas.minLen(7)],
+            ci:         [Validacion.reglas.requerido, Validacion.reglas.minLen(5)],
+        };
+        if (!esEditar) {
+            reglas.usuario  = [Validacion.reglas.requerido, Validacion.reglas.alphanumerico, Validacion.reglas.minLen(3)];
+            reglas.password = [Validacion.reglas.requerido, Validacion.reglas.minLen(6)];
+        }
+        Validacion.iniciar(form, reglas);
+    });
+    </script>
 
     <div class="row">
         <div class="col-md-5">
