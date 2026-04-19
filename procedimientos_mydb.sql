@@ -367,4 +367,204 @@ BEGIN
     WHERE `cod` = p_cod;
 END//
 
+-- =============================================
+-- SUCURSAL
+-- =============================================
+
+DROP PROCEDURE IF EXISTS sp_listar_sucursales//
+CREATE PROCEDURE sp_listar_sucursales()
+BEGIN
+    SELECT `cod`, `nombre`, `direccion`, `nroTelefono`
+    FROM `Sucursal`
+    ORDER BY `cod` DESC;
+END//
+
+DROP PROCEDURE IF EXISTS sp_obtener_sucursal_por_cod//
+CREATE PROCEDURE sp_obtener_sucursal_por_cod(IN p_cod INT)
+BEGIN
+    SELECT `cod`, `nombre`, `direccion`, `nroTelefono`
+    FROM `Sucursal`
+    WHERE `cod` = p_cod
+    LIMIT 1;
+END//
+
+DROP PROCEDURE IF EXISTS sp_crear_sucursal//
+CREATE PROCEDURE sp_crear_sucursal(
+    IN p_nombre VARCHAR(50),
+    IN p_direccion VARCHAR(100),
+    IN p_nro_telefono VARCHAR(30)
+)
+BEGIN
+    INSERT INTO `Sucursal` (`nombre`, `direccion`, `nroTelefono`)
+    VALUES (p_nombre, p_direccion, p_nro_telefono);
+END//
+
+DROP PROCEDURE IF EXISTS sp_actualizar_sucursal//
+CREATE PROCEDURE sp_actualizar_sucursal(
+    IN p_cod INT,
+    IN p_nombre VARCHAR(50),
+    IN p_direccion VARCHAR(100),
+    IN p_nro_telefono VARCHAR(30)
+)
+BEGIN
+    UPDATE `Sucursal`
+    SET `nombre` = p_nombre,
+        `direccion` = p_direccion,
+        `nroTelefono` = p_nro_telefono
+    WHERE `cod` = p_cod;
+END//
+
+DROP PROCEDURE IF EXISTS sp_eliminar_sucursal//
+CREATE PROCEDURE sp_eliminar_sucursal(IN p_cod INT)
+BEGIN
+    DELETE FROM `Sucursal`
+    WHERE `cod` = p_cod;
+END//
+
+-- =============================================
+-- CUENTA
+-- =============================================
+
+DROP PROCEDURE IF EXISTS sp_listar_cuentas//
+CREATE PROCEDURE sp_listar_cuentas()
+BEGIN
+    SELECT `usuario`, `password`
+    FROM `Cuenta`
+    ORDER BY `usuario` ASC;
+END//
+
+DROP PROCEDURE IF EXISTS sp_obtener_cuenta_por_usuario//
+CREATE PROCEDURE sp_obtener_cuenta_por_usuario(IN p_usuario VARCHAR(40))
+BEGIN
+    SELECT `usuario`, `password`
+    FROM `Cuenta`
+    WHERE `usuario` = p_usuario
+    LIMIT 1;
+END//
+
+DROP PROCEDURE IF EXISTS sp_crear_cuenta//
+CREATE PROCEDURE sp_crear_cuenta(
+    IN p_usuario VARCHAR(40),
+    IN p_password VARCHAR(255)
+)
+BEGIN
+    INSERT INTO `Cuenta` (`usuario`, `password`)
+    VALUES (p_usuario, p_password);
+END//
+
+DROP PROCEDURE IF EXISTS sp_actualizar_password_cuenta//
+CREATE PROCEDURE sp_actualizar_password_cuenta(
+    IN p_usuario VARCHAR(40),
+    IN p_password VARCHAR(255)
+)
+BEGIN
+    UPDATE `Cuenta`
+    SET `password` = p_password
+    WHERE `usuario` = p_usuario;
+END//
+
+DROP PROCEDURE IF EXISTS sp_eliminar_cuenta//
+CREATE PROCEDURE sp_eliminar_cuenta(IN p_usuario VARCHAR(40))
+BEGIN
+    DELETE FROM `Cuenta`
+    WHERE `usuario` = p_usuario;
+END//
+
+DROP PROCEDURE IF EXISTS sp_verificar_cliente_asociado//
+CREATE PROCEDURE sp_verificar_cliente_asociado(IN p_usuario VARCHAR(40))
+BEGIN
+    SELECT COUNT(*) AS total
+    FROM `Cliente`
+    WHERE `usuarioCuenta` = p_usuario
+    LIMIT 1;
+END//
+
+-- =============================================
+-- CLIENTE (métodos faltantes)
+-- =============================================
+
+DROP PROCEDURE IF EXISTS sp_listar_clientes//
+CREATE PROCEDURE sp_listar_clientes()
+BEGIN
+    SELECT `ci`, `nombres`, `apPaterno`, `apMaterno`, `correo`, `direccion`, `nroCelular`, `usuarioCuenta`
+    FROM `Cliente`
+    ORDER BY `ci` DESC;
+END//
+
+DROP PROCEDURE IF EXISTS sp_obtener_cliente_por_clave//
+CREATE PROCEDURE sp_obtener_cliente_por_clave(
+    IN p_ci VARCHAR(20),
+    IN p_usuario VARCHAR(40)
+)
+BEGIN
+    SELECT `ci`, `nombres`, `apPaterno`, `apMaterno`, `correo`, `direccion`, `nroCelular`, `usuarioCuenta`
+    FROM `Cliente`
+    WHERE `ci` = p_ci AND `usuarioCuenta` = p_usuario
+    LIMIT 1;
+END//
+
+DROP PROCEDURE IF EXISTS sp_crear_cliente//
+CREATE PROCEDURE sp_crear_cliente(
+    IN p_ci VARCHAR(20),
+    IN p_nombres VARCHAR(50),
+    IN p_ap_paterno VARCHAR(20),
+    IN p_ap_materno VARCHAR(20),
+    IN p_correo VARCHAR(30),
+    IN p_direccion VARCHAR(45),
+    IN p_nro_celular VARCHAR(30),
+    IN p_usuario_cuenta VARCHAR(40)
+)
+BEGIN
+    INSERT INTO `Cliente` (`ci`, `nombres`, `apPaterno`, `apMaterno`, `correo`, `direccion`, `nroCelular`, `usuarioCuenta`)
+    VALUES (p_ci, p_nombres, p_ap_paterno, p_ap_materno, p_correo, p_direccion, p_nro_celular, p_usuario_cuenta);
+END//
+
+DROP PROCEDURE IF EXISTS sp_actualizar_cliente//
+CREATE PROCEDURE sp_actualizar_cliente(
+    IN p_ci VARCHAR(20),
+    IN p_usuario VARCHAR(40),
+    IN p_nombres VARCHAR(50),
+    IN p_ap_paterno VARCHAR(20),
+    IN p_ap_materno VARCHAR(20),
+    IN p_correo VARCHAR(30),
+    IN p_direccion VARCHAR(45),
+    IN p_nro_celular VARCHAR(30)
+)
+BEGIN
+    UPDATE `Cliente`
+    SET `nombres` = p_nombres,
+        `apPaterno` = p_ap_paterno,
+        `apMaterno` = p_ap_materno,
+        `correo` = p_correo,
+        `direccion` = p_direccion,
+        `nroCelular` = p_nro_celular
+    WHERE `ci` = p_ci AND `usuarioCuenta` = p_usuario;
+END//
+
+DROP PROCEDURE IF EXISTS sp_eliminar_cliente//
+CREATE PROCEDURE sp_eliminar_cliente(
+    IN p_ci VARCHAR(20),
+    IN p_usuario VARCHAR(40)
+)
+BEGIN
+    DELETE FROM `Cliente`
+    WHERE `ci` = p_ci AND `usuarioCuenta` = p_usuario;
+END//
+
+-- =============================================
+-- USUARIO
+-- =============================================
+
+DROP PROCEDURE IF EXISTS sp_verificar_credenciales_usuario//
+CREATE PROCEDURE sp_verificar_credenciales_usuario(
+    IN p_usuario VARCHAR(40),
+    IN p_password VARCHAR(255)
+)
+BEGIN
+    SELECT `usuario`
+    FROM `Cuenta`
+    WHERE `usuario` = p_usuario AND `password` = p_password
+    LIMIT 1;
+END//
+
 DELIMITER ;

@@ -9,23 +9,24 @@ class Cliente {
     }
 
     public function obtenerTodos() {
-        $sql = "SELECT c.ci, c.nombres, c.apPaterno, c.apMaterno, c.correo, c.direccion, c.nroCelular, c.usuarioCuenta
-                FROM `Cliente` c
-                ORDER BY c.ci DESC";
-        $resultado = $this->db->query($sql);
-        return $resultado ? $resultado->fetch_all(MYSQLI_ASSOC) : [];
+        $stmt = $this->db->prepare("CALL sp_listar_clientes()");
+        if (!$stmt) return [];
+        $stmt->execute();
+        $resultado = $stmt->get_result();
+        $datos = $resultado ? $resultado->fetch_all(MYSQLI_ASSOC) : [];
+        $stmt->close();
+        $this->limpiarResultadosPendientes();
+        return $datos;
     }
 
     public function crear($ci, $nombres, $apPaterno, $apMaterno, $correo, $direccion, $nroCelular, $usuarioCuenta) {
-        $sql = "INSERT INTO `Cliente` (ci, nombres, apPaterno, apMaterno, correo, direccion, nroCelular, usuarioCuenta)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
-        $stmt = $this->db->prepare($sql);
-        if (!$stmt) {
-            return false;
-        }
-
+        $stmt = $this->db->prepare("CALL sp_crear_cliente(?, ?, ?, ?, ?, ?, ?, ?)");
+        if (!$stmt) return false;
         $stmt->bind_param('ssssssss', $ci, $nombres, $apPaterno, $apMaterno, $correo, $direccion, $nroCelular, $usuarioCuenta);
-        return $stmt->execute();
+        $ok = $stmt->execute();
+        $stmt->close();
+        $this->limpiarResultadosPendientes();
+        return $ok;
     }
 
     public function crearConCuenta($usuario, $passwordHash, $ci, $nombres, $apPaterno, $apMaterno, $correo, $direccion, $nroCelular) {
@@ -42,19 +43,15 @@ class Cliente {
 
         $this->db->begin_transaction();
         try {
-            $stmtCuenta = $this->db->prepare("INSERT INTO `Cuenta` (usuario, password) VALUES (?, ?)");
-            if (!$stmtCuenta) {
-                throw new Exception('No se pudo crear la cuenta.');
-            }
+            $stmtCuenta = $this->db->prepare("CALL sp_crear_cuenta(?, ?)");
+            if (!$stmtCuenta) throw new Exception('No se pudo crear la cuenta.');
             $stmtCuenta->bind_param('ss', $usuario, $passwordHash);
-            if (!$stmtCuenta->execute()) {
-                throw new Exception('No se pudo crear la cuenta.');
-            }
+            if (!$stmtCuenta->execute()) throw new Exception('No se pudo crear la cuenta.');
+            $stmtCuenta->close();
+            $this->limpiarResultadosPendientes();
 
             $okCliente = $this->crear($ci, $nombres, $apPaterno, $apMaterno, $correo, $direccion, $nroCelular, $usuario);
-            if (!$okCliente) {
-                throw new Exception('No se pudo crear el cliente.');
-            }
+            if (!$okCliente) throw new Exception('No se pudo crear el cliente.');
 
             $this->db->commit();
             return true;
@@ -65,31 +62,25 @@ class Cliente {
     }
 
     public function obtenerPorClave($ci, $usuarioCuenta) {
-        $sql = "SELECT ci, nombres, apPaterno, apMaterno, correo, direccion, nroCelular, usuarioCuenta
-                FROM `Cliente`
-                WHERE ci = ? AND usuarioCuenta = ?";
-        $stmt = $this->db->prepare($sql);
-        if (!$stmt) {
-            return null;
-        }
-
+        $stmt = $this->db->prepare("CALL sp_obtener_cliente_por_clave(?, ?)");
+        if (!$stmt) return null;
         $stmt->bind_param('ss', $ci, $usuarioCuenta);
         $stmt->execute();
         $resultado = $stmt->get_result();
-        return $resultado ? $resultado->fetch_assoc() : null;
+        $dato = $resultado ? $resultado->fetch_assoc() : null;
+        $stmt->close();
+        $this->limpiarResultadosPendientes();
+        return $dato;
     }
 
     public function actualizar($ci, $usuarioCuenta, $nombres, $apPaterno, $apMaterno, $correo, $direccion, $nroCelular) {
-        $sql = "UPDATE `Cliente`
-                SET nombres = ?, apPaterno = ?, apMaterno = ?, correo = ?, direccion = ?, nroCelular = ?
-                WHERE ci = ? AND usuarioCuenta = ?";
-        $stmt = $this->db->prepare($sql);
-        if (!$stmt) {
-            return false;
-        }
-
-        $stmt->bind_param('ssssssss', $nombres, $apPaterno, $apMaterno, $correo, $direccion, $nroCelular, $ci, $usuarioCuenta);
-        return $stmt->execute();
+        $stmt = $this->db->prepare("CALL sp_actualizar_cliente(?, ?, ?, ?, ?, ?, ?, ?)");
+        if (!$stmt) return false;
+        $stmt->bind_param('ssssssss', $ci, $usuarioCuenta, $nombres, $apPaterno, $apMaterno, $correo, $direccion, $nroCelular);
+        $ok = $stmt->execute();
+        $stmt->close();
+        $this->limpiarResultadosPendientes();
+        return $ok;
     }
 
     public function actualizarConPassword($ci, $usuarioCuenta, $nombres, $apPaterno, $apMaterno, $correo, $direccion, $nroCelular, $passwordHash) {
@@ -101,37 +92,33 @@ class Cliente {
             $ok = $stmtSp->execute();
             $stmtSp->close();
             $this->limpiarResultadosPendientes();
-            if ($ok) {
-                return true;
-            }
+            if ($ok) return true;
         }
 
         $okCliente = $this->actualizar($ci, $usuarioCuenta, $nombres, $apPaterno, $apMaterno, $correo, $direccion, $nroCelular);
-        if (!$okCliente) {
-            return false;
-        }
+        if (!$okCliente) return false;
 
         if ($passwordHash !== '') {
-            $stmtCuenta = $this->db->prepare("UPDATE `Cuenta` SET password = ? WHERE usuario = ?");
-            if (!$stmtCuenta) {
-                return false;
-            }
-            $stmtCuenta->bind_param('ss', $passwordHash, $usuarioCuenta);
-            return $stmtCuenta->execute();
+            $stmt = $this->db->prepare("CALL sp_actualizar_password_cuenta(?, ?)");
+            if (!$stmt) return false;
+            $stmt->bind_param('ss', $usuarioCuenta, $passwordHash);
+            $ok = $stmt->execute();
+            $stmt->close();
+            $this->limpiarResultadosPendientes();
+            return $ok;
         }
 
         return true;
     }
 
     public function eliminar($ci, $usuarioCuenta) {
-        $sql = "DELETE FROM `Cliente` WHERE ci = ? AND usuarioCuenta = ?";
-        $stmt = $this->db->prepare($sql);
-        if (!$stmt) {
-            return false;
-        }
-
+        $stmt = $this->db->prepare("CALL sp_eliminar_cliente(?, ?)");
+        if (!$stmt) return false;
         $stmt->bind_param('ss', $ci, $usuarioCuenta);
-        return $stmt->execute();
+        $ok = $stmt->execute();
+        $stmt->close();
+        $this->limpiarResultadosPendientes();
+        return $ok;
     }
 
     public function eliminarClienteYCuentaSegura($ci, $usuarioCuenta) {
@@ -141,9 +128,7 @@ class Cliente {
             $ok = $stmtSp->execute();
             $stmtSp->close();
             $this->limpiarResultadosPendientes();
-            if ($ok) {
-                return true;
-            }
+            if ($ok) return true;
         }
 
         return $this->eliminar($ci, $usuarioCuenta);

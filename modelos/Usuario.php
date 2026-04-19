@@ -9,16 +9,23 @@ class Usuario {
     }
 
     public function verificarCredenciales($usuario, $password) {
-        $sql = "SELECT usuario FROM `Cuenta` WHERE usuario = ? AND password = ? LIMIT 1";
-        $stmt = $this->db->prepare($sql);
-        if (!$stmt) {
-            return false;
-        }
-
-        $stmt->bind_param("ss", $usuario, $password);
+        $stmt = $this->db->prepare("CALL sp_verificar_credenciales_usuario(?, ?)");
+        if (!$stmt) return false;
+        $stmt->bind_param('ss', $usuario, $password);
         $stmt->execute();
         $resultado = $stmt->get_result();
+        $encontrado = $resultado && $resultado->num_rows === 1;
+        $stmt->close();
+        $this->limpiarResultadosPendientes();
+        return $encontrado;
+    }
 
-        return $resultado && $resultado->num_rows === 1;
+    private function limpiarResultadosPendientes() {
+        while ($this->db->more_results() && $this->db->next_result()) {
+            $resultado = $this->db->use_result();
+            if ($resultado instanceof mysqli_result) {
+                $resultado->free();
+            }
+        }
     }
 }

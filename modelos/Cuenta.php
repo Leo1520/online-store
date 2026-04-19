@@ -9,19 +9,26 @@ class Cuenta {
     }
 
     public function obtenerTodas() {
-        $resultado = $this->db->query("SELECT usuario, password FROM `Cuenta` ORDER BY usuario ASC");
-        return $resultado ? $resultado->fetch_all(MYSQLI_ASSOC) : [];
+        $stmt = $this->db->prepare("CALL sp_listar_cuentas()");
+        if (!$stmt) return [];
+        $stmt->execute();
+        $resultado = $stmt->get_result();
+        $datos = $resultado ? $resultado->fetch_all(MYSQLI_ASSOC) : [];
+        $stmt->close();
+        $this->limpiarResultadosPendientes();
+        return $datos;
     }
 
     public function obtenerPorUsuario($usuario) {
-        $stmt = $this->db->prepare("SELECT usuario, password FROM `Cuenta` WHERE usuario = ? LIMIT 1");
-        if (!$stmt) {
-            return null;
-        }
+        $stmt = $this->db->prepare("CALL sp_obtener_cuenta_por_usuario(?)");
+        if (!$stmt) return null;
         $stmt->bind_param('s', $usuario);
         $stmt->execute();
         $resultado = $stmt->get_result();
-        return $resultado && $resultado->num_rows > 0 ? $resultado->fetch_assoc() : null;
+        $dato = ($resultado && $resultado->num_rows > 0) ? $resultado->fetch_assoc() : null;
+        $stmt->close();
+        $this->limpiarResultadosPendientes();
+        return $dato;
     }
 
     public function verificarCredenciales($usuario, $password) {
@@ -47,44 +54,46 @@ class Cuenta {
 
     public function crear($usuario, $password) {
         $passwordNormalizado = $this->normalizarPassword($password);
-
-        $stmt = $this->db->prepare("INSERT INTO `Cuenta` (usuario, password) VALUES (?, ?)");
-        if (!$stmt) {
-            return false;
-        }
+        $stmt = $this->db->prepare("CALL sp_crear_cuenta(?, ?)");
+        if (!$stmt) return false;
         $stmt->bind_param('ss', $usuario, $passwordNormalizado);
-        return $stmt->execute();
+        $ok = $stmt->execute();
+        $stmt->close();
+        $this->limpiarResultadosPendientes();
+        return $ok;
     }
 
     public function actualizarPassword($usuario, $password) {
         $passwordNormalizado = $this->normalizarPassword($password);
-
-        $stmt = $this->db->prepare("UPDATE `Cuenta` SET password = ? WHERE usuario = ?");
-        if (!$stmt) {
-            return false;
-        }
-        $stmt->bind_param('ss', $passwordNormalizado, $usuario);
-        return $stmt->execute();
+        $stmt = $this->db->prepare("CALL sp_actualizar_password_cuenta(?, ?)");
+        if (!$stmt) return false;
+        $stmt->bind_param('ss', $usuario, $passwordNormalizado);
+        $ok = $stmt->execute();
+        $stmt->close();
+        $this->limpiarResultadosPendientes();
+        return $ok;
     }
 
     public function tieneClienteAsociado($usuario) {
-        $stmt = $this->db->prepare("SELECT 1 FROM `Cliente` WHERE usuarioCuenta = ? LIMIT 1");
-        if (!$stmt) {
-            return true;
-        }
+        $stmt = $this->db->prepare("CALL sp_verificar_cliente_asociado(?)");
+        if (!$stmt) return true;
         $stmt->bind_param('s', $usuario);
         $stmt->execute();
         $resultado = $stmt->get_result();
-        return $resultado && $resultado->num_rows > 0;
+        $fila = $resultado ? $resultado->fetch_assoc() : null;
+        $stmt->close();
+        $this->limpiarResultadosPendientes();
+        return $fila && (int)$fila['total'] > 0;
     }
 
     public function eliminar($usuario) {
-        $stmt = $this->db->prepare("DELETE FROM `Cuenta` WHERE usuario = ?");
-        if (!$stmt) {
-            return false;
-        }
+        $stmt = $this->db->prepare("CALL sp_eliminar_cuenta(?)");
+        if (!$stmt) return false;
         $stmt->bind_param('s', $usuario);
-        return $stmt->execute();
+        $ok = $stmt->execute();
+        $stmt->close();
+        $this->limpiarResultadosPendientes();
+        return $ok;
     }
 
     private function esHashPassword($password) {
@@ -98,5 +107,14 @@ class Cuenta {
             return $password;
         }
         return password_hash($password, PASSWORD_DEFAULT);
+    }
+
+    private function limpiarResultadosPendientes() {
+        while ($this->db->more_results() && $this->db->next_result()) {
+            $resultado = $this->db->use_result();
+            if ($resultado instanceof mysqli_result) {
+                $resultado->free();
+            }
+        }
     }
 }
