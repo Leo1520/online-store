@@ -23,7 +23,10 @@
                     <a class="nav-link" href="index.php?pagina=inicio">Inicio</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="index.php?pagina=carrito">Carrito</a>
+                    <a class="nav-link" href="index.php?pagina=carrito">
+                        <i class="bi bi-cart3"></i> Carrito
+                        <span id="carritoContador" class="badge badge-danger" style="display:none;">0</span>
+                    </a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="index.php?pagina=pago">Pagar</a>
