@@ -33,8 +33,12 @@ class PagoControlador {
         $errorPago = null;
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            if (empty($_SESSION['usuario'])) {
+                header('Location: index.php?pagina=login');
+                exit();
+            }
             $venta = new Venta();
-            $nroVenta = $venta->registrarVenta($_SESSION['carrito']);
+            $nroVenta = $venta->registrarVenta($_SESSION['carrito'], $_SESSION['usuario']);
 
             if ($nroVenta !== false) {
                 $_SESSION['carrito'] = [];

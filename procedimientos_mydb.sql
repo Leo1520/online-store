@@ -567,4 +567,51 @@ BEGIN
     LIMIT 1;
 END//
 
+-- =============================================
+-- DETALLE PRODUCTO SUCURSAL
+-- =============================================
+
+DROP PROCEDURE IF EXISTS sp_listar_stock_sucursales//
+CREATE PROCEDURE sp_listar_stock_sucursales()
+BEGIN
+    SELECT dps.`codProducto`, p.`nombre` AS producto,
+           dps.`codSucursal`, s.`nombre` AS sucursal, dps.`stock`
+    FROM `DetalleProductoSucursal` dps
+    INNER JOIN `Producto` p ON p.`cod` = dps.`codProducto`
+    INNER JOIN `Sucursal` s ON s.`cod` = dps.`codSucursal`
+    ORDER BY dps.`codProducto` DESC, dps.`codSucursal` ASC;
+END//
+
+DROP PROCEDURE IF EXISTS sp_eliminar_stock_sucursal//
+CREATE PROCEDURE sp_eliminar_stock_sucursal(
+    IN p_cod_producto INT,
+    IN p_cod_sucursal INT
+)
+BEGIN
+    DELETE FROM `DetalleProductoSucursal`
+    WHERE `codProducto` = p_cod_producto AND `codSucursal` = p_cod_sucursal;
+END//
+
+-- =============================================
+-- VENTA
+-- =============================================
+
+DROP PROCEDURE IF EXISTS sp_existe_producto//
+CREATE PROCEDURE sp_existe_producto(IN p_cod_producto INT)
+BEGIN
+    SELECT COUNT(*) AS existe
+    FROM `Producto`
+    WHERE `cod` = p_cod_producto
+    LIMIT 1;
+END//
+
+DROP PROCEDURE IF EXISTS sp_obtener_ci_cliente_por_usuario//
+CREATE PROCEDURE sp_obtener_ci_cliente_por_usuario(IN p_usuario VARCHAR(40))
+BEGIN
+    SELECT `ci`
+    FROM `Cliente`
+    WHERE `usuarioCuenta` = p_usuario
+    LIMIT 1;
+END//
+
 DELIMITER ;
