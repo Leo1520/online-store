@@ -40,6 +40,10 @@ class Venta {
                     throw new Exception('No se pudo registrar el detalle de venta.');
                 }
 
+                if (!$this->descontarStock($codProducto, $cantidad)) {
+                    throw new Exception('Stock insuficiente para el producto ' . $codProducto . '.');
+                }
+
                 $item++;
             }
 
@@ -96,6 +100,16 @@ class Venta {
 
         if ($nro <= 0) throw new Exception('Numero de venta invalido.');
         return $nro;
+    }
+
+    private function descontarStock($codProducto, $cantidad) {
+        $stmt = $this->db->prepare("CALL sp_descontar_stock_producto(?, ?)");
+        if (!$stmt) return false;
+        $stmt->bind_param('ii', $codProducto, $cantidad);
+        $ok = $stmt->execute();
+        $stmt->close();
+        $this->limpiarResultadosPendientes();
+        return $ok;
     }
 
     private function insertarDetalleVenta($nroVenta, $codProducto, $item, $cantidad) {

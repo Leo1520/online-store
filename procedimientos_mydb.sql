@@ -568,6 +568,67 @@ BEGIN
 END//
 
 -- =============================================
+-- DESCUENTO DE STOCK
+-- =============================================
+
+DROP PROCEDURE IF EXISTS sp_descontar_stock_producto//
+CREATE PROCEDURE sp_descontar_stock_producto(
+    IN p_cod_producto INT,
+    IN p_cantidad     INT
+)
+BEGIN
+    DECLARE v_stock_total  INT DEFAULT 0;
+    DECLARE v_restante     INT DEFAULT p_cantidad;
+    DECLARE v_cod_sucursal INT;
+    DECLARE v_stock_actual INT;
+    DECLARE done           INT DEFAULT FALSE;
+
+    DECLARE cur CURSOR FOR
+        SELECT `codSucursal`, CAST(`stock` AS UNSIGNED)
+        FROM `DetalleProductoSucursal`
+        WHERE `codProducto` = p_cod_producto
+          AND CAST(`stock` AS UNSIGNED) > 0
+        ORDER BY `codSucursal` ASC;
+
+    DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
+
+    -- Verificar stock total disponible
+    SELECT COALESCE(SUM(CAST(`stock` AS UNSIGNED)), 0)
+    INTO v_stock_total
+    FROM `DetalleProductoSucursal`
+    WHERE `codProducto` = p_cod_producto;
+
+    IF v_stock_total < p_cantidad THEN
+        SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'Stock insuficiente para completar la compra';
+    END IF;
+
+    -- Descontar secuencialmente por sucursal
+    OPEN cur;
+    descuento_loop: LOOP
+        FETCH cur INTO v_cod_sucursal, v_stock_actual;
+        IF done OR v_restante <= 0 THEN
+            LEAVE descuento_loop;
+        END IF;
+
+        IF v_stock_actual >= v_restante THEN
+            UPDATE `DetalleProductoSucursal`
+            SET `stock` = CAST(CAST(`stock` AS UNSIGNED) - v_restante AS CHAR)
+            WHERE `codProducto` = p_cod_producto
+              AND `codSucursal`  = v_cod_sucursal;
+            SET v_restante = 0;
+        ELSE
+            UPDATE `DetalleProductoSucursal`
+            SET `stock` = '0'
+            WHERE `codProducto` = p_cod_producto
+              AND `codSucursal`  = v_cod_sucursal;
+            SET v_restante = v_restante - v_stock_actual;
+        END IF;
+    END LOOP;
+    CLOSE cur;
+END//
+
+-- =============================================
 -- BUSQUEDA DE PRODUCTOS
 -- =============================================
 
