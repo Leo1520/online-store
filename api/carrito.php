@@ -32,7 +32,8 @@ function calcularResumen() {
         }
     }
 
-    return ['items' => $items, 'total' => $total, 'cantidad' => count($items)];
+    $totalUnidades = array_sum(array_column($items, 'cantidad'));
+    return ['items' => $items, 'total' => $total, 'cantidad' => $totalUnidades];
 }
 
 switch ($accion) {
