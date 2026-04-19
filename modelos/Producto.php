@@ -113,6 +113,23 @@ class Producto {
         return $resultado->fetch_assoc();
     }
 
+    public function buscar($nombre = '', $codCategoria = 0, $precioMin = 0, $precioMax = 0) {
+        $nombre       = trim($nombre);
+        $codCategoria = (int)$codCategoria;
+        $precioMin    = (float)$precioMin;
+        $precioMax    = (float)$precioMax;
+
+        $stmt = $this->db->prepare("CALL sp_buscar_productos(?, ?, ?, ?)");
+        if (!$stmt) return [];
+        $stmt->bind_param('sidd', $nombre, $codCategoria, $precioMin, $precioMax);
+        $stmt->execute();
+        $resultado = $stmt->get_result();
+        $datos = $resultado ? $resultado->fetch_all(MYSQLI_ASSOC) : [];
+        $stmt->close();
+        $this->limpiarResultadosPendientes();
+        return $datos;
+    }
+
     public function agregar($nombre, $descripcion, $precio, $imagen, $codMarca, $codIndustria, $codCategoria, $estado = 'activo') {
         $precio = (float)$precio;
         $codMarca = (int)$codMarca;

@@ -568,6 +568,48 @@ BEGIN
 END//
 
 -- =============================================
+-- BUSQUEDA DE PRODUCTOS
+-- =============================================
+
+DROP PROCEDURE IF EXISTS sp_buscar_productos//
+CREATE PROCEDURE sp_buscar_productos(
+    IN p_nombre        VARCHAR(50),
+    IN p_cod_categoria INT,
+    IN p_precio_min    DECIMAL(10,2),
+    IN p_precio_max    DECIMAL(10,2)
+)
+BEGIN
+    SELECT
+        p.`cod`          AS id_producto,
+        p.`nombre`,
+        p.`descripcion`,
+        p.`precio`,
+        p.`imagen`,
+        p.`estado`,
+        p.`codMarca`,
+        p.`codIndustria`,
+        p.`codCategoria`,
+        COALESCE(SUM(CAST(dps.`stock` AS UNSIGNED)), 0) AS stock,
+        m.`nombre`  AS marca,
+        c.`nombre`  AS categoria,
+        i.`nombre`  AS industria
+    FROM `Producto` p
+    LEFT JOIN `DetalleProductoSucursal` dps ON dps.`codProducto` = p.`cod`
+    LEFT JOIN `Marca`     m ON m.`cod` = p.`codMarca`
+    LEFT JOIN `Categoria` c ON c.`cod` = p.`codCategoria`
+    LEFT JOIN `Industria` i ON i.`cod` = p.`codIndustria`
+    WHERE p.`estado` = 'activo'
+      AND (p_nombre        = ''  OR p.`nombre`       LIKE CONCAT('%', p_nombre, '%'))
+      AND (p_cod_categoria  = 0   OR p.`codCategoria` = p_cod_categoria)
+      AND (p_precio_min     = 0   OR p.`precio`       >= p_precio_min)
+      AND (p_precio_max     = 0   OR p.`precio`       <= p_precio_max)
+    GROUP BY p.`cod`, p.`nombre`, p.`descripcion`, p.`precio`, p.`imagen`, p.`estado`,
+             p.`codMarca`, p.`codIndustria`, p.`codCategoria`,
+             m.`nombre`, c.`nombre`, i.`nombre`
+    ORDER BY p.`cod` DESC;
+END//
+
+-- =============================================
 -- VENDEDOR
 -- =============================================
 
