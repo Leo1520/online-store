@@ -11,215 +11,110 @@ skinparam ParticipantBackgroundColor #667eea
 skinparam ParticipantBorderColor #333333
 skinparam ParticipantFontColor #FFFFFF
 
-title MODULO DE VENTAS - CARRITO DE COMPRAS
+title Modulo de Ventas\nCarrito de Compras
 
-actor "Usuario/Cliente" as USUARIO
-participant "Vista Carrito\n(carrito.php)" as VISTA
-participant "CarritoControlador\n(index.php)" as CONTROLADOR
-participant "ProductoModelo\n(Producto.php)" as MODELO
-database "Base de Datos" as BD
+actor Usuario
+participant Vista
+participant Controlador
+participant Modelo
+database BaseDatos
 
-== SESION 1: ACCESO AL CARRITO ==
+== Sesion 1: Acceso al Carrito ==
 
-USUARIO -> VISTA: 1. GET /carrito
-activate VISTA
-VISTA -> CONTROLADOR: 2. Cargar controlador
-activate CONTROLADOR
-CONTROLADOR -> CONTROLADOR: 3. Obtener SESSION carrito
-CONTROLADOR -> VISTA: 4. Pasar carrito a vista
+Usuario -> Vista: GET carrito
+activate Vista
+Vista -> Controlador: Cargar controlador
+activate Controlador
+Controlador -> Controlador: Obtener SESSION carrito
+Controlador -> Vista: Pasar carrito
+Vista -> Usuario: Mostrar lista productos
+deactivate Vista
 
-note right of CONTROLADOR
-  Sesion: SESSION carrito
-  Estructura: [{id_producto, cantidad}, ...]
-end note
+== Sesion 2: Ver Detalles ==
 
-VISTA -> USUARIO: 5. Mostrar lista de productos\nen el carrito
+Usuario -> Vista: Ver detalles producto
+activate Vista
+Vista -> Controlador: GET carrito
+activate Controlador
+Controlador -> Modelo: obtenerPorId
+activate Modelo
+Modelo -> BaseDatos: SELECT FROM Producto
+activate BaseDatos
+BaseDatos -->> Modelo: Retorna datos
+deactivate BaseDatos
+Modelo -->> Controlador: Array datos
+Controlador -> Vista: Pasar datos
+Vista -> Usuario: Mostrar detalles
+deactivate Modelo
+deactivate Controlador
+deactivate Vista
 
-note right of VISTA
-  Muestra:
-  - Nombre producto
-  - Cantidad
-  - Precio unitario
-  - Subtotal (precio * cantidad)
-  - Total acumulado
-  - Botones de accion
-end note
+== Sesion 3: Actualizar Cantidad ==
 
-== SESION 2: VER DETALLES DE PRODUCTOS ==
+Usuario -> Vista: Click cantidad
+activate Vista
+Usuario -> Vista: Cambiar cantidad
+Vista -> Controlador: POST carrito
+activate Controlador
+Controlador -> Controlador: Obtener id_producto
+Controlador -> Controlador: Validar cantidad
+Controlador -> Modelo: obtenerPorId
+activate Modelo
+Modelo -> BaseDatos: SELECT stock
+activate BaseDatos
+BaseDatos -->> Modelo: Retorna stock
+deactivate BaseDatos
+Modelo -->> Controlador: Stock actual
+deactivate Modelo
+Controlador -> Controlador: Actualizar SESSION
+Controlador -> Vista: Actualizar vista
+Vista -> Usuario: Mostrar cantidad nueva
+deactivate Controlador
+deactivate Vista
 
-USUARIO -> VISTA: 6. Ver detalles de producto
-activate VISTA
-VISTA -> CONTROLADOR: 7. GET /carrito
-CONTROLADOR -> MODELO: 8. obtenerPorId(id_producto)
-activate MODELO
-MODELO -> BD: 9. SELECT * FROM Producto\nWHERE cod = ?
-activate BD
-BD -->> MODELO: 10. Retorna datos del producto
-deactivate BD
+== Sesion 4: Eliminar Producto ==
 
-note right of MODELO
-  Obtiene:
-  - Nombre
-  - Descripcion
-  - Precio
-  - Imagen
-  - Stock disponible
-end note
+Usuario -> Vista: Click Eliminar
+activate Vista
+Vista -> Controlador: POST carrito
+activate Controlador
+Controlador -> Controlador: Obtener id_producto
+Controlador -> Controlador: Eliminar de SESSION
+Controlador -> Vista: Actualizar vista
+Vista -> Usuario: Producto eliminado
+deactivate Controlador
+deactivate Vista
 
-MODELO -->> CONTROLADOR: 11. Array con datos
-CONTROLADOR -> VISTA: 12. Pasar datos a vista
-VISTA -> USUARIO: 13. Mostrar detalles:\nNombre, precio, stock
-deactivate MODELO
-deactivate CONTROLADOR
-deactivate VISTA
+== Sesion 5: Vaciar Carrito ==
 
-== SESION 3: ACTUALIZAR CANTIDAD ==
+Usuario -> Vista: Click Vaciar
+activate Vista
+Vista -> Controlador: POST carrito
+activate Controlador
+Controlador -> Controlador: unset SESSION carrito
+Controlador -> Vista: Limpiar vista
+Vista -> Usuario: Carrito vacio
+deactivate Controlador
+deactivate Vista
 
-USUARIO -> VISTA: 14. Click en campo cantidad
-activate VISTA
-USUARIO -> VISTA: 15. Cambiar cantidad\n(Ej: 1 a 3)
-VISTA -> CONTROLADOR: 16. POST /carrito\nAccion: actualizar_cantidad
-activate CONTROLADOR
+== Sesion 6: Ver Resumen ==
 
-CONTROLADOR -> CONTROLADOR: 17. Obtener id_producto\ny nueva_cantidad
+Usuario -> Vista: Desplazarse a resumen
+activate Vista
+Vista -> Vista: Calcular totales
+Vista -> Usuario: Mostrar resumen
+deactivate Vista
 
-note right of CONTROLADOR
-  POST id_producto = 1
-  POST cantidad = 3
-end note
+== Sesion 7: Proceder al Pago ==
 
-CONTROLADOR -> CONTROLADOR: 18. Validar cantidad > 0
-
-if (Cantidad valida?) then (No)
-    CONTROLADOR -> VISTA: 19. Pasar error
-    VISTA -> USUARIO: 20. Mostrar error:\nCantidad debe ser > 0
-    deactivate CONTROLADOR
-    deactivate VISTA
-else (Si)
-    CONTROLADOR -> MODELO: 21. obtenerPorId(id_producto)
-    activate MODELO
-    MODELO -> BD: 22. SELECT stock FROM Producto\nWHERE cod = ?
-    activate BD
-    BD -->> MODELO: 23. Retorna stock disponible
-    deactivate BD
-    
-    note right of MODELO
-      Verifica que haya
-      stock suficiente
-    end note
-    
-    MODELO -->> CONTROLADOR: 24. Stock actual
-    deactivate MODELO
-    
-    if (Stock >= cantidad?) then (No)
-        CONTROLADOR -> VISTA: 25. Pasar error stock
-        VISTA -> USUARIO: 26. Mostrar:\nStock insuficiente
-        deactivate CONTROLADOR
-        deactivate VISTA
-    else (Si)
-        CONTROLADOR -> CONTROLADOR: 27. SESSION carrito[id]\nCantidad = 3
-        
-        note right of CONTROLADOR
-          Actualizar sesion
-          con nueva cantidad
-        end note
-        
-        CONTROLADOR -> VISTA: 28. Actualizar vista
-        VISTA -> USUARIO: 29. Mostrar cantidad\nactualizada: 3
-        
-        note right of VISTA
-          Recalcula:
-          - Subtotal
-          - Total general
-        end note
-        
-        deactivate CONTROLADOR
-        deactivate VISTA
-    end
-end
-
-== SESION 4: ELIMINAR PRODUCTO ==
-
-USUARIO -> VISTA: 30. Click en boton\nEliminar
-activate VISTA
-VISTA -> CONTROLADOR: 31. POST /carrito\nAccion: eliminar
-activate CONTROLADOR
-
-CONTROLADOR -> CONTROLADOR: 32. Obtener id_producto
-CONTROLADOR -> CONTROLADOR: 33. Validar que existe\nen sesion
-
-note right of CONTROLADOR
-  Verificar que SESSION carrito
-  contiene ese producto
-end note
-
-if (Producto en carrito?) then (No)
-    CONTROLADOR -> VISTA: 34. Pasar error
-    VISTA -> USUARIO: 35. Error:\nProducto no encontrado
-    deactivate CONTROLADOR
-    deactivate VISTA
-else (Si)
-    CONTROLADOR -> CONTROLADOR: 36. unset SESSION carrito\nindice
-    CONTROLADOR -> CONTROLADOR: 37. Re-indexar array
-    
-    note right of CONTROLADOR
-      Eliminar del array
-      de sesion
-    end note
-    
-    CONTROLADOR -> VISTA: 38. Actualizar vista
-    VISTA -> USUARIO: 39. Producto eliminado\nActualizar totales
-    deactivate CONTROLADOR
-    deactivate VISTA
-end
-
-== SESION 5: VACIAR CARRITO ==
-
-USUARIO -> VISTA: 40. Click en\nVaciar Carrito
-activate VISTA
-VISTA -> CONTROLADOR: 41. POST /carrito\nAccion: vaciar_carrito
-activate CONTROLADOR
-
-CONTROLADOR -> CONTROLADOR: 42. unset SESSION carrito
-
-note right of CONTROLADOR
-  Eliminar completamente
-  la sesion de carrito
-end note
-
-CONTROLADOR -> VISTA: 43. Limpiar vista
-VISTA -> USUARIO: 44. Mostrar mensaje:\nCarrito vacio
-deactivate CONTROLADOR
-deactivate VISTA
-
-== SESION 6: VER RESUMEN Y TOTALES ==
-
-USUARIO -> VISTA: 45. Desplazarse a resumen
-activate VISTA
-VISTA -> VISTA: 46. Calcular totales
-
-note right of VISTA
-  Suma de subtotales:
-  - Recorre carrito
-  - Suma (precio * cantidad)
-  - Muestra total general
-end note
-
-VISTA -> USUARIO: 47. Mostrar resumen:\nProductos, cantidad, total
-deactivate VISTA
-
-== SESION 7: PROCEDER AL PAGO ==
-
-USUARIO -> VISTA: 48. Click en\nProceder al Pago
-activate VISTA
-VISTA -> USUARIO: 49. Redirigir a\n/pago
-deactivate VISTA
-
-USUARIO -> CONTROLADOR: 50. GET /pago
-activate CONTROLADOR
-CONTROLADOR -> VISTA: 51. Cargar vista pago.php
-VISTA -> USUARIO: 52. Mostrar formulario\nde pago
-
-deactivate CONTROLADOR
+Usuario -> Vista: Click Pago
+activate Vista
+Vista -> Usuario: Redirigir a pago
+deactivate Vista
+Usuario -> Controlador: GET pago
+activate Controlador
+Controlador -> Vista: Cargar vista pago
+Vista -> Usuario: Mostrar formulario pago
+deactivate Controlador
 
 @enduml
