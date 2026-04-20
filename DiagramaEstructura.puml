@@ -1,0 +1,140 @@
+@startuml DiagramaEstructuraDatos
+!theme plain
+skinparam backgroundColor #FFFFFF
+skinparam ClassBackgroundColor #E3F2FD
+skinparam ClassBorderColor #1976d2
+skinparam ClassFontColor #000000
+skinparam AttributeFontColor #000000
+skinparam MethodFontColor #000000
+skinparam NoteBkgColor #FFFFCC
+skinparam NoteBorderColor #FF9800
+
+title Sistema de Ventas y Forma de Pago\nDiagrama de Estructura de Datos (ER)
+
+entity "Cuenta" as CUENTA {
+    PK usuario: VARCHAR(40)
+    --
+    password: VARCHAR(255)
+}
+
+entity "Cliente" as CLIENTE {
+    PK ci: VARCHAR(20)
+    FK usuarioCuenta: VARCHAR(40)
+    --
+    nombres: VARCHAR(50)
+    apPaterno: VARCHAR(20)
+    apMaterno: VARCHAR(20)
+    correo: VARCHAR(30)
+    direccion: VARCHAR(45)
+    nroCelular: VARCHAR(30)
+}
+
+entity "NotaVenta" as NOTAVENTA {
+    PK nro: INT
+    FK ciCliente: VARCHAR(20)
+    --
+    fechaHora: DATETIME
+}
+
+entity "DetalleNotaVenta" as DETALLENVENTA {
+    PK nroNotaVenta: INT
+    PK codProducto: INT
+    --
+    item: INT
+    cant: INT
+}
+
+entity "Producto" as PRODUCTO {
+    PK cod: INT
+    FK codMarca: INT
+    FK codIndustria: INT
+    FK codCategoria: INT
+    --
+    nombre: VARCHAR(50)
+    descripcion: VARCHAR(200)
+    precio: FLOAT
+    imagen: VARCHAR(200)
+    estado: VARCHAR(20)
+}
+
+entity "DetalleProductoSucursal" as DETALLEPS {
+    PK codProducto: INT
+    PK codSucursal: INT
+    --
+    stock: VARCHAR(20)
+}
+
+entity "Sucursal" as SUCURSAL {
+    PK cod: INT
+    --
+    nombre: VARCHAR(30)
+    direccion: VARCHAR(45)
+    nroTelefono: INT
+}
+
+entity "Marca" as MARCA {
+    PK cod: INT
+    --
+    nombre: VARCHAR(30)
+}
+
+entity "Industria" as INDUSTRIA {
+    PK cod: INT
+    --
+    nombre: VARCHAR(30)
+}
+
+entity "Categoria" as CATEGORIA {
+    PK cod: INT
+    --
+    nombre: VARCHAR(30)
+}
+
+'== RELACIONES ==
+
+CLIENTE ||--|| CUENTA: "usa"
+CLIENTE ||--o{ NOTAVENTA: "genera"
+NOTAVENTA ||--o{ DETALLENVENTA: "contiene"
+DETALLENVENTA }o--|| PRODUCTO: "referencia"
+PRODUCTO ||--o{ DETALLEPS: "tiene stock en"
+DETALLEPS }o--|| SUCURSAL: "pertenece a"
+PRODUCTO }o--|| MARCA: "pertenece a"
+PRODUCTO }o--|| INDUSTRIA: "pertenece a"
+PRODUCTO }o--|| CATEGORIA: "pertenece a"
+
+note right of CUENTA
+  Credenciales de acceso
+  del cliente al sistema
+end note
+
+note right of CLIENTE
+  Datos personales del cliente
+  Relacionado con Cuenta
+  para autenticación
+end note
+
+note right of NOTAVENTA
+  Factura/Ticket de compra
+  Número secuencial
+  Fecha y hora de compra
+end note
+
+note right of DETALLENVENTA
+  Líneas de producto
+  en una NotaVenta
+  Guarda cantidad comprada
+end note
+
+note right of PRODUCTO
+  Artículos disponibles
+  para comprar
+  Con clasificación
+end note
+
+note right of DETALLEPS
+  Stock disponible
+  de cada producto
+  por cada sucursal
+end note
+
+@enduml

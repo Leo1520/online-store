@@ -1,0 +1,119 @@
+@startuml DiagramaActividades
+!theme plain
+skinparam backgroundColor #FFFFFF
+skinparam ActivityBackgroundColor #E3F2FD
+skinparam ActivityBorderColor #1976d2
+skinparam ActivityFontColor #000000
+skinparam ArrowColor #000000
+skinparam DecisionBackgroundColor #FFF3E0
+skinparam DecisionBorderColor #FF9800
+skinparam NoteBkgColor #FFFFCC
+skinparam NoteBorderColor #FF9800
+
+title Flujo de Actividades - Proceso de Pago y Venta
+
+start
+:Usuario accede
+a /pago;
+:Validar carrito
+no vacío;
+
+if (¿Carrito vacío?) then (Sí)
+    :❌ Mostrar carrito vacío;
+    end
+else (No)
+    :Obtener productos
+    del carrito;
+    :Mostrar resumen
+    de compra;
+    :Usuario revisa
+    cantidad y precio;
+    :Usuario hace clic
+    en "Confirmar Pago";
+    
+    if (¿Usuario logueado?) then (No)
+        :❌ Redirigir a login;
+        end
+    else (Sí)
+        :Obtener usuario
+        de sesión;
+        :Obtener CI del cliente
+        desde BD;
+        
+        if (¿Existe cliente?) then (No)
+            :❌ Error: Cliente no existe;
+            end
+        else (Sí)
+            :BEGIN TRANSACTION
+            (bloquea tablas);
+            
+            :Crear NotaVenta
+            con número secuencial;
+            
+            partition "Loop: Para cada producto" {
+                :Verificar existencia
+                de producto;
+                
+                if (¿Existe?) then (No)
+                    :⏭️ Saltar producto;
+                else (Sí)
+                    :Insertar DetalleNotaVenta
+                    (cantidad);
+                    :Descontar stock;
+                    
+                    if (¿Stock suficiente?) then (No)
+                        :⚠️ ROLLBACK
+                        Deshacer cambios;
+                        :❌ Retorna FALSE;
+                        end
+                    else (Sí)
+                        :Stock actualizado;
+                    endif
+                endif
+            }
+            
+            if (¿Mínimo 1 producto válido?) then (No)
+                :⚠️ ROLLBACK;
+                :❌ Error: Sin productos válidos;
+                end
+            else (Sí)
+                :COMMIT TRANSACTION
+                Guardar cambios;
+                :✅ Venta registrada
+                con número nro_venta;
+                :Limpiar carrito
+                unset($_SESSION['carrito']);
+                :Redirigir a
+                /pago_exitoso?nro=1;
+                :Mostrar confirmación
+                de compra exitosa;
+                :Usuario ve número
+                de venta y total;
+                :Usuario puede volver
+                al inicio o ver compra;
+                end
+            endif
+        endif
+    endif
+endif
+
+stop
+
+note right of "Usuario accede\na /pago"
+  Entrada al flujo
+  de compra
+end note
+
+note right of "BEGIN TRANSACTION"
+  Todas las operaciones
+  siguientes son atómicas
+  o todo entra o nada
+end note
+
+note right of "COMMIT TRANSACTION"
+  Todos los cambios se
+  guardan permanentemente
+  en la BD
+end note
+
+@enduml
