@@ -1,0 +1,837 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diagrama de Secuencia - Ventas y Forma de Pago</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+        .content {
+            padding: 40px;
+        }
+        .diagram-section {
+            margin-bottom: 60px;
+        }
+        .diagram-title {
+            font-size: 1.8em;
+            color: #333;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #667eea;
+        }
+        .mermaid {
+            display: flex;
+            justify-content: center;
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            overflow-x: auto;
+            min-height: 400px;
+        }
+        .description {
+            background: #e3f2fd;
+            border-left: 4px solid #2196F3;
+            padding: 20px;
+            margin-top: 20px;
+            border-radius: 4px;
+            color: #1565c0;
+        }
+        .description h3 {
+            color: #0d47a1;
+            margin-bottom: 10px;
+        }
+        .description p {
+            margin: 8px 0;
+            line-height: 1.6;
+        }
+        .steps {
+            background: #f5f5f5;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+        .steps h3 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.1em;
+        }
+        .step-item {
+            display: flex;
+            margin: 12px 0;
+            padding: 10px;
+            background: white;
+            border-radius: 4px;
+            border-left: 4px solid #667eea;
+        }
+        .step-number {
+            background: #667eea;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            flex-shrink: 0;
+            font-weight: bold;
+        }
+        .step-content {
+            flex: 1;
+        }
+        .step-content strong {
+            color: #333;
+            display: block;
+            margin-bottom: 3px;
+        }
+        .step-content em {
+            color: #666;
+            font-size: 0.95em;
+        }
+        .table-wrapper {
+            overflow-x: auto;
+            margin-top: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+        }
+        table th {
+            background: #667eea;
+            color: white;
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+        }
+        table td {
+            padding: 12px;
+            border: 1px solid #ddd;
+        }
+        table tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+        table tr:hover {
+            background: #f0f4ff;
+        }
+        .code-block {
+            background: #272822;
+            color: #f8f8f2;
+            padding: 15px;
+            border-radius: 4px;
+            overflow-x: auto;
+            margin-top: 15px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+        }
+        .code-block code {
+            color: #f8f8f2;
+        }
+        .highlight {
+            background: #fff3cd;
+            padding: 15px;
+            border-left: 4px solid #ffc107;
+            margin-top: 20px;
+            border-radius: 4px;
+            color: #856404;
+        }
+        .highlight h3 {
+            color: #856404;
+            margin-bottom: 10px;
+        }
+        footer {
+            background: #f8f9fa;
+            padding: 20px;
+            text-align: center;
+            color: #666;
+            font-size: 0.9em;
+            border-top: 1px solid #ddd;
+        }
+        .transaction-box {
+            background: #fff3e0;
+            border: 2px solid #ff9800;
+            border-radius: 4px;
+            padding: 15px;
+            margin-top: 15px;
+        }
+        .transaction-box h4 {
+            color: #e65100;
+            margin-bottom: 8px;
+        }
+        .transaction-box ul {
+            margin-left: 20px;
+            color: #bf360c;
+        }
+        .transaction-box li {
+            margin: 5px 0;
+        }
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.8em;
+            }
+            .content {
+                padding: 20px;
+            }
+            .mermaid {
+                min-height: 300px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>💳 Diagrama de Secuencia</h1>
+            <p>Sistema de Ventas y Forma de Pago</p>
+        </div>
+
+        <div class="content">
+            <!-- DIAGRAMA 1: PROCESO GENERAL DE PAGO -->
+            <div class="diagram-section">
+                <h2 class="diagram-title">1️⃣ Proceso General de Pago (Cliente)</h2>
+                <div class="mermaid">
+                    sequenceDiagram
+                        participant Usuario as 👤 Usuario
+                        participant Vista as 📄 Vista Pago
+                        participant Controlador as 🎮 PagoControlador
+                        participant Modelo as 💼 VentaModelo
+                        participant BD as 🗄️ Base de Datos
+
+                        Usuario->>Vista: 1. Accede a /pago
+                        Vista->>Controlador: 2. GET request
+                        Controlador->>Controlador: 3. Validar carrito no vacío
+                        Controlador->>Controlador: 4. Obtener productos del carrito
+                        Controlador->>Vista: 5. Pasar datos a vista
+                        Vista->>Usuario: 6. Mostrar resumen de compra
+
+                        Note over Usuario: Revisa productos y total
+
+                        Usuario->>Vista: 7. Click "Confirmar Pago"
+                        Vista->>Controlador: 8. POST /index.php?pagina=pago
+                        
+                        Controlador->>Controlador: 9. Verificar $_SESSION['usuario']
+                        alt Usuario NO logueado
+                            Controlador->>Usuario: ❌ Redirigir a login
+                        else Usuario logueado
+                            Controlador->>Modelo: 10. registrarVenta(carrito, usuario)
+                            Modelo->>Modelo: 11. Validar datos de entrada
+                        end
+                </div>
+
+                <div class="description">
+                    <h3>📖 Descripción del Flujo:</h3>
+                    <p>El usuario accede a la página de pago donde puede revisar los productos que ha seleccionado en el carrito. Se muestra un resumen detallado con precios y cantidades. Cuando el usuario confirma el pago, se valida que esté logueado antes de proceder con el registro de la venta.</p>
+                </div>
+
+                <div class="steps">
+                    <h3>📋 Pasos Detallados:</h3>
+                    <div class="step-item">
+                        <div class="step-number">1</div>
+                        <div class="step-content">
+                            <strong>Usuario accede a /pago</strong>
+                            <em>El navegador carga la vista de pago desde el controlador</em>
+                        </div>
+                    </div>
+                    <div class="step-item">
+                        <div class="step-number">2</div>
+                        <div class="step-content">
+                            <strong>Validación del carrito</strong>
+                            <em>Se verifica que $_SESSION['carrito'] no esté vacío</em>
+                        </div>
+                    </div>
+                    <div class="step-item">
+                        <div class="step-number">3</div>
+                        <div class="step-content">
+                            <strong>Obtener datos de productos</strong>
+                            <em>Se consultan los detalles de cada producto del carrito</em>
+                        </div>
+                    </div>
+                    <div class="step-item">
+                        <div class="step-number">4</div>
+                        <div class="step-content">
+                            <strong>Mostrar formulario de pago</strong>
+                            <em>Se renderiza pago.php con resumen y botón de confirmación</em>
+                        </div>
+                    </div>
+                    <div class="step-item">
+                        <div class="step-number">5</div>
+                        <div class="step-content">
+                            <strong>Confirmación del usuario</strong>
+                            <em>Usuario revisa y hace clic en "Confirmar Pago"</em>
+                        </div>
+                    </div>
+                    <div class="step-item">
+                        <div class="step-number">6</div>
+                        <div class="step-content">
+                            <strong>Validación de sesión</strong>
+                            <em>Se verifica que el usuario esté logueado (no es anónimo)</em>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- DIAGRAMA 2: REGISTRO DE VENTA EN TRANSACCIÓN -->
+            <div class="diagram-section">
+                <h2 class="diagram-title">2️⃣ Registración de Venta (Transacción Atómica)</h2>
+                <div class="mermaid">
+                    sequenceDiagram
+                        participant Controlador as 🎮 PagoControlador
+                        participant Modelo as 💼 VentaModelo
+                        participant Transaccion as 🔒 Transacción BD
+                        participant BD as 🗄️ Base de Datos
+
+                        Controlador->>Modelo: 1. registrarVenta(carrito, usuario)
+                        
+                        Modelo->>Modelo: 2. Validar carrito ≠ vacío
+                        Modelo->>Modelo: 3. Validar usuario ≠ vacío
+                        
+                        Modelo->>BD: 4. sp_obtener_ci_cliente_por_usuario(usuario)
+                        BD->>BD: 5. SELECT ci FROM Cliente WHERE usuarioCuenta = ?
+                        BD-->>Modelo: 6. Retorna CI del cliente
+
+                        Modelo->>Transaccion: 7. BEGIN TRANSACTION
+                        Transaccion->>BD: 8. Bloquear tablas
+
+                        Modelo->>BD: 9. sp_crear_nota_venta(ci_cliente, @nro_venta)
+                        BD->>BD: 10. SELECT MAX(nro) FROM NotaVenta
+                        BD->>BD: 11. SET @nro_venta = MAX + 1
+                        BD->>BD: 12. INSERT INTO NotaVenta (nro, fechaHora, ciCliente)
+                        BD-->>Modelo: 13. Retorna @nro_venta
+
+                        loop Para cada producto en carrito
+                            Modelo->>BD: 14. sp_existe_producto(cod_producto)
+                            BD-->>Modelo: 15. Retorna: ¿existe?
+
+                            alt Producto NO existe
+                                Modelo->>Modelo: 16. SKIP - Continuar siguiente
+                            else Producto existe
+                                Modelo->>BD: 17. sp_insertar_detalle_venta(nro_venta, cod, item, cant)
+                                BD->>BD: 18. INSERT INTO DetalleNotaVenta
+                                BD-->>Modelo: 19. OK
+
+                                Modelo->>BD: 20. sp_descontar_stock(cod_producto, cantidad)
+                                BD->>BD: 21. UPDATE DetalleProductoSucursal SET stock -= ?
+                                BD-->>Modelo: 22. OK o ERROR
+
+                                alt Stock insuficiente
+                                    Modelo->>Transaccion: 23. ROLLBACK
+                                    Transaccion->>BD: 24. Deshacer todos los cambios
+                                    Modelo-->>Controlador: 25. Retorna FALSE
+                                end
+                            end
+                        end
+
+                        Modelo->>Transaccion: 26. COMMIT TRANSACTION
+                        Transaccion->>BD: 27. Confirmar todos los cambios
+                        Modelo-->>Controlador: 28. Retorna nro_venta (exitoso)
+                </div>
+
+                <div class="description">
+                    <h3>📖 Descripción del Flujo:</h3>
+                    <p>Este es el proceso más crítico. Se utiliza una transacción para garantizar que o se registran todos los datos correctamente o no se registra nada. Si hay cualquier error (producto no existe, stock insuficiente, etc.), se deshacen todos los cambios.</p>
+                </div>
+
+                <div class="transaction-box">
+                    <h4>🔒 Transacción Atómica (ACID)</h4>
+                    <ul>
+                        <li><strong>Atomicidad:</strong> Todo se guarda o todo se cancela</li>
+                        <li><strong>Consistencia:</strong> La BD queda en estado válido</li>
+                        <li><strong>Aislamiento:</strong> Otros procesos no ven cambios incompletos</li>
+                        <li><strong>Durabilidad:</strong> Los datos se guardan de forma permanente</li>
+                    </ul>
+                </div>
+
+                <div class="steps">
+                    <h3>📋 Pasos Críticos:</h3>
+                    <div class="step-item">
+                        <div class="step-number">1</div>
+                        <div class="step-content">
+                            <strong>Obtener CI del cliente</strong>
+                            <em>Se busca el CI del cliente usando su usuario de sesión</em>
+                        </div>
+                    </div>
+                    <div class="step-item">
+                        <div class="step-number">2</div>
+                        <div class="step-content">
+                            <strong>Iniciar transacción</strong>
+                            <em>BEGIN TRANSACTION - A partir de aquí, o todo entra o nada</em>
+                        </div>
+                    </div>
+                    <div class="step-item">
+                        <div class="step-number">3</div>
+                        <div class="step-content">
+                            <strong>Crear NotaVenta</strong>
+                            <em>Se genera número secuencial para la venta y se registra</em>
+                        </div>
+                    </div>
+                    <div class="step-item">
+                        <div class="step-number">4</div>
+                        <div class="step-content">
+                            <strong>Procesar cada producto</strong>
+                            <em>Para cada producto: validar, registrar detalle, descontar stock</em>
+                        </div>
+                    </div>
+                    <div class="step-item">
+                        <div class="step-number">5</div>
+                        <div class="step-content">
+                            <strong>Confirmar transacción</strong>
+                            <em>COMMIT - Guardar todos los cambios de forma permanente</em>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- DIAGRAMA 3: FLUJO DE ÉXITO Y LIMPIEZA -->
+            <div class="diagram-section">
+                <h2 class="diagram-title">3️⃣ Confirmación y Redirección (Pago Exitoso)</h2>
+                <div class="mermaid">
+                    sequenceDiagram
+                        participant Modelo as 💼 VentaModelo
+                        participant Controlador as 🎮 PagoControlador
+                        participant Sesion as 💾 Sesión PHP
+                        participant Vista as 📄 Vista
+                        participant Usuario as 👤 Usuario
+
+                        Modelo-->>Controlador: 1. nro_venta (número > 0)
+                        
+                        alt Venta NO fue exitosa (nro_venta = FALSE)
+                            Controlador->>Vista: 2. Pasar errorPago
+                            Vista->>Usuario: 3. Mostrar: "Error al registrar compra"
+                            Usuario->>Usuario: Intentar nuevamente o abandonar
+                        else Venta fue EXITOSA
+                            Controlador->>Sesion: 4. unset($_SESSION['carrito'])
+                            Sesion->>Sesion: 5. Limpiar carrito de la sesión
+                            
+                            Controlador->>Usuario: 6. header("Location: /pago_exitoso?nro=" + nro_venta)
+                            Usuario->>Controlador: 7. GET /index.php?pagina=pago_exitoso&nro=123
+                            
+                            Controlador->>Controlador: 8. Validar nro_venta
+                            Controlador->>Vista: 9. Pasar nro_venta a vista
+                            
+                            Vista->>Usuario: 10. Mostrar: "✅ Compra Exitosa #123"
+                            Vista->>Usuario: 11. Botones: Volver Inicio / Ver Mi Compra
+                            
+                            Usuario->>Usuario: Compra confirmada
+                        end
+                </div>
+
+                <div class="description">
+                    <h3>📖 Descripción del Flujo:</h3>
+                    <p>Después de registrar la venta, se limpia el carrito de la sesión para evitar duplicados. El usuario es redirigido a una página de confirmación donde se muestra el número de venta generado. Si algo falló, se muestra un mensaje de error.</p>
+                </div>
+
+                <div class="steps">
+                    <h3>📋 Pasos Posteriores al Pago:</h3>
+                    <div class="step-item">
+                        <div class="step-number">1</div>
+                        <div class="step-content">
+                            <strong>Validar resultado</strong>
+                            <em>Verificar que nro_venta sea un número válido (no FALSE)</em>
+                        </div>
+                    </div>
+                    <div class="step-item">
+                        <div class="step-number">2</div>
+                        <div class="step-content">
+                            <strong>Limpiar sesión</strong>
+                            <em>unset($_SESSION['carrito']) para que no se vuelva a usar</em>
+                        </div>
+                    </div>
+                    <div class="step-item">
+                        <div class="step-number">3</div>
+                        <div class="step-content">
+                            <strong>Redirigir a confirmación</strong>
+                            <em>Redirect HTTP 302 a página de éxito con número de venta</em>
+                        </div>
+                    </div>
+                    <div class="step-item">
+                        <div class="step-number">4</div>
+                        <div class="step-content">
+                            <strong>Mostrar confirmación</strong>
+                            <em>Vista pago_exitoso.php con detalles de la compra</em>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- DIAGRAMA 4: ESTRUCTURA DE DATOS -->
+            <div class="diagram-section">
+                <h2 class="diagram-title">4️⃣ Estructura de Datos - Relaciones</h2>
+                <div class="mermaid">
+                    graph TD
+                        A["👤 Tabla: Cliente"] -->|"usuarioCuenta"| B["🔑 Tabla: Cuenta"]
+                        A -->|"genera"| C["📋 Tabla: NotaVenta"]
+                        C -->|"contiene (1:N)"| D["📦 Tabla: DetalleNotaVenta"]
+                        D -->|"referencia (1:N)"| E["🛍️ Tabla: Producto"]
+                        E -->|"stock en"| F["🏪 Tabla: DetalleProductoSucursal"]
+                        F -->|"pertenece a"| G["📍 Tabla: Sucursal"]
+                        E -->|"pertenece a"| H["🏷️ Tabla: Marca"]
+                        E -->|"pertenece a"| I["🏭 Tabla: Industria"]
+                        E -->|"pertenece a"| J["📂 Tabla: Categoría"]
+
+                        style A fill:#e3f2fd,stroke:#1976d2,stroke-width:2px
+                        style B fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px
+                        style C fill:#fff3e0,stroke:#f57c00,stroke-width:2px
+                        style D fill:#fff3e0,stroke:#f57c00,stroke-width:2px
+                        style E fill:#e8f5e9,stroke:#388e3c,stroke-width:2px
+                        style F fill:#f1f8e9,stroke:#689f38,stroke-width:2px
+                        style G fill:#fce4ec,stroke:#c2185b,stroke-width:2px
+                        style H fill:#ede7f6,stroke:#512da8,stroke-width:2px
+                        style I fill:#ede7f6,stroke:#512da8,stroke-width:2px
+                        style J fill:#ede7f6,stroke:#512da8,stroke-width:2px
+                </div>
+
+                <div class="table-wrapper">
+                    <h3 style="margin-bottom: 15px;">📊 Tabla de Relaciones:</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>De Tabla</th>
+                                <th>A Tabla</th>
+                                <th>Relación</th>
+                                <th>Campo FK</th>
+                                <th>Cardinalidad</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Cliente</td>
+                                <td>Cuenta</td>
+                                <td>Cuenta de acceso</td>
+                                <td>usuarioCuenta</td>
+                                <td>N:1 (muchos clientes por cuenta)</td>
+                            </tr>
+                            <tr>
+                                <td>Cliente</td>
+                                <td>NotaVenta</td>
+                                <td>Genera compras</td>
+                                <td>ciCliente</td>
+                                <td>1:N (un cliente, varias compras)</td>
+                            </tr>
+                            <tr>
+                                <td>NotaVenta</td>
+                                <td>DetalleNotaVenta</td>
+                                <td>Contiene líneas</td>
+                                <td>nroNotaVenta</td>
+                                <td>1:N (una compra, varios productos)</td>
+                            </tr>
+                            <tr>
+                                <td>DetalleNotaVenta</td>
+                                <td>Producto</td>
+                                <td>Referencia producto</td>
+                                <td>codProducto</td>
+                                <td>N:1 (producto en muchas compras)</td>
+                            </tr>
+                            <tr>
+                                <td>Producto</td>
+                                <td>DetalleProductoSucursal</td>
+                                <td>Stock por sucursal</td>
+                                <td>codProducto</td>
+                                <td>1:N (producto en múltiples sucursales)</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- DIAGRAMA 5: PROCEDIMIENTOS ALMACENADOS -->
+            <div class="diagram-section">
+                <h2 class="diagram-title">5️⃣ Procedimientos Almacenados Utilizados</h2>
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Procedimiento</th>
+                                <th>Función</th>
+                                <th>Parámetros IN</th>
+                                <th>Parámetros OUT</th>
+                                <th>Tabla Principal</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>sp_obtener_ci_cliente_por_usuario</code></td>
+                                <td>Obtener CI del cliente por usuario</td>
+                                <td>usuario (VARCHAR)</td>
+                                <td>ci (VARCHAR)</td>
+                                <td>Cliente</td>
+                            </tr>
+                            <tr>
+                                <td><code>sp_crear_nota_venta</code></td>
+                                <td>Crear nueva nota/factura de venta</td>
+                                <td>ci_cliente (VARCHAR)</td>
+                                <td>nro_venta (INT)</td>
+                                <td>NotaVenta</td>
+                            </tr>
+                            <tr>
+                                <td><code>sp_existe_producto</code></td>
+                                <td>Verificar existencia de producto</td>
+                                <td>cod_producto (INT)</td>
+                                <td>existe (INT)</td>
+                                <td>Producto</td>
+                            </tr>
+                            <tr>
+                                <td><code>sp_insertar_detalle_venta</code></td>
+                                <td>Registrar línea de venta</td>
+                                <td>nro_venta, cod_producto, item, cantidad</td>
+                                <td>--</td>
+                                <td>DetalleNotaVenta</td>
+                            </tr>
+                            <tr>
+                                <td><code>sp_descontar_stock</code></td>
+                                <td>Restar stock de producto</td>
+                                <td>cod_producto (INT), cantidad (INT)</td>
+                                <td>--</td>
+                                <td>DetalleProductoSucursal</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- DIAGRAMA 6: EJEMPLO PRÁCTICO -->
+            <div class="diagram-section">
+                <h2 class="diagram-title">6️⃣ Ejemplo Práctico - Simulación</h2>
+                
+                <div class="steps">
+                    <h3>📋 Escenario: Cliente "admin" compra 2 sudaderas y 1 zapatilla</h3>
+                    
+                    <div class="step-item">
+                        <div class="step-number">1</div>
+                        <div class="step-content">
+                            <strong>Sesión de usuario</strong>
+                            <em>$_SESSION['usuario'] = 'admin'</em>
+                        </div>
+                    </div>
+
+                    <div class="step-item">
+                        <div class="step-number">2</div>
+                        <div class="step-content">
+                            <strong>Carrito del usuario</strong>
+                            <em>$_SESSION['carrito'] = [{id: 1, qty: 2}, {id: 3, qty: 1}]</em>
+                        </div>
+                    </div>
+
+                    <div class="step-item">
+                        <div class="step-number">3</div>
+                        <div class="step-content">
+                            <strong>Total a pagar</strong>
+                            <em>Sudadera: $250 × 2 = $500 | Zapatilla: $410 × 1 = $410 | TOTAL: $910</em>
+                        </div>
+                    </div>
+
+                    <div class="step-item">
+                        <div class="step-number">4</div>
+                        <div class="step-content">
+                            <strong>Llamar sp_obtener_ci_cliente_por_usuario('admin')</strong>
+                            <em>Retorna: CI = '78945612'</em>
+                        </div>
+                    </div>
+
+                    <div class="step-item">
+                        <div class="step-number">5</div>
+                        <div class="step-content">
+                            <strong>Iniciar transacción</strong>
+                            <em>BEGIN TRANSACTION (bloquea tablas)</em>
+                        </div>
+                    </div>
+
+                    <div class="step-item">
+                        <div class="step-number">6</div>
+                        <div class="step-content">
+                            <strong>Crear NotaVenta</strong>
+                            <em>sp_crear_nota_venta('78945612') → nro_venta = 1</em>
+                        </div>
+                    </div>
+
+                    <div class="step-item">
+                        <div class="step-number">7</div>
+                        <div class="step-content">
+                            <strong>Primer producto (Sudadera, cod=1, cant=2)</strong>
+                            <em>INSERT DetalleNotaVenta (nro=1, cod=1, item=1, cant=2)</em>
+                        </div>
+                    </div>
+
+                    <div class="step-item">
+                        <div class="step-number">8</div>
+                        <div class="step-content">
+                            <strong>Descontar stock sudadera</strong>
+                            <em>UPDATE DetalleProductoSucursal SET stock = stock - 2 WHERE cod=1</em>
+                        </div>
+                    </div>
+
+                    <div class="step-item">
+                        <div class="step-number">9</div>
+                        <div class="step-content">
+                            <strong>Segundo producto (Zapatilla, cod=3, cant=1)</strong>
+                            <em>INSERT DetalleNotaVenta (nro=1, cod=3, item=2, cant=1)</em>
+                        </div>
+                    </div>
+
+                    <div class="step-item">
+                        <div class="step-number">10</div>
+                        <div class="step-content">
+                            <strong>Descontar stock zapatilla</strong>
+                            <em>UPDATE DetalleProductoSucursal SET stock = stock - 1 WHERE cod=3</em>
+                        </div>
+                    </div>
+
+                    <div class="step-item">
+                        <div class="step-number">11</div>
+                        <div class="step-content">
+                            <strong>Confirmar transacción</strong>
+                            <em>COMMIT (todos los cambios se guardan permanentemente)</em>
+                        </div>
+                    </div>
+
+                    <div class="step-item">
+                        <div class="step-number">12</div>
+                        <div class="step-content">
+                            <strong>Limpiar carrito</strong>
+                            <em>unset($_SESSION['carrito'])</em>
+                        </div>
+                    </div>
+
+                    <div class="step-item">
+                        <div class="step-number">13</div>
+                        <div class="step-content">
+                            <strong>Redirigir a éxito</strong>
+                            <em>header("Location: /pago_exitoso?nro=1")</em>
+                        </div>
+                    </div>
+
+                    <div class="step-item">
+                        <div class="step-number">14</div>
+                        <div class="step-content">
+                            <strong>Mostrar confirmación</strong>
+                            <em>Usuario ve: "✅ Compra #1 Confirmada - Total: $910"</em>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="highlight">
+                    <h3>✅ Resultado Final en Base de Datos:</h3>
+                    <div class="code-block">
+<code>-- NotaVenta
+| nro | fechaHora           | ciCliente |
+|-----|---------------------|-----------|
+| 1   | 2026-04-19 14:35:22 | 78945612  |
+
+-- DetalleNotaVenta
+| nroNotaVenta | codProducto | item | cant |
+|--------------|-------------|------|------|
+| 1            | 1           | 1    | 2    |
+| 1            | 3           | 2    | 1    |
+
+-- DetalleProductoSucursal (Antes/Después)
+| codProducto | codSucursal | stock_antes | stock_despues |
+|-------------|-------------|-------------|---------------|
+| 1           | 1           | 12          | 10            |
+| 3           | 1           | 9           | 8             |</code>
+                    </div>
+                </div>
+            </div>
+
+            <!-- DIAGRAMA 7: MANEJO DE ERRORES -->
+            <div class="diagram-section">
+                <h2 class="diagram-title">7️⃣ Manejo de Errores y Excepciones</h2>
+                <div class="mermaid">
+                    flowchart TD
+                        A["Inicio: registrarVenta()"] --> B{¿Carrito vacío?}
+                        B -->|Sí| C["❌ Retorna FALSE<br/>Error: Carrito vacío"]
+                        B -->|No| D{¿Usuario vacío?}
+                        
+                        D -->|Sí| E["❌ Retorna FALSE<br/>Error: Usuario no identificado"]
+                        D -->|No| F["Obtener CI del cliente"]
+                        
+                        F --> G{¿Existe cliente?}
+                        G -->|No| H["❌ Retorna FALSE<br/>Error: Cliente no existe"]
+                        G -->|Sí| I["BEGIN TRANSACTION"]
+                        
+                        I --> J{¿Existe producto?}
+                        J -->|No| K["SKIP producto<br/>Continuar siguiente"]
+                        J -->|Sí| L{"¿Stock<br/>suficiente?"}
+                        
+                        L -->|No| M["⚠️ ROLLBACK<br/>❌ Retorna FALSE"]
+                        L -->|Sí| N["Insertar detalle<br/>Descontar stock"]
+                        
+                        N --> O{¿Más productos?}
+                        O -->|Sí| J
+                        O -->|No| P{¿Al menos 1<br/>producto válido?}
+                        
+                        P -->|No| Q["⚠️ ROLLBACK<br/>❌ Retorna FALSE"]
+                        P -->|Sí| R["✅ COMMIT<br/>Retorna nro_venta"]
+                        
+                        style C fill:#ffcdd2,stroke:#c62828,stroke-width:2px
+                        style E fill:#ffcdd2,stroke:#c62828,stroke-width:2px
+                        style H fill:#ffcdd2,stroke:#c62828,stroke-width:2px
+                        style M fill:#ffe0b2,stroke:#e65100,stroke-width:2px
+                        style Q fill:#ffe0b2,stroke:#e65100,stroke-width:2px
+                        style R fill:#c8e6c9,stroke:#2e7d32,stroke-width:2px
+                        style K fill:#fff9c4,stroke:#f57f17,stroke-width:2px
+                </div>
+
+                <div class="highlight">
+                    <h3>⚠️ Posibles Errores Manejados:</h3>
+                    <ul>
+                        <li><strong>Carrito vacío:</strong> No hay productos para vender</li>
+                        <li><strong>Usuario no identificado:</strong> No viene en sesión</li>
+                        <li><strong>Cliente no existe:</strong> No hay registro en tabla Cliente</li>
+                        <li><strong>Producto no existe:</strong> Se salta ese producto (no es error crítico)</li>
+                        <li><strong>Stock insuficiente:</strong> Se cancela toda la venta (ROLLBACK)</li>
+                        <li><strong>Sin productos válidos:</strong> Se cancela la venta si todos fallaron</li>
+                    </ul>
+                </div>
+            </div>
+
+        </div>
+
+        <footer>
+            <p>💳 Diagrama de Secuencia - Sistema de Ventas y Forma de Pago</p>
+            <p>Generado con Mermaid.js | Actualizado: 19 de Abril de 2026</p>
+        </footer>
+    </div>
+
+    <script>
+        mermaid.initialize({ 
+            startOnLoad: true, 
+            theme: 'default',
+            securityLevel: 'loose',
+            flowchart: { useMaxWidth: true }
+        });
+        mermaid.contentLoaded();
+    </script>
+</body>
+</html>
