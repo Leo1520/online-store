@@ -40,12 +40,21 @@
 
         data.items.forEach(function (item) {
             html += '<tr id="fila-' + item.id_producto + '">' +
-                '<td>' + escHtml(item.nombre) + '</td>' +
+                '<td>' +
+                    '<a href="index.php?pagina=producto&id=' + item.id_producto + '" class="text-dark font-weight-bold">' +
+                    escHtml(item.nombre) + '</a>' +
+                '</td>' +
                 '<td>$' + item.precio.toFixed(2) + '</td>' +
-                '<td>' + item.cantidad + '</td>' +
-                '<td>$' + item.subtotal.toFixed(2) + '</td>' +
+                '<td>' +
+                    '<div class="d-flex align-items-center">' +
+                    '<button class="btn btn-outline-secondary btn-sm btn-menos" data-id="' + item.id_producto + '" data-cant="' + (item.cantidad - 1) + '">-</button>' +
+                    '<span class="mx-2 cantidad-valor" id="cant-' + item.id_producto + '">' + item.cantidad + '</span>' +
+                    '<button class="btn btn-outline-secondary btn-sm btn-mas" data-id="' + item.id_producto + '" data-cant="' + (item.cantidad + 1) + '">+</button>' +
+                    '</div>' +
+                '</td>' +
+                '<td id="sub-' + item.id_producto + '">$' + item.subtotal.toFixed(2) + '</td>' +
                 '<td><button class="btn btn-danger btn-sm btn-eliminar" data-id="' + item.id_producto + '">' +
-                '<i class="bi bi-trash"></i> Eliminar</button></td>' +
+                '<i class="bi bi-trash"></i></button></td>' +
                 '</tr>';
         });
 
@@ -59,10 +68,50 @@
         contenedor.innerHTML = html;
         actualizarContadorNavbar(data.cantidad);
 
+        function actualizarFila(data, id) {
+            if (!data.ok) return;
+            if (data.items.length === 0) { renderCarrito(data); return; }
+            var item = data.items.find(function(i){ return i.id_producto == id; });
+            if (item) {
+                var cantEl = document.getElementById('cant-' + id);
+                var subEl  = document.getElementById('sub-'  + id);
+                var filaEl = document.getElementById('fila-' + id);
+                if (cantEl) cantEl.textContent = item.cantidad;
+                if (subEl)  subEl.textContent  = '$' + item.subtotal.toFixed(2);
+                // Actualizar data-cant de los botones
+                if (filaEl) {
+                    var btnM = filaEl.querySelector('.btn-menos');
+                    var btnP = filaEl.querySelector('.btn-mas');
+                    if (btnM) btnM.dataset.cant = item.cantidad - 1;
+                    if (btnP) btnP.dataset.cant = item.cantidad + 1;
+                }
+            } else {
+                var filaEl = document.getElementById('fila-' + id);
+                if (filaEl) filaEl.remove();
+            }
+            var totalEl = document.getElementById('totalCarrito');
+            if (totalEl) totalEl.textContent = data.total.toFixed(2);
+            actualizarContadorNavbar(data.cantidad);
+        }
+
+        function ajaxActualizar(id, cantidad) {
+            fetch('api/carrito.php?accion=actualizar&id=' + id + '&cantidad=' + cantidad)
+                .then(function(r){ return r.json(); })
+                .then(function(data){ actualizarFila(data, id); })
+                .catch(function(){});
+        }
+
+        // Eventos +/-
+        document.querySelectorAll('.btn-menos, .btn-mas').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                ajaxActualizar(this.dataset.id, parseInt(this.dataset.cant) || 0);
+            });
+        });
+
         // Eventos de eliminar
         document.querySelectorAll('.btn-eliminar').forEach(function (btn) {
             btn.addEventListener('click', function () {
-                var id  = this.dataset.id;
+                var id   = this.dataset.id;
                 var fila = document.getElementById('fila-' + id);
                 btn.disabled = true;
                 btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
@@ -80,7 +129,7 @@
                             actualizarContadorNavbar(data.cantidad);
                         }
                     })
-                    .catch(function () { btn.disabled = false; btn.innerHTML = '<i class="bi bi-trash"></i> Eliminar'; });
+                    .catch(function () { btn.disabled = false; btn.innerHTML = '<i class="bi bi-trash"></i>'; });
             });
         });
     }

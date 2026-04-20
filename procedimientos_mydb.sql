@@ -988,4 +988,41 @@ BEGIN
     ORDER BY nv.`nro` DESC;
 END//
 
+-- =============================================
+-- PANEL VENDEDOR: estadísticas del dashboard
+-- =============================================
+
+DROP PROCEDURE IF EXISTS sp_resumen_dashboard//
+CREATE PROCEDURE sp_resumen_dashboard()
+BEGIN
+    SELECT
+        (SELECT COUNT(*) FROM `NotaVenta`
+         WHERE DATE(`fechaHora`) = CURDATE())                                                AS ventasHoy,
+        (SELECT COUNT(*) FROM `NotaVenta`
+         WHERE `fechaHora` >= DATE_SUB(NOW(), INTERVAL 7 DAY))                              AS ventasSemana,
+        (SELECT COUNT(*) FROM `NotaVenta`
+         WHERE MONTH(`fechaHora`) = MONTH(NOW()) AND YEAR(`fechaHora`) = YEAR(NOW()))       AS ventasMes,
+        (SELECT COALESCE(SUM(dnv.`cant` * p.`precio`), 0)
+         FROM `DetalleNotaVenta` dnv
+         INNER JOIN `Producto`  p  ON p.`cod`  = dnv.`codProducto`
+         INNER JOIN `NotaVenta` nv ON nv.`nro` = dnv.`nroNotaVenta`
+         WHERE MONTH(nv.`fechaHora`) = MONTH(NOW()) AND YEAR(nv.`fechaHora`) = YEAR(NOW())) AS ingresosMes,
+        (SELECT COALESCE(SUM(dnv.`cant` * p.`precio`), 0)
+         FROM `DetalleNotaVenta` dnv
+         INNER JOIN `Producto` p ON p.`cod` = dnv.`codProducto`)                           AS ingresosTotal;
+END//
+
+DROP PROCEDURE IF EXISTS sp_productos_mas_vendidos//
+CREATE PROCEDURE sp_productos_mas_vendidos(IN p_limite INT)
+BEGIN
+    SELECT p.`nombre`,
+           SUM(dnv.`cant`)              AS totalVendido,
+           SUM(dnv.`cant` * p.`precio`) AS totalIngresos
+    FROM `DetalleNotaVenta` dnv
+    INNER JOIN `Producto` p ON p.`cod` = dnv.`codProducto`
+    GROUP BY p.`cod`, p.`nombre`
+    ORDER BY totalVendido DESC
+    LIMIT p_limite;
+END//
+
 DELIMITER ;

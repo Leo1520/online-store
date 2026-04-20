@@ -68,6 +68,23 @@
     <!-- Grid de productos -->
     <div id="gridProductos" class="row" style="display:none;"></div>
 
+    <!-- Paginacion -->
+    <div id="paginacion" class="d-flex justify-content-between align-items-center mt-2 mb-4" style="display:none!important;">
+        <div class="text-muted small" id="infoPagina"></div>
+        <nav>
+            <ul class="pagination pagination-sm mb-0" id="listaPaginas"></ul>
+        </nav>
+        <div class="d-flex align-items-center">
+            <label class="text-muted small mr-2 mb-0">Por página:</label>
+            <select id="porPagina" class="form-control form-control-sm" style="width:70px;">
+                <option value="6">6</option>
+                <option value="12" selected>12</option>
+                <option value="24">24</option>
+                <option value="48">48</option>
+            </select>
+        </div>
+    </div>
+
     <!-- Plantilla de tarjeta -->
     <template id="plantillaProducto">
         <div class="col-md-4 mb-4">
@@ -110,13 +127,21 @@
 
 <script>
 (function () {
-    var grid       = document.getElementById('gridProductos');
-    var cargando   = document.getElementById('cargando');
-    var plantilla  = document.getElementById('plantillaProducto');
-    var toast      = document.getElementById('toastCarrito');
-    var toastMsg   = document.getElementById('toastMensaje');
-    var contador   = document.getElementById('contadorResultados');
-    var debounceId = null;
+    var grid         = document.getElementById('gridProductos');
+    var cargando     = document.getElementById('cargando');
+    var plantilla    = document.getElementById('plantillaProducto');
+    var toast        = document.getElementById('toastCarrito');
+    var toastMsg     = document.getElementById('toastMensaje');
+    var contador     = document.getElementById('contadorResultados');
+    var paginacion   = document.getElementById('paginacion');
+    var listaPaginas = document.getElementById('listaPaginas');
+    var infoPagina   = document.getElementById('infoPagina');
+    var selectPP     = document.getElementById('porPagina');
+    var debounceId   = null;
+
+    // Estado de paginacion
+    var todosLosProductos = [];
+    var paginaActual      = 1;
 
     // --- Filtros ---
     var inputBusqueda   = document.getElementById('filtroBusqueda');
@@ -156,6 +181,10 @@
 
     selectCategoria.addEventListener('change', cargarProductos);
     selectOrden.addEventListener('change', cargarProductos);
+    selectPP.addEventListener('change', function () {
+        paginaActual = 1;
+        mostrarPagina(paginaActual);
+    });
 
     // --- Toast ---
     function mostrarToast(mensaje, exito) {
@@ -173,7 +202,7 @@
         badge.style.display  = cantidad > 0 ? 'inline-block' : 'none';
     }
 
-    // --- Render productos ---
+    // --- Render una pagina de productos ---
     function renderProductos(productos) {
         grid.innerHTML = '';
 
@@ -183,6 +212,7 @@
                 '<i class="bi bi-search" style="font-size:3rem;color:#ccc;"></i>' +
                 '<p class="mt-3 text-muted">No se encontraron productos con esos filtros.</p>' +
                 '</div>';
+            paginacion.style.display = 'none';
             return;
         }
 
@@ -191,23 +221,81 @@
             var imgSrc = 'recursos/imagenes/' + p.imagen;
 
             var detalleUrl = 'index.php?pagina=producto&id=' + p.id_producto;
-            nodo.querySelector('.producto-imagen-link').href     = detalleUrl;
-            nodo.querySelector('.producto-imagen').src           = imgSrc;
-            nodo.querySelector('.producto-imagen').alt           = p.nombre;
-            nodo.querySelector('.producto-nombre').textContent      = p.nombre;
-            nodo.querySelector('.producto-descripcion').textContent = p.descripcion;
-            nodo.querySelector('.producto-marca').textContent       = p.marca     || 'N/D';
-            nodo.querySelector('.producto-categoria').textContent   = p.categoria || 'N/D';
-            nodo.querySelector('.producto-precio').textContent      = parseFloat(p.precio).toFixed(2);
-            nodo.querySelector('.producto-stock').textContent       = parseInt(p.stock) || 0;
+            nodo.querySelector('.producto-imagen-link').href         = detalleUrl;
+            nodo.querySelector('.producto-imagen').src               = imgSrc;
+            nodo.querySelector('.producto-imagen').alt               = p.nombre;
+            nodo.querySelector('.producto-nombre').textContent       = p.nombre;
+            nodo.querySelector('.producto-descripcion').textContent  = p.descripcion;
+            nodo.querySelector('.producto-marca').textContent        = p.marca     || 'N/D';
+            nodo.querySelector('.producto-categoria').textContent    = p.categoria || 'N/D';
+            nodo.querySelector('.producto-precio').textContent       = parseFloat(p.precio).toFixed(2);
+            nodo.querySelector('.producto-stock').textContent        = parseInt(p.stock) || 0;
 
             nodo.querySelector('.btn-detalle').href = detalleUrl;
 
             var btn = nodo.querySelector('.btn-agregar');
             btn.dataset.id = p.id_producto;
+            if ((parseInt(p.stock) || 0) === 0) {
+                btn.disabled = true;
+                btn.textContent = 'Sin stock';
+            }
 
             grid.appendChild(nodo);
         });
+    }
+
+    // --- Mostrar pagina concreta ---
+    function mostrarPagina(pagina) {
+        var pp    = parseInt(selectPP.value) || 12;
+        var total = todosLosProductos.length;
+        var totalPaginas = Math.ceil(total / pp) || 1;
+
+        paginaActual = Math.max(1, Math.min(pagina, totalPaginas));
+
+        var inicio = (paginaActual - 1) * pp;
+        var slice  = todosLosProductos.slice(inicio, inicio + pp);
+
+        renderProductos(slice);
+
+        // Info de pagina
+        var fin = Math.min(inicio + pp, total);
+        infoPagina.textContent = 'Mostrando ' + (inicio + 1) + '-' + fin + ' de ' + total + ' productos';
+
+        // Construir botones de paginas
+        listaPaginas.innerHTML = '';
+
+        function crearLi(texto, pg, activo, deshabilitado) {
+            var li = document.createElement('li');
+            li.className = 'page-item' + (activo ? ' active' : '') + (deshabilitado ? ' disabled' : '');
+            var a = document.createElement('a');
+            a.className = 'page-link';
+            a.href = '#';
+            a.innerHTML = texto;
+            if (!deshabilitado && !activo) {
+                a.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    mostrarPagina(pg);
+                    window.scrollTo({ top: grid.offsetTop - 20, behavior: 'smooth' });
+                });
+            }
+            li.appendChild(a);
+            return li;
+        }
+
+        listaPaginas.appendChild(crearLi('&laquo;', paginaActual - 1, false, paginaActual === 1));
+
+        // Rango de botones visible: máximo 5 páginas
+        var rangoInicio = Math.max(1, paginaActual - 2);
+        var rangoFin    = Math.min(totalPaginas, rangoInicio + 4);
+        rangoInicio     = Math.max(1, rangoFin - 4);
+
+        for (var i = rangoInicio; i <= rangoFin; i++) {
+            listaPaginas.appendChild(crearLi(i, i, i === paginaActual, false));
+        }
+
+        listaPaginas.appendChild(crearLi('&raquo;', paginaActual + 1, false, paginaActual === totalPaginas));
+
+        paginacion.style.display = total > 0 ? 'flex' : 'none';
     }
 
     // Delegacion de eventos para agregar al carrito
@@ -236,6 +324,7 @@
     function cargarProductos() {
         cargando.style.display = '';
         grid.style.display     = 'none';
+        paginacion.style.display = 'none';
         contador.textContent   = '';
 
         fetch('api/productos.php?' + obtenerFiltros())
@@ -243,7 +332,10 @@
             .then(function (data) {
                 cargando.style.display = 'none';
                 grid.style.display     = '';
-                renderProductos(data.productos);
+
+                todosLosProductos = data.productos || [];
+                paginaActual = 1;
+                mostrarPagina(1);
 
                 var hayFiltro = inputBusqueda.value.trim() !== '' ||
                                 selectCategoria.value !== '0'    ||
@@ -275,7 +367,10 @@
 
                 cargando.style.display = 'none';
                 grid.style.display     = '';
-                renderProductos(data.productos);
+
+                todosLosProductos = data.productos || [];
+                paginaActual = 1;
+                mostrarPagina(1);
             })
             .catch(function () {
                 cargando.innerHTML =

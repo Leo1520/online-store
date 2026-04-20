@@ -13,6 +13,7 @@ $paginasPermitidas = [
     'registro',
     'mi_cuenta',
     'producto',
+    'vendedor_panel',
     'admin_catalogos',
     'admin_sucursales',
     'admin_clientes',
@@ -66,6 +67,10 @@ switch ($pagina) {
     case 'mi_cuenta':
         require_once __DIR__ . '/controladores/MiCuentaControlador.php';
         (new MiCuentaControlador())->index();
+        break;
+    case 'vendedor_panel':
+        require_once __DIR__ . '/controladores/VendedorControlador.php';
+        (new VendedorControlador())->panel();
         break;
     case 'producto':
         require_once __DIR__ . '/controladores/ProductoControlador.php';

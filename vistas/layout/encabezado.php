@@ -60,11 +60,19 @@
                         </span>
                     </li>
                     <?php if (!isset($_SESSION['es_admin']) || !$_SESSION['es_admin']): ?>
-                    <li class="nav-item">
-                        <a class="nav-link" href="index.php?pagina=mi_cuenta">
-                            <i class="bi bi-person-circle"></i> Mi cuenta
-                        </a>
-                    </li>
+                        <?php if (isset($_SESSION['rol']) && $_SESSION['rol'] === 'vendedor'): ?>
+                        <li class="nav-item">
+                            <a class="nav-link" href="index.php?pagina=vendedor_panel">
+                                <i class="bi bi-speedometer2"></i> Mi panel
+                            </a>
+                        </li>
+                        <?php else: ?>
+                        <li class="nav-item">
+                            <a class="nav-link" href="index.php?pagina=mi_cuenta">
+                                <i class="bi bi-person-circle"></i> Mi cuenta
+                            </a>
+                        </li>
+                        <?php endif; ?>
                     <?php endif; ?>
                     <li class="nav-item">
                         <a class="nav-link" href="index.php?pagina=logout">Salir</a>

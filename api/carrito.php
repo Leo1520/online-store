@@ -73,6 +73,43 @@ switch ($accion) {
         ]);
         break;
 
+    case 'actualizar':
+        if ($id <= 0) {
+            echo json_encode(['ok' => false, 'mensaje' => 'ID invalido.']);
+            exit();
+        }
+
+        $cantidad = isset($_POST['cantidad']) ? (int)$_POST['cantidad'] : (isset($_GET['cantidad']) ? (int)$_GET['cantidad'] : 0);
+
+        if ($cantidad <= 0) {
+            // Eliminar si cantidad llega a 0
+            foreach ($_SESSION['carrito'] as $i => $item) {
+                if ($item['id_producto'] == $id) {
+                    unset($_SESSION['carrito'][$i]);
+                    break;
+                }
+            }
+            $_SESSION['carrito'] = array_values($_SESSION['carrito']);
+        } else {
+            $actualizado = false;
+            foreach ($_SESSION['carrito'] as &$item) {
+                if ($item['id_producto'] == $id) {
+                    $item['cantidad'] = $cantidad;
+                    $actualizado = true;
+                    break;
+                }
+            }
+            unset($item);
+            if (!$actualizado) {
+                echo json_encode(['ok' => false, 'mensaje' => 'Producto no esta en el carrito.']);
+                exit();
+            }
+        }
+
+        $resumen = calcularResumen();
+        echo json_encode(array_merge(['ok' => true], $resumen));
+        break;
+
     case 'eliminar':
         if ($id <= 0) {
             echo json_encode(['ok' => false, 'mensaje' => 'ID invalido.']);
