@@ -173,6 +173,22 @@ BEGIN
     LIMIT p_limite;
 END//
 
+-- =============================================
+-- MIGRACIÓN v3: estado en NotaVenta
+-- =============================================
+
+ALTER TABLE `NotaVenta` ADD COLUMN IF NOT EXISTS `estado` VARCHAR(20) NOT NULL DEFAULT 'pendiente';
+UPDATE `NotaVenta` SET `estado` = 'entregado' WHERE `estado` = 'pendiente';
+
+DROP PROCEDURE IF EXISTS sp_actualizar_estado_venta//
+CREATE PROCEDURE sp_actualizar_estado_venta(IN p_nro INT, IN p_estado VARCHAR(20))
+BEGIN
+    IF p_estado NOT IN ('pendiente','procesando','enviado','entregado','cancelado') THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Estado no valido';
+    END IF;
+    UPDATE `NotaVenta` SET `estado` = p_estado WHERE `nro` = p_nro;
+END//
+
 DELIMITER ;
 
 -- Verificación final

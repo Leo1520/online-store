@@ -116,10 +116,15 @@
                                         <th>Cliente</th>
                                         <th>Items</th>
                                         <th>Total</th>
+                                        <th>Estado</th>
                                     </tr>
                                 </thead>
                                 <tbody>
+                                    <?php
+                                        $bcVendedor = ['pendiente'=>'badge-secondary','procesando'=>'badge-warning','enviado'=>'badge-info','entregado'=>'badge-success','cancelado'=>'badge-danger'];
+                                    ?>
                                     <?php foreach ($ultimasVentas as $venta): ?>
+                                        <?php $est = $venta['estado'] ?? 'pendiente'; ?>
                                         <tr>
                                             <td><strong>#<?php echo (int)$venta['nro']; ?></strong></td>
                                             <td><small><?php echo htmlspecialchars($venta['fechaHora']); ?></small></td>
@@ -127,6 +132,11 @@
                                             <td><?php echo (int)$venta['totalItems']; ?></td>
                                             <td class="text-success font-weight-bold">
                                                 $<?php echo number_format((float)$venta['totalMonto'], 2); ?>
+                                            </td>
+                                            <td>
+                                                <span class="badge <?php echo $bcVendedor[$est] ?? 'badge-secondary'; ?>">
+                                                    <?php echo ucfirst($est); ?>
+                                                </span>
                                             </td>
                                         </tr>
                                     <?php endforeach; ?>

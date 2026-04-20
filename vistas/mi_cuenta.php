@@ -100,8 +100,15 @@
                                             <span>
                                                 <strong>Pedido #<?php echo (int)$compra['nro']; ?></strong>
                                                 <small class="text-muted ml-2"><?php echo htmlspecialchars($compra['fechaHora']); ?></small>
+                                                <?php
+                                                    $est = $compra['estado'] ?? 'pendiente';
+                                                    $bc  = ['pendiente'=>'badge-secondary','procesando'=>'badge-warning','enviado'=>'badge-info','entregado'=>'badge-success','cancelado'=>'badge-danger'];
+                                                ?>
+                                                <span class="badge <?php echo $bc[$est] ?? 'badge-secondary'; ?> ml-2">
+                                                    <?php echo ucfirst($est); ?>
+                                                </span>
                                             </span>
-                                            <span class="badge badge-success">
+                                            <span class="badge badge-light border">
                                                 $<?php echo number_format((float)$compra['totalMonto'], 2); ?>
                                             </span>
                                         </button>

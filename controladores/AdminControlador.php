@@ -366,6 +366,19 @@ class AdminControlador {
         $this->validarAutenticacion();
 
         $notaModel = new NotaVenta();
+        $mensaje   = isset($_GET['msg']) ? trim($_GET['msg']) : null;
+
+        if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accion']) && $_POST['accion'] === 'cambiar_estado') {
+            $nro    = (int)($_POST['nro'] ?? 0);
+            $estado = trim($_POST['estado'] ?? '');
+            $permitidos = ['pendiente', 'procesando', 'enviado', 'entregado', 'cancelado'];
+            if ($nro > 0 && in_array($estado, $permitidos)) {
+                $notaModel->actualizarEstado($nro, $estado);
+            }
+            header('Location: index.php?pagina=admin_ventas');
+            exit();
+        }
+
         $ventas = $notaModel->obtenerTodasConResumen();
 
         $detalles = [];

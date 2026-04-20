@@ -35,8 +35,8 @@ BEGIN
 
     SET p_nro_venta = v_ultimo + 1;
 
-    INSERT INTO `NotaVenta` (`nro`, `fechaHora`, `ciCliente`)
-    VALUES (p_nro_venta, NOW(), p_ci_cliente);
+    INSERT INTO `NotaVenta` (`nro`, `fechaHora`, `ciCliente`, `estado`)
+    VALUES (p_nro_venta, NOW(), p_ci_cliente, 'pendiente');
 END//
 
 DROP PROCEDURE IF EXISTS sp_insertar_detalle_venta//
@@ -248,13 +248,16 @@ END//
 DROP PROCEDURE IF EXISTS sp_resumen_ventas//
 CREATE PROCEDURE sp_resumen_ventas()
 BEGIN
-    SELECT nv.`nro`, nv.`fechaHora`, nv.`ciCliente`,
+    SELECT nv.`nro`, nv.`fechaHora`, nv.`ciCliente`, nv.`estado`,
            CONCAT(cl.`nombres`, ' ', cl.`apPaterno`, ' ', cl.`apMaterno`) AS cliente,
-           COALESCE(SUM(dnv.`cant`), 0) AS totalItems
+           COALESCE(SUM(dnv.`cant`), 0)             AS totalItems,
+           COALESCE(SUM(dnv.`cant` * p.`precio`), 0) AS totalMonto
     FROM `NotaVenta` nv
     INNER JOIN `Cliente` cl ON cl.`ci` = nv.`ciCliente`
-    LEFT JOIN `DetalleNotaVenta` dnv ON dnv.`nroNotaVenta` = nv.`nro`
-    GROUP BY nv.`nro`, nv.`fechaHora`, nv.`ciCliente`, cl.`nombres`, cl.`apPaterno`, cl.`apMaterno`
+    LEFT  JOIN `DetalleNotaVenta` dnv ON dnv.`nroNotaVenta` = nv.`nro`
+    LEFT  JOIN `Producto` p ON p.`cod` = dnv.`codProducto`
+    GROUP BY nv.`nro`, nv.`fechaHora`, nv.`ciCliente`, nv.`estado`,
+             cl.`nombres`, cl.`apPaterno`, cl.`apMaterno`
     ORDER BY nv.`nro` DESC;
 END//
 
@@ -909,14 +912,14 @@ END//
 DROP PROCEDURE IF EXISTS sp_historial_compras_cliente//
 CREATE PROCEDURE sp_historial_compras_cliente(IN p_usuario VARCHAR(40))
 BEGIN
-    SELECT nv.`nro`, nv.`fechaHora`,
-           COALESCE(SUM(dnv.`cant`), 0)                              AS totalItems,
-           COALESCE(SUM(dnv.`cant` * p.`precio`), 0)                 AS totalMonto
+    SELECT nv.`nro`, nv.`fechaHora`, nv.`estado`,
+           COALESCE(SUM(dnv.`cant`), 0)              AS totalItems,
+           COALESCE(SUM(dnv.`cant` * p.`precio`), 0) AS totalMonto
     FROM `NotaVenta` nv
     INNER JOIN `Cliente` cl ON cl.`ci` = nv.`ciCliente` AND cl.`usuarioCuenta` = p_usuario
     LEFT  JOIN `DetalleNotaVenta` dnv ON dnv.`nroNotaVenta` = nv.`nro`
     LEFT  JOIN `Producto` p ON p.`cod` = dnv.`codProducto`
-    GROUP BY nv.`nro`, nv.`fechaHora`
+    GROUP BY nv.`nro`, nv.`fechaHora`, nv.`estado`
     ORDER BY nv.`nro` DESC;
 END//
 
@@ -941,22 +944,16 @@ BEGIN
 END//
 
 -- =============================================
--- VENTAS: resumen con total monetario
+-- VENTAS: resumen con total monetario y estado
 -- =============================================
 
-DROP PROCEDURE IF EXISTS sp_resumen_ventas//
-CREATE PROCEDURE sp_resumen_ventas()
+DROP PROCEDURE IF EXISTS sp_actualizar_estado_venta//
+CREATE PROCEDURE sp_actualizar_estado_venta(IN p_nro INT, IN p_estado VARCHAR(20))
 BEGIN
-    SELECT nv.`nro`, nv.`fechaHora`, nv.`ciCliente`,
-           CONCAT(cl.`nombres`, ' ', cl.`apPaterno`, ' ', cl.`apMaterno`) AS cliente,
-           COALESCE(SUM(dnv.`cant`), 0)                                    AS totalItems,
-           COALESCE(SUM(dnv.`cant` * p.`precio`), 0)                       AS totalMonto
-    FROM `NotaVenta` nv
-    INNER JOIN `Cliente` cl ON cl.`ci` = nv.`ciCliente`
-    LEFT JOIN `DetalleNotaVenta` dnv ON dnv.`nroNotaVenta` = nv.`nro`
-    LEFT JOIN `Producto` p ON p.`cod` = dnv.`codProducto`
-    GROUP BY nv.`nro`, nv.`fechaHora`, nv.`ciCliente`, cl.`nombres`, cl.`apPaterno`, cl.`apMaterno`
-    ORDER BY nv.`nro` DESC;
+    IF p_estado NOT IN ('pendiente','procesando','enviado','entregado','cancelado') THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Estado no valido';
+    END IF;
+    UPDATE `NotaVenta` SET `estado` = p_estado WHERE `nro` = p_nro;
 END//
 
 -- =============================================

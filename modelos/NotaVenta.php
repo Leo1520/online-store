@@ -23,7 +23,7 @@ class NotaVenta {
             $this->limpiarResultadosPendientes();
         }
 
-        $sql = "SELECT nv.nro, nv.fechaHora, nv.ciCliente,
+        $sql = "SELECT nv.nro, nv.fechaHora, nv.ciCliente, nv.estado,
                        CONCAT(cl.nombres, ' ', cl.apPaterno, ' ', cl.apMaterno) AS cliente,
                        COALESCE(SUM(dnv.cant), 0) AS totalItems,
                        COALESCE(SUM(dnv.cant * p.precio), 0) AS totalMonto
@@ -31,7 +31,7 @@ class NotaVenta {
                 INNER JOIN `Cliente` cl ON cl.ci = nv.ciCliente
                 LEFT JOIN `DetalleNotaVenta` dnv ON dnv.nroNotaVenta = nv.nro
                 LEFT JOIN `Producto` p ON p.cod = dnv.codProducto
-                GROUP BY nv.nro, nv.fechaHora, nv.ciCliente, cl.nombres, cl.apPaterno, cl.apMaterno
+                GROUP BY nv.nro, nv.fechaHora, nv.ciCliente, nv.estado, cl.nombres, cl.apPaterno, cl.apMaterno
                 ORDER BY nv.nro DESC";
         $resultado = $this->db->query($sql);
         return $resultado ? $resultado->fetch_all(MYSQLI_ASSOC) : [];
@@ -65,6 +65,16 @@ class NotaVenta {
         $stmt = $this->db->prepare("CALL sp_actualizar_perfil_cliente(?, ?, ?, ?, ?)");
         if (!$stmt) return false;
         $stmt->bind_param('sssss', $ci, $usuario, $correo, $direccion, $nroCelular);
+        $ok = $stmt->execute();
+        $stmt->close();
+        $this->limpiarResultadosPendientes();
+        return $ok;
+    }
+
+    public function actualizarEstado($nro, $estado) {
+        $stmt = $this->db->prepare("CALL sp_actualizar_estado_venta(?, ?)");
+        if (!$stmt) return false;
+        $stmt->bind_param('is', $nro, $estado);
         $ok = $stmt->execute();
         $stmt->close();
         $this->limpiarResultadosPendientes();
