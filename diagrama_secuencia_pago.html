@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diagrama de Secuencia - Proceso de Pago y Ventas</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+        .content {
+            padding: 40px;
+        }
+        .diagram-section {
+            margin-bottom: 50px;
+        }
+        .diagram-title {
+            font-size: 1.8em;
+            color: #333;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #667eea;
+        }
+        .mermaid {
+            display: flex;
+            justify-content: center;
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            overflow-x: auto;
+        }
+        .legend {
+            background: #f0f4ff;
+            border-left: 4px solid #667eea;
+            padding: 20px;
+            margin-top: 20px;
+            border-radius: 4px;
+        }
+        .legend h3 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+        .legend-item {
+            margin: 8px 0;
+            color: #555;
+        }
+        .legend-item strong {
+            color: #333;
+        }
+        .notes {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 20px;
+            margin-top: 20px;
+            border-radius: 4px;
+            color: #856404;
+        }
+        .notes h3 {
+            color: #856404;
+            margin-bottom: 10px;
+        }
+        .notes ul {
+            margin-left: 20px;
+        }
+        .notes li {
+            margin: 5px 0;
+        }
+        footer {
+            background: #f8f9fa;
+            padding: 20px;
+            text-align: center;
+            color: #666;
+            font-size: 0.9em;
+        }
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.8em;
+            }
+            .content {
+                padding: 20px;
+            }
+            .mermaid {
+                overflow-x: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📊 Diagrama de Secuencia</h1>
+            <p>Proceso de Pago y Registración de Ventas</p>
+        </div>
+
+        <div class="content">
+            <!-- DIAGRAMA 1: FLUJO PRINCIPAL DE PAGO -->
+            <div class="diagram-section">
+                <h2 class="diagram-title">1. Flujo Principal de Pago</h2>
+                <div class="mermaid">
+                    sequenceDiagram
+                        participant Usuario
+                        participant Navegador
+                        participant PagoControlador
+                        participant VentaModelo
+                        participant BaseDatos
+                        participant Sesion
+
+                        Usuario->>Navegador: 1. Accede a /pago<br/>(Ver carrito y formulario)
+                        Navegador->>PagoControlador: 2. GET /index.php?pagina=pago
+                        PagoControlador->>PagoControlador: 3. Validar carrito no vacío
+                        PagoControlador->>PagoControlador: 4. Obtener datos de productos
+                        PagoControlador->>Navegador: 5. Renderizar vista pago.php
+                        Navegador->>Usuario: 6. Mostrar resumen de compra
+
+                        Usuario->>Navegador: 7. Revisar productos y total
+                        Usuario->>Navegador: 8. Click en "Confirmar Pago"
+                        Navegador->>PagoControlador: 9. POST /index.php?pagina=pago
+
+                        PagoControlador->>Sesion: 10. Obtener usuario de sesión
+                        alt Usuario NO logueado
+                            PagoControlador->>Navegador: Redirigir a login
+                        else Usuario logueado
+                            PagoControlador->>VentaModelo: 11. Llamar registrarVenta()
+                        end
+
+                        VentaModelo->>VentaModelo: 12. Validar carrito no vacío
+                        VentaModelo->>VentaModelo: 13. Validar usuario no vacío
+                </div>
+                <div class="legend">
+                    <h3>🔑 Componentes Principales:</h3>
+                    <div class="legend-item"><strong>Usuario:</strong> Cliente del sistema</div>
+                    <div class="legend-item"><strong>Navegador:</strong> Interfaz del cliente (HTTP)</div>
+                    <div class="legend-item"><strong>PagoControlador:</strong> Controlador que maneja peticiones de pago</div>
+                    <div class="legend-item"><strong>VentaModelo:</strong> Modelo que procesa la lógica de ventas</div>
+                    <div class="legend-item"><strong>BaseDatos:</strong> MySQL/MariaDB con procedimientos almacenados</div>
+                </div>
+            </div>
+
+            <!-- DIAGRAMA 2: REGISTRO DE VENTA EN BD -->
+            <div class="diagram-section">
+                <h2 class="diagram-title">2. Registración de Venta en Base de Datos</h2>
+                <div class="mermaid">
+                    sequenceDiagram
+                        participant VentaModelo
+                        participant BaseDatos
+                        participant Transaccion
+
+                        VentaModelo->>BaseDatos: 1. sp_obtener_ci_cliente_por_usuario(usuario)
+                        BaseDatos->>BaseDatos: 2. Consultar tabla Cliente
+                        BaseDatos-->>VentaModelo: 3. Retorna CI del cliente
+
+                        VentaModelo->>Transaccion: 4. BEGIN TRANSACTION
+                        
+                        VentaModelo->>BaseDatos: 5. sp_crear_nota_venta(ci_cliente)
+                        BaseDatos->>BaseDatos: 6. SELECT MAX(nro) FROM NotaVenta
+                        BaseDatos->>BaseDatos: 7. Calcular próximo nro_venta
+                        BaseDatos->>BaseDatos: 8. INSERT INTO NotaVenta<br/>(nro, fechaHora, ciCliente)
+                        BaseDatos-->>VentaModelo: 9. Retorna nro_venta
+
+                        loop Por cada producto en carrito
+                            VentaModelo->>BaseDatos: 10. sp_existe_producto(cod_producto)
+                            BaseDatos-->>VentaModelo: 11. Retorna existe (true/false)
+                            
+                            alt Producto existe
+                                VentaModelo->>BaseDatos: 12. sp_insertar_detalle_venta<br/>(nro_venta, cod_producto, item, cantidad)
+                                BaseDatos->>BaseDatos: 13. INSERT INTO DetalleNotaVenta
+                                BaseDatos-->>VentaModelo: 14. OK
+                                
+                                VentaModelo->>BaseDatos: 15. sp_descontar_stock<br/>(cod_producto, cantidad)
+                                BaseDatos->>BaseDatos: 16. UPDATE DetalleProductoSucursal<br/>SET stock = stock - cantidad
+                                BaseDatos-->>VentaModelo: 17. OK
+                            else Producto NO existe
+                                VentaModelo->>VentaModelo: 18. Saltar producto
+                            end
+                        end
+
+                        VentaModelo->>Transaccion: 19. COMMIT TRANSACTION
+                        Transaccion-->>VentaModelo: 20. Transacción confirmada
+                        VentaModelo-->>VentaModelo: 21. Retorna nro_venta
+                </div>
+                <div class="notes">
+                    <h3>⚠️ Notas Importantes:</h3>
+                    <ul>
+                        <li>La transacción asegura consistencia: si hay error, se hace ROLLBACK de todos los cambios</li>
+                        <li>El número de venta se genera automáticamente (secuencial)</li>
+                        <li>Cada producto del carrito genera un DETALLE de venta</li>
+                        <li>El stock se descuenta por cada producto vendido</li>
+                        <li>Si hay error en cualquier paso, toda la venta se cancela</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- DIAGRAMA 3: FLUJO POSTERIOR A PAGO EXITOSO -->
+            <div class="diagram-section">
+                <h2 class="diagram-title">3. Confirmación de Pago Exitoso</h2>
+                <div class="mermaid">
+                    sequenceDiagram
+                        participant VentaModelo
+                        participant PagoControlador
+                        participant Sesion
+                        participant Navegador
+                        participant Usuario
+
+                        VentaModelo-->>PagoControlador: 1. nro_venta (exitoso)
+                        
+                        alt Venta NO fue registrada
+                            PagoControlador->>Navegador: Mostrar error
+                            Navegador->>Usuario: Error en la compra
+                        else Venta fue exitosa
+                            PagoControlador->>Sesion: 2. Limpiar carrito<br/>unset($_SESSION['carrito'])
+                            
+                            PagoControlador->>Navegador: 3. Redirigir a /pago_exitoso?nro=123
+                            
+                            Navegador->>PagoControlador: 4. GET /pago_exitoso?nro=123
+                            
+                            PagoControlador->>PagoControlador: 5. Validar nro_venta
+                            
+                            PagoControlador->>Navegador: 6. Renderizar vista pago_exitoso.php
+                            
+                            Navegador->>Usuario: 7. Mostrar confirmación<br/>Compra Nº123 Confirmada
+                        end
+
+                        Usuario->>Navegador: 8. Click en "Volver al inicio"
+                        Navegador->>PagoControlador: 9. Navegar a inicio
+                </div>
+            </div>
+
+            <!-- DIAGRAMA 4: LISTAR VENTAS (ADMIN) -->
+            <div class="diagram-section">
+                <h2 class="diagram-title">4. Consulta de Ventas (Panel Admin)</h2>
+                <div class="mermaid">
+                    sequenceDiagram
+                        participant Admin
+                        participant AdminControlador
+                        participant VentaModelo
+                        participant BaseDatos
+                        participant Navegador
+
+                        Admin->>Navegador: 1. Accede a /admin_ventas
+                        Navegador->>AdminControlador: 2. GET /index.php?pagina=admin_ventas
+                        
+                        AdminControlador->>AdminControlador: 3. Validar sesión admin
+                        
+                        alt NO es admin
+                            AdminControlador->>Navegador: Redirigir a login
+                        else ES admin
+                            AdminControlador->>VentaModelo: 4. Llamar obtenerResumenVentas()
+                        end
+
+                        VentaModelo->>BaseDatos: 5. sp_resumen_ventas()
+                        
+                        BaseDatos->>BaseDatos: 6. SELECT nro, fechaHora, ci_cliente,<br/>cantidad_productos, monto_total<br/>FROM NotaVenta<br/>LEFT JOIN DetalleNotaVenta
+
+                        BaseDatos-->>VentaModelo: 7. Retorna array de ventas
+
+                        VentaModelo-->>AdminControlador: 8. Retorna datos procesados
+
+                        AdminControlador->>Navegador: 9. Renderizar admin_ventas.php<br/>con tabla de ventas
+                        
+                        Navegador->>Admin: 10. Mostrar listado de ventas
+
+                        Admin->>Navegador: 11. Click en una venta
+                        Navegador->>AdminControlador: 12. GET /admin_ventas?ver=123
+
+                        AdminControlador->>VentaModelo: 13. obtenerDetalleVenta(123)
+                        VentaModelo->>BaseDatos: 14. sp_detalle_venta(123)
+                        BaseDatos-->>VentaModelo: 15. Retorna detalles
+                        VentaModelo-->>AdminControlador: 16. Datos procesados
+                        AdminControlador->>Navegador: 17. Mostrar detalles de venta
+                        Navegador->>Admin: 18. Ver productos y monto
+                </div>
+            </div>
+
+            <!-- DIAGRAMA 5: ESTRUCTURA DE DATOS -->
+            <div class="diagram-section">
+                <h2 class="diagram-title">5. Estructura de Datos Relacionada</h2>
+                <div class="mermaid">
+                    graph TD
+                        A["👤 Cliente"] -->|tiene| B["🔑 Cuenta<br/>(usuario, password)"]
+                        A -->|genera| C["📋 NotaVenta<br/>(nro, fechaHora, ciCliente)"]
+                        C -->|contiene| D["📦 DetalleNotaVenta<br/>(nroNotaVenta, codProducto,<br/>item, cantidad)"]
+                        D -->|referencia| E["🛍️ Producto<br/>(cod, nombre, precio,<br/>marca, industria, categoría)"]
+                        E -->|stock en| F["🏪 DetalleProductoSucursal<br/>(codProducto, codSucursal, stock)"]
+                        F -->|pertenece a| G["📍 Sucursal<br/>(cod, nombre, dirección)"]
+                        
+                        style A fill:#e1f5ff
+                        style B fill:#f3e5f5
+                        style C fill:#fff3e0
+                        style D fill:#fff3e0
+                        style E fill:#f1f8e9
+                        style F fill:#ede7f6
+                        style G fill:#fce4ec
+                </div>
+                <div class="legend">
+                    <h3>📊 Relaciones:</h3>
+                    <div class="legend-item">• Un Cliente tiene UNA Cuenta de acceso</div>
+                    <div class="legend-item">• Un Cliente genera múltiples NotasVenta</div>
+                    <div class="legend-item">• Una NotaVenta contiene múltiples DetallesVenta</div>
+                    <div class="legend-item">• Cada DetalleVenta referencia un Producto</div>
+                    <div class="legend-item">• Cada Producto tiene stock por Sucursal</div>
+                </div>
+            </div>
+
+            <!-- DIAGRAMA 6: PROCEDIMIENTOS ALMACENADOS -->
+            <div class="diagram-section">
+                <h2 class="diagram-title">6. Procedimientos Almacenados Utilizados</h2>
+                <div style="overflow-x: auto;">
+                    <table style="width: 100%; border-collapse: collapse; margin-top: 20px;">
+                        <thead>
+                            <tr style="background: #667eea; color: white;">
+                                <th style="padding: 12px; text-align: left; border: 1px solid #ddd;">Procedimiento</th>
+                                <th style="padding: 12px; text-align: left; border: 1px solid #ddd;">Función</th>
+                                <th style="padding: 12px; text-align: left; border: 1px solid #ddd;">Parámetros</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr style="background: #f8f9fa;">
+                                <td style="padding: 12px; border: 1px solid #ddd;"><code>sp_obtener_ci_cliente_por_usuario</code></td>
+                                <td style="padding: 12px; border: 1px solid #ddd;">Obtener CI del cliente por usuario</td>
+                                <td style="padding: 12px; border: 1px solid #ddd;">usuario</td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 12px; border: 1px solid #ddd;"><code>sp_crear_nota_venta</code></td>
+                                <td style="padding: 12px; border: 1px solid #ddd;">Crear nueva nota de venta</td>
+                                <td style="padding: 12px; border: 1px solid #ddd;">ci_cliente (IN), nro_venta (OUT)</td>
+                            </tr>
+                            <tr style="background: #f8f9fa;">
+                                <td style="padding: 12px; border: 1px solid #ddd;"><code>sp_insertar_detalle_venta</code></td>
+                                <td style="padding: 12px; border: 1px solid #ddd;">Insertar detalle de producto en venta</td>
+                                <td style="padding: 12px; border: 1px solid #ddd;">nro_venta, cod_producto, item, cantidad</td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 12px; border: 1px solid #ddd;"><code>sp_existe_producto</code></td>
+                                <td style="padding: 12px; border: 1px solid #ddd;">Verificar si producto existe</td>
+                                <td style="padding: 12px; border: 1px solid #ddd;">cod_producto</td>
+                            </tr>
+                            <tr style="background: #f8f9fa;">
+                                <td style="padding: 12px; border: 1px solid #ddd;"><code>sp_descontar_stock</code></td>
+                                <td style="padding: 12px; border: 1px solid #ddd;">Descontar stock de producto</td>
+                                <td style="padding: 12px; border: 1px solid #ddd;">cod_producto, cantidad</td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 12px; border: 1px solid #ddd;"><code>sp_resumen_ventas</code></td>
+                                <td style="padding: 12px; border: 1px solid #ddd;">Obtener resumen de todas las ventas</td>
+                                <td style="padding: 12px; border: 1px solid #ddd;">--</td>
+                            </tr>
+                            <tr style="background: #f8f9fa;">
+                                <td style="padding: 12px; border: 1px solid #ddd;"><code>sp_detalle_venta</code></td>
+                                <td style="padding: 12px; border: 1px solid #ddd;">Obtener detalles de una venta específica</td>
+                                <td style="padding: 12px; border: 1px solid #ddd;">nro_venta</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- RESUMEN EJECUTIVO -->
+            <div class="diagram-section">
+                <h2 class="diagram-title">📝 Resumen Ejecutivo del Flujo</h2>
+                <div style="background: #f5f5f5; padding: 20px; border-radius: 8px; line-height: 1.8;">
+                    <h3 style="color: #333; margin-bottom: 15px;">Flujo General del Proceso:</h3>
+                    <ol style="color: #555; margin-left: 20px;">
+                        <li><strong>Usuario accede a carrito:</strong> Revisa productos seleccionados</li>
+                        <li><strong>Procede al pago:</strong> PagoControlador valida carrito y usuario logueado</li>
+                        <li><strong>Registra venta:</strong> VentaModelo inicia transacción en BD</li>
+                        <li><strong>Obtiene CI del cliente:</strong> Se busca en tabla Cliente</li>
+                        <li><strong>Crea NotaVenta:</strong> Se genera número secuencial de venta</li>
+                        <li><strong>Inserta detalles:</strong> Para cada producto, se registra cantidad y se descuenta stock</li>
+                        <li><strong>Confirma transacción:</strong> COMMIT si todo es exitoso, ROLLBACK si hay error</li>
+                        <li><strong>Redirige a éxito:</strong> Usuario ve confirmación con número de venta</li>
+                        <li><strong>Admin consulta ventas:</strong> Puede ver listado y detalles de todas las ventas</li>
+                    </ol>
+                </div>
+            </div>
+
+        </div>
+
+        <footer>
+            <p>💼 Diagrama de Secuencia - Sistema de Tienda Online | Generado con Mermaid.js</p>
+            <p>Última actualización: 19 de Abril de 2026</p>
+        </footer>
+    </div>
+
+    <script>
+        mermaid.initialize({ startOnLoad: true, theme: 'default', securityLevel: 'loose' });
+        mermaid.contentLoaded();
+    </script>
+</body>
+</html>
