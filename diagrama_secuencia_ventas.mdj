@@ -1,0 +1,220 @@
+{
+  "_type": "Project",
+  "_id": "PRJ01",
+  "name": "DiagramaSecuenciaVentas",
+  "ownedElements": [
+    {
+      "_type": "UMLModel",
+      "_id": "MDL01",
+      "_parent": { "$ref": "PRJ01" },
+      "name": "Model",
+      "ownedElements": [
+        {
+          "_type": "UMLCollaboration",
+          "_id": "COL01",
+          "_parent": { "$ref": "MDL01" },
+          "name": "VentasPago",
+          "ownedElements": [
+            {
+              "_type": "UMLInteraction",
+              "_id": "INT01",
+              "_parent": { "$ref": "COL01" },
+              "name": "DiagramaSecuenciaVentasYPago",
+              "participants": [
+                { "_type": "UMLLifeline", "_id": "LL1", "_parent": { "$ref": "INT01" }, "name": "Usuario" },
+                { "_type": "UMLLifeline", "_id": "LL2", "_parent": { "$ref": "INT01" }, "name": "index.php (Router)" },
+                { "_type": "UMLLifeline", "_id": "LL3", "_parent": { "$ref": "INT01" }, "name": "PagoControlador" },
+                { "_type": "UMLLifeline", "_id": "LL4", "_parent": { "$ref": "INT01" }, "name": "Venta (Modelo)" },
+                { "_type": "UMLLifeline", "_id": "LL5", "_parent": { "$ref": "INT01" }, "name": "Producto (Modelo)" },
+                { "_type": "UMLLifeline", "_id": "LL6", "_parent": { "$ref": "INT01" }, "name": "MySQL (Stored Procs)" }
+              ],
+              "messages": [
+                { "_type": "UMLMessage", "_id": "MSG01",    "_parent": { "$ref": "INT01" }, "name": "GET ?pagina=pago",                                        "messageSort": "synchCall", "source": { "$ref": "LL1" }, "target": { "$ref": "LL2" } },
+                { "_type": "UMLMessage", "_id": "MSG02",    "_parent": { "$ref": "INT01" }, "name": "manejar() [GET]",                                         "messageSort": "synchCall", "source": { "$ref": "LL2" }, "target": { "$ref": "LL3" } },
+                { "_type": "UMLMessage", "_id": "MSGEMPTY", "_parent": { "$ref": "INT01" }, "name": "redirect carrito (carrito vacio)",                        "messageSort": "reply",     "source": { "$ref": "LL3" }, "target": { "$ref": "LL2" } },
+                { "_type": "UMLMessage", "_id": "MSG03",    "_parent": { "$ref": "INT01" }, "name": "obtenerPorId(id)",                                        "messageSort": "synchCall", "source": { "$ref": "LL3" }, "target": { "$ref": "LL5" } },
+                { "_type": "UMLMessage", "_id": "MSG04",    "_parent": { "$ref": "INT01" }, "name": "CALL sp_obtener_producto_por_id(id)",                     "messageSort": "synchCall", "source": { "$ref": "LL5" }, "target": { "$ref": "LL6" } },
+                { "_type": "UMLMessage", "_id": "MSG05",    "_parent": { "$ref": "INT01" }, "name": "{nombre, precio, stock, imagen}",                         "messageSort": "reply",     "source": { "$ref": "LL6" }, "target": { "$ref": "LL5" } },
+                { "_type": "UMLMessage", "_id": "MSG06",    "_parent": { "$ref": "INT01" }, "name": "$producto",                                               "messageSort": "reply",     "source": { "$ref": "LL5" }, "target": { "$ref": "LL3" } },
+                { "_type": "UMLMessage", "_id": "MSG07",    "_parent": { "$ref": "INT01" }, "name": "$items, $total, $sinStock",                               "messageSort": "reply",     "source": { "$ref": "LL3" }, "target": { "$ref": "LL2" } },
+                { "_type": "UMLMessage", "_id": "MSG08",    "_parent": { "$ref": "INT01" }, "name": "render pago.php (tabla + alertas stock)",                 "messageSort": "reply",     "source": { "$ref": "LL2" }, "target": { "$ref": "LL1" } },
+                { "_type": "UMLMessage", "_id": "MSG09",    "_parent": { "$ref": "INT01" }, "name": "POST ?pagina=pago [Completar Compra]",                    "messageSort": "synchCall", "source": { "$ref": "LL1" }, "target": { "$ref": "LL2" } },
+                { "_type": "UMLMessage", "_id": "MSG10",    "_parent": { "$ref": "INT01" }, "name": "manejar() [POST]",                                        "messageSort": "synchCall", "source": { "$ref": "LL2" }, "target": { "$ref": "LL3" } },
+                { "_type": "UMLMessage", "_id": "MSGNOSES", "_parent": { "$ref": "INT01" }, "name": "redirect login (sin sesion)",                             "messageSort": "reply",     "source": { "$ref": "LL3" }, "target": { "$ref": "LL2" } },
+                { "_type": "UMLMessage", "_id": "MSG11",    "_parent": { "$ref": "INT01" }, "name": "registrarVenta($carrito, $usuario)",                      "messageSort": "synchCall", "source": { "$ref": "LL3" }, "target": { "$ref": "LL4" } },
+                { "_type": "UMLMessage", "_id": "MSG12",    "_parent": { "$ref": "INT01" }, "name": "CALL sp_obtener_ci_cliente_por_usuario($usuario)",         "messageSort": "synchCall", "source": { "$ref": "LL4" }, "target": { "$ref": "LL6" } },
+                { "_type": "UMLMessage", "_id": "MSG13",    "_parent": { "$ref": "INT01" }, "name": "$ci (CI del cliente)",                                    "messageSort": "reply",     "source": { "$ref": "LL6" }, "target": { "$ref": "LL4" } },
+                { "_type": "UMLMessage", "_id": "MSGNOCI",  "_parent": { "$ref": "INT01" }, "name": "return false (CI no encontrado)",                         "messageSort": "reply",     "source": { "$ref": "LL4" }, "target": { "$ref": "LL3" } },
+                { "_type": "UMLMessage", "_id": "MSG14",    "_parent": { "$ref": "INT01" }, "name": "BEGIN TRANSACTION",                                       "messageSort": "synchCall", "source": { "$ref": "LL4" }, "target": { "$ref": "LL4" } },
+                { "_type": "UMLMessage", "_id": "MSG15",    "_parent": { "$ref": "INT01" }, "name": "CALL sp_crear_nota_venta($ci)",                           "messageSort": "synchCall", "source": { "$ref": "LL4" }, "target": { "$ref": "LL6" } },
+                { "_type": "UMLMessage", "_id": "MSG16",    "_parent": { "$ref": "INT01" }, "name": "$nroVenta",                                               "messageSort": "reply",     "source": { "$ref": "LL6" }, "target": { "$ref": "LL4" } },
+                { "_type": "UMLMessage", "_id": "MSG17",    "_parent": { "$ref": "INT01" }, "name": "CALL sp_existe_producto($codProducto)",                   "messageSort": "synchCall", "source": { "$ref": "LL4" }, "target": { "$ref": "LL6" } },
+                { "_type": "UMLMessage", "_id": "MSG18",    "_parent": { "$ref": "INT01" }, "name": "existe=1",                                                "messageSort": "reply",     "source": { "$ref": "LL6" }, "target": { "$ref": "LL4" } },
+                { "_type": "UMLMessage", "_id": "MSG19",    "_parent": { "$ref": "INT01" }, "name": "CALL sp_insertar_detalle_venta(nroVenta, codProd, item, cant)", "messageSort": "synchCall", "source": { "$ref": "LL4" }, "target": { "$ref": "LL6" } },
+                { "_type": "UMLMessage", "_id": "MSG20",    "_parent": { "$ref": "INT01" }, "name": "ok",                                                      "messageSort": "reply",     "source": { "$ref": "LL6" }, "target": { "$ref": "LL4" } },
+                { "_type": "UMLMessage", "_id": "MSG21",    "_parent": { "$ref": "INT01" }, "name": "CALL sp_descontar_stock_producto($codProd, $cantidad)",    "messageSort": "synchCall", "source": { "$ref": "LL4" }, "target": { "$ref": "LL6" } },
+                { "_type": "UMLMessage", "_id": "MSG22",    "_parent": { "$ref": "INT01" }, "name": "ok / Exception si stock insuficiente",                    "messageSort": "reply",     "source": { "$ref": "LL6" }, "target": { "$ref": "LL4" } },
+                { "_type": "UMLMessage", "_id": "MSGCOMMIT","_parent": { "$ref": "INT01" }, "name": "COMMIT",                                                  "messageSort": "synchCall", "source": { "$ref": "LL4" }, "target": { "$ref": "LL6" } },
+                { "_type": "UMLMessage", "_id": "MSGROLL",  "_parent": { "$ref": "INT01" }, "name": "ROLLBACK (error capturado)",                              "messageSort": "synchCall", "source": { "$ref": "LL4" }, "target": { "$ref": "LL6" } },
+                { "_type": "UMLMessage", "_id": "MSG25",    "_parent": { "$ref": "INT01" }, "name": "$nroVenta (o false si error)",                            "messageSort": "reply",     "source": { "$ref": "LL4" }, "target": { "$ref": "LL3" } },
+                { "_type": "UMLMessage", "_id": "MSG26",    "_parent": { "$ref": "INT01" }, "name": "redirect pago_exitoso / redirect carrito (error)",        "messageSort": "reply",     "source": { "$ref": "LL3" }, "target": { "$ref": "LL2" } },
+                { "_type": "UMLMessage", "_id": "MSG27",    "_parent": { "$ref": "INT01" }, "name": "render pago_exitoso.php",                                 "messageSort": "reply",     "source": { "$ref": "LL2" }, "target": { "$ref": "LL1" } }
+              ],
+              "fragments": [
+                {
+                  "_type": "UMLCombinedFragment",
+                  "_id": "CF1",
+                  "_parent": { "$ref": "INT01" },
+                  "interactionOperator": "alt",
+                  "operands": [
+                    { "_type": "UMLInteractionOperand", "_id": "OP1A", "_parent": { "$ref": "CF1" }, "guard": "[carrito vacio]" },
+                    { "_type": "UMLInteractionOperand", "_id": "OP1B", "_parent": { "$ref": "CF1" }, "guard": "[carrito con productos]" }
+                  ]
+                },
+                {
+                  "_type": "UMLCombinedFragment",
+                  "_id": "CF2",
+                  "_parent": { "$ref": "INT01" },
+                  "interactionOperator": "alt",
+                  "operands": [
+                    { "_type": "UMLInteractionOperand", "_id": "OP2A", "_parent": { "$ref": "CF2" }, "guard": "[sin sesion activa]" },
+                    { "_type": "UMLInteractionOperand", "_id": "OP2B", "_parent": { "$ref": "CF2" }, "guard": "[sesion activa]" }
+                  ]
+                },
+                {
+                  "_type": "UMLCombinedFragment",
+                  "_id": "CF3",
+                  "_parent": { "$ref": "INT01" },
+                  "interactionOperator": "alt",
+                  "operands": [
+                    { "_type": "UMLInteractionOperand", "_id": "OP3A", "_parent": { "$ref": "CF3" }, "guard": "[CI no encontrado -> return false]" },
+                    { "_type": "UMLInteractionOperand", "_id": "OP3B", "_parent": { "$ref": "CF3" }, "guard": "[CI encontrado -> continuar]" }
+                  ]
+                },
+                {
+                  "_type": "UMLCombinedFragment",
+                  "_id": "CFLOOP",
+                  "_parent": { "$ref": "INT01" },
+                  "interactionOperator": "loop",
+                  "operands": [
+                    { "_type": "UMLInteractionOperand", "_id": "OPLOOP", "_parent": { "$ref": "CFLOOP" }, "guard": "por cada producto en carrito" }
+                  ]
+                },
+                {
+                  "_type": "UMLCombinedFragment",
+                  "_id": "CF4",
+                  "_parent": { "$ref": "INT01" },
+                  "interactionOperator": "alt",
+                  "operands": [
+                    { "_type": "UMLInteractionOperand", "_id": "OP4A", "_parent": { "$ref": "CF4" }, "guard": "[exito -> COMMIT]" },
+                    { "_type": "UMLInteractionOperand", "_id": "OP4B", "_parent": { "$ref": "CF4" }, "guard": "[error -> ROLLBACK]" }
+                  ]
+                }
+              ],
+              "ownedElements": [
+                {
+                  "_type": "UMLSequenceDiagram",
+                  "_id": "DGM01",
+                  "_parent": { "$ref": "INT01" },
+                  "name": "DiagramaSecuenciaVentasYPago",
+                  "defaultDiagram": true,
+                  "ownedViews": [
+
+                    { "_type": "UMLSeqLifelineView", "_id": "LLV1", "_parent": { "$ref": "DGM01" }, "model": { "$ref": "LL1" }, "left": 15,   "top": 30, "width": 130, "height": 1220 },
+                    { "_type": "UMLSeqLifelineView", "_id": "LLV2", "_parent": { "$ref": "DGM01" }, "model": { "$ref": "LL2" }, "left": 200,  "top": 30, "width": 130, "height": 1220 },
+                    { "_type": "UMLSeqLifelineView", "_id": "LLV3", "_parent": { "$ref": "DGM01" }, "model": { "$ref": "LL3" }, "left": 410,  "top": 30, "width": 130, "height": 1220 },
+                    { "_type": "UMLSeqLifelineView", "_id": "LLV4", "_parent": { "$ref": "DGM01" }, "model": { "$ref": "LL4" }, "left": 620,  "top": 30, "width": 130, "height": 1220 },
+                    { "_type": "UMLSeqLifelineView", "_id": "LLV5", "_parent": { "$ref": "DGM01" }, "model": { "$ref": "LL5" }, "left": 815,  "top": 30, "width": 130, "height": 1220 },
+                    { "_type": "UMLSeqLifelineView", "_id": "LLV6", "_parent": { "$ref": "DGM01" }, "model": { "$ref": "LL6" }, "left": 1030, "top": 30, "width": 130, "height": 1220 },
+
+                    { "_type": "UMLSeqMessageView", "_id": "MSGV01",    "_parent": { "$ref": "DGM01" }, "model": { "$ref": "MSG01"    }, "tail": { "$ref": "LLV1" }, "head": { "$ref": "LLV2" }, "points": "80:130;265:130"    },
+                    { "_type": "UMLSeqMessageView", "_id": "MSGV02",    "_parent": { "$ref": "DGM01" }, "model": { "$ref": "MSG02"    }, "tail": { "$ref": "LLV2" }, "head": { "$ref": "LLV3" }, "points": "265:160;475:160"   },
+                    { "_type": "UMLSeqMessageView", "_id": "MSGVEMPTY", "_parent": { "$ref": "DGM01" }, "model": { "$ref": "MSGEMPTY" }, "tail": { "$ref": "LLV3" }, "head": { "$ref": "LLV2" }, "points": "475:205;265:205"   },
+                    { "_type": "UMLSeqMessageView", "_id": "MSGV03",    "_parent": { "$ref": "DGM01" }, "model": { "$ref": "MSG03"    }, "tail": { "$ref": "LLV3" }, "head": { "$ref": "LLV5" }, "points": "475:245;880:245"   },
+                    { "_type": "UMLSeqMessageView", "_id": "MSGV04",    "_parent": { "$ref": "DGM01" }, "model": { "$ref": "MSG04"    }, "tail": { "$ref": "LLV5" }, "head": { "$ref": "LLV6" }, "points": "880:275;1095:275"  },
+                    { "_type": "UMLSeqMessageView", "_id": "MSGV05",    "_parent": { "$ref": "DGM01" }, "model": { "$ref": "MSG05"    }, "tail": { "$ref": "LLV6" }, "head": { "$ref": "LLV5" }, "points": "1095:305;880:305" },
+                    { "_type": "UMLSeqMessageView", "_id": "MSGV06",    "_parent": { "$ref": "DGM01" }, "model": { "$ref": "MSG06"    }, "tail": { "$ref": "LLV5" }, "head": { "$ref": "LLV3" }, "points": "880:335;475:335"   },
+                    { "_type": "UMLSeqMessageView", "_id": "MSGV07",    "_parent": { "$ref": "DGM01" }, "model": { "$ref": "MSG07"    }, "tail": { "$ref": "LLV3" }, "head": { "$ref": "LLV2" }, "points": "475:378;265:378"   },
+                    { "_type": "UMLSeqMessageView", "_id": "MSGV08",    "_parent": { "$ref": "DGM01" }, "model": { "$ref": "MSG08"    }, "tail": { "$ref": "LLV2" }, "head": { "$ref": "LLV1" }, "points": "265:408;80:408"    },
+
+                    { "_type": "UMLSeqMessageView", "_id": "MSGV09",    "_parent": { "$ref": "DGM01" }, "model": { "$ref": "MSG09"    }, "tail": { "$ref": "LLV1" }, "head": { "$ref": "LLV2" }, "points": "80:460;265:460"    },
+                    { "_type": "UMLSeqMessageView", "_id": "MSGV10",    "_parent": { "$ref": "DGM01" }, "model": { "$ref": "MSG10"    }, "tail": { "$ref": "LLV2" }, "head": { "$ref": "LLV3" }, "points": "265:490;475:490"   },
+                    { "_type": "UMLSeqMessageView", "_id": "MSGVNOSES", "_parent": { "$ref": "DGM01" }, "model": { "$ref": "MSGNOSES" }, "tail": { "$ref": "LLV3" }, "head": { "$ref": "LLV2" }, "points": "475:535;265:535"   },
+                    { "_type": "UMLSeqMessageView", "_id": "MSGV11",    "_parent": { "$ref": "DGM01" }, "model": { "$ref": "MSG11"    }, "tail": { "$ref": "LLV3" }, "head": { "$ref": "LLV4" }, "points": "475:575;685:575"   },
+                    { "_type": "UMLSeqMessageView", "_id": "MSGV12",    "_parent": { "$ref": "DGM01" }, "model": { "$ref": "MSG12"    }, "tail": { "$ref": "LLV4" }, "head": { "$ref": "LLV6" }, "points": "685:605;1095:605"  },
+                    { "_type": "UMLSeqMessageView", "_id": "MSGV13",    "_parent": { "$ref": "DGM01" }, "model": { "$ref": "MSG13"    }, "tail": { "$ref": "LLV6" }, "head": { "$ref": "LLV4" }, "points": "1095:635;685:635" },
+                    { "_type": "UMLSeqMessageView", "_id": "MSGVNOCI",  "_parent": { "$ref": "DGM01" }, "model": { "$ref": "MSGNOCI"  }, "tail": { "$ref": "LLV4" }, "head": { "$ref": "LLV3" }, "points": "685:680;475:680"   },
+                    { "_type": "UMLSeqMessageView", "_id": "MSGV14",    "_parent": { "$ref": "DGM01" }, "model": { "$ref": "MSG14"    }, "tail": { "$ref": "LLV4" }, "head": { "$ref": "LLV4" }, "points": "685:715;745:715;745:730;685:730" },
+                    { "_type": "UMLSeqMessageView", "_id": "MSGV15",    "_parent": { "$ref": "DGM01" }, "model": { "$ref": "MSG15"    }, "tail": { "$ref": "LLV4" }, "head": { "$ref": "LLV6" }, "points": "685:750;1095:750"  },
+                    { "_type": "UMLSeqMessageView", "_id": "MSGV16",    "_parent": { "$ref": "DGM01" }, "model": { "$ref": "MSG16"    }, "tail": { "$ref": "LLV6" }, "head": { "$ref": "LLV4" }, "points": "1095:780;685:780" },
+                    { "_type": "UMLSeqMessageView", "_id": "MSGV17",    "_parent": { "$ref": "DGM01" }, "model": { "$ref": "MSG17"    }, "tail": { "$ref": "LLV4" }, "head": { "$ref": "LLV6" }, "points": "685:820;1095:820"  },
+                    { "_type": "UMLSeqMessageView", "_id": "MSGV18",    "_parent": { "$ref": "DGM01" }, "model": { "$ref": "MSG18"    }, "tail": { "$ref": "LLV6" }, "head": { "$ref": "LLV4" }, "points": "1095:850;685:850" },
+                    { "_type": "UMLSeqMessageView", "_id": "MSGV19",    "_parent": { "$ref": "DGM01" }, "model": { "$ref": "MSG19"    }, "tail": { "$ref": "LLV4" }, "head": { "$ref": "LLV6" }, "points": "685:880;1095:880"  },
+                    { "_type": "UMLSeqMessageView", "_id": "MSGV20",    "_parent": { "$ref": "DGM01" }, "model": { "$ref": "MSG20"    }, "tail": { "$ref": "LLV6" }, "head": { "$ref": "LLV4" }, "points": "1095:910;685:910" },
+                    { "_type": "UMLSeqMessageView", "_id": "MSGV21",    "_parent": { "$ref": "DGM01" }, "model": { "$ref": "MSG21"    }, "tail": { "$ref": "LLV4" }, "head": { "$ref": "LLV6" }, "points": "685:940;1095:940"  },
+                    { "_type": "UMLSeqMessageView", "_id": "MSGV22",    "_parent": { "$ref": "DGM01" }, "model": { "$ref": "MSG22"    }, "tail": { "$ref": "LLV6" }, "head": { "$ref": "LLV4" }, "points": "1095:970;685:970" },
+                    { "_type": "UMLSeqMessageView", "_id": "MSGVCOMMIT","_parent": { "$ref": "DGM01" }, "model": { "$ref": "MSGCOMMIT" }, "tail": { "$ref": "LLV4" }, "head": { "$ref": "LLV6" }, "points": "685:1025;1095:1025" },
+                    { "_type": "UMLSeqMessageView", "_id": "MSGVROLL",  "_parent": { "$ref": "DGM01" }, "model": { "$ref": "MSGROLL"  }, "tail": { "$ref": "LLV4" }, "head": { "$ref": "LLV6" }, "points": "685:1055;1095:1055" },
+                    { "_type": "UMLSeqMessageView", "_id": "MSGV25",    "_parent": { "$ref": "DGM01" }, "model": { "$ref": "MSG25"    }, "tail": { "$ref": "LLV4" }, "head": { "$ref": "LLV3" }, "points": "685:1105;475:1105"  },
+                    { "_type": "UMLSeqMessageView", "_id": "MSGV26",    "_parent": { "$ref": "DGM01" }, "model": { "$ref": "MSG26"    }, "tail": { "$ref": "LLV3" }, "head": { "$ref": "LLV2" }, "points": "475:1145;265:1145"  },
+                    { "_type": "UMLSeqMessageView", "_id": "MSGV27",    "_parent": { "$ref": "DGM01" }, "model": { "$ref": "MSG27"    }, "tail": { "$ref": "LLV2" }, "head": { "$ref": "LLV1" }, "points": "265:1175;80:1175"   },
+
+                    {
+                      "_type": "UMLCombinedFragmentView", "_id": "CFV1", "_parent": { "$ref": "DGM01" },
+                      "model": { "$ref": "CF1" },
+                      "left": 410, "top": 178, "width": 750, "height": 185,
+                      "operandViews": [
+                        { "_type": "UMLInteractionOperandView", "_id": "OPV1A", "_parent": { "$ref": "CFV1" }, "model": { "$ref": "OP1A" }, "left": 410, "top": 178, "width": 750, "height": 45 },
+                        { "_type": "UMLInteractionOperandView", "_id": "OPV1B", "_parent": { "$ref": "CFV1" }, "model": { "$ref": "OP1B" }, "left": 410, "top": 223, "width": 750, "height": 140 }
+                      ]
+                    },
+
+                    {
+                      "_type": "UMLCombinedFragmentView", "_id": "CFV2", "_parent": { "$ref": "DGM01" },
+                      "model": { "$ref": "CF2" },
+                      "left": 410, "top": 508, "width": 750, "height": 622,
+                      "operandViews": [
+                        { "_type": "UMLInteractionOperandView", "_id": "OPV2A", "_parent": { "$ref": "CFV2" }, "model": { "$ref": "OP2A" }, "left": 410, "top": 508, "width": 750, "height": 50 },
+                        { "_type": "UMLInteractionOperandView", "_id": "OPV2B", "_parent": { "$ref": "CFV2" }, "model": { "$ref": "OP2B" }, "left": 410, "top": 558, "width": 750, "height": 572 }
+                      ]
+                    },
+
+                    {
+                      "_type": "UMLCombinedFragmentView", "_id": "CFV3", "_parent": { "$ref": "DGM01" },
+                      "model": { "$ref": "CF3" },
+                      "left": 620, "top": 655, "width": 540, "height": 435,
+                      "operandViews": [
+                        { "_type": "UMLInteractionOperandView", "_id": "OPV3A", "_parent": { "$ref": "CFV3" }, "model": { "$ref": "OP3A" }, "left": 620, "top": 655, "width": 540, "height": 45 },
+                        { "_type": "UMLInteractionOperandView", "_id": "OPV3B", "_parent": { "$ref": "CFV3" }, "model": { "$ref": "OP3B" }, "left": 620, "top": 700, "width": 540, "height": 390 }
+                      ]
+                    },
+
+                    {
+                      "_type": "UMLCombinedFragmentView", "_id": "CFVLOOP", "_parent": { "$ref": "DGM01" },
+                      "model": { "$ref": "CFLOOP" },
+                      "left": 620, "top": 800, "width": 540, "height": 195,
+                      "operandViews": [
+                        { "_type": "UMLInteractionOperandView", "_id": "OPVLOOP", "_parent": { "$ref": "CFVLOOP" }, "model": { "$ref": "OPLOOP" }, "left": 620, "top": 800, "width": 540, "height": 195 }
+                      ]
+                    },
+
+                    {
+                      "_type": "UMLCombinedFragmentView", "_id": "CFV4", "_parent": { "$ref": "DGM01" },
+                      "model": { "$ref": "CF4" },
+                      "left": 620, "top": 1005, "width": 540, "height": 80,
+                      "operandViews": [
+                        { "_type": "UMLInteractionOperandView", "_id": "OPV4A", "_parent": { "$ref": "CFV4" }, "model": { "$ref": "OP4A" }, "left": 620, "top": 1005, "width": 540, "height": 40 },
+                        { "_type": "UMLInteractionOperandView", "_id": "OPV4B", "_parent": { "$ref": "CFV4" }, "model": { "$ref": "OP4B" }, "left": 620, "top": 1045, "width": 540, "height": 40 }
+                      ]
+                    }
+
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
