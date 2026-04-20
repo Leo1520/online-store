@@ -436,7 +436,7 @@ END//
 DROP PROCEDURE IF EXISTS sp_obtener_cuenta_por_usuario//
 CREATE PROCEDURE sp_obtener_cuenta_por_usuario(IN p_usuario VARCHAR(40))
 BEGIN
-    SELECT `usuario`, `password`
+    SELECT `usuario`, `password`, `rol`
     FROM `Cuenta`
     WHERE `usuario` = p_usuario
     LIMIT 1;
@@ -692,35 +692,6 @@ BEGIN
     FROM `Vendedor`
     WHERE `ci` = p_ci AND `usuarioCuenta` = p_usuario
     LIMIT 1;
-END//
-
-DROP PROCEDURE IF EXISTS sp_crear_vendedor_con_cuenta//
-CREATE PROCEDURE sp_crear_vendedor_con_cuenta(
-    IN p_usuario VARCHAR(40),
-    IN p_password VARCHAR(255),
-    IN p_ci VARCHAR(20),
-    IN p_nombres VARCHAR(50),
-    IN p_ap_paterno VARCHAR(20),
-    IN p_ap_materno VARCHAR(20),
-    IN p_correo VARCHAR(50),
-    IN p_nro_celular VARCHAR(30)
-)
-BEGIN
-    DECLARE EXIT HANDLER FOR SQLEXCEPTION
-    BEGIN
-        ROLLBACK;
-        RESIGNAL;
-    END;
-
-    START TRANSACTION;
-
-    INSERT INTO `Cuenta` (`usuario`, `password`)
-    VALUES (p_usuario, p_password);
-
-    INSERT INTO `Vendedor` (`ci`, `nombres`, `apPaterno`, `apMaterno`, `correo`, `nroCelular`, `usuarioCuenta`)
-    VALUES (p_ci, p_nombres, p_ap_paterno, p_ap_materno, p_correo, p_nro_celular, p_usuario);
-
-    COMMIT;
 END//
 
 DROP PROCEDURE IF EXISTS sp_actualizar_vendedor//

@@ -10,6 +10,12 @@ ALTER TABLE `Cuenta` ADD COLUMN IF NOT EXISTS `rol` VARCHAR(20) NOT NULL DEFAULT
 -- 2. Marcar admin como admin
 UPDATE `Cuenta` SET `rol` = 'admin' WHERE `usuario` = 'admin' AND `rol` = 'cliente';
 
+-- 3. Corregir vendedores creados antes de la migración (sin rol)
+UPDATE `Cuenta` c
+INNER JOIN `Vendedor` v ON v.`usuarioCuenta` = c.`usuario`
+SET c.`rol` = 'vendedor'
+WHERE c.`rol` = 'cliente';
+
 DELIMITER //
 
 -- 3. sp_crear_vendedor_con_cuenta actualizado (inserta rol='vendedor')
