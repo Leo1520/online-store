@@ -1,0 +1,9 @@
+# Dependencias PHP
+vendor/
+
+# Configuración con secretos
+config/stripe.php
+
+# Archivos de sistema
+.DS_Store
+Thumbs.db
