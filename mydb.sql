@@ -18,6 +18,7 @@ USE `mydb` ;
 CREATE TABLE IF NOT EXISTS `mydb`.`Cuenta` (
   `usuario` VARCHAR(40) NOT NULL,
   `password` VARCHAR(255) NOT NULL,
+  `rol` VARCHAR(20) NOT NULL DEFAULT 'cliente',
   PRIMARY KEY (`usuario`))
 ENGINE = InnoDB;
 

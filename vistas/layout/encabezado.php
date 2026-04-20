@@ -54,15 +54,31 @@
                             <strong><?php echo htmlspecialchars($_SESSION['usuario']); ?></strong>
                             <?php if (isset($_SESSION['es_admin']) && $_SESSION['es_admin']): ?>
                                 <span class="badge badge-success">Admin</span>
+                            <?php elseif (isset($_SESSION['rol']) && $_SESSION['rol'] === 'vendedor'): ?>
+                                <span class="badge badge-info">Vendedor</span>
                             <?php endif; ?>
                         </span>
                     </li>
+                    <?php if (!isset($_SESSION['es_admin']) || !$_SESSION['es_admin']): ?>
+                    <li class="nav-item">
+                        <a class="nav-link" href="index.php?pagina=mi_cuenta">
+                            <i class="bi bi-person-circle"></i> Mi cuenta
+                        </a>
+                    </li>
+                    <?php endif; ?>
                     <li class="nav-item">
                         <a class="nav-link" href="index.php?pagina=logout">Salir</a>
                     </li>
                 <?php else: ?>
                     <li class="nav-item">
-                        <a class="nav-link" href="index.php?pagina=login">Login</a>
+                        <a class="nav-link" href="index.php?pagina=login">
+                            <i class="bi bi-box-arrow-in-right"></i> Iniciar sesión
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="index.php?pagina=registro">
+                            <i class="bi bi-person-plus"></i> Registrarse
+                        </a>
                     </li>
                 <?php endif; ?>
             </ul>

@@ -25,14 +25,50 @@ class NotaVenta {
 
         $sql = "SELECT nv.nro, nv.fechaHora, nv.ciCliente,
                        CONCAT(cl.nombres, ' ', cl.apPaterno, ' ', cl.apMaterno) AS cliente,
-                       COALESCE(SUM(dnv.cant), 0) AS totalItems
+                       COALESCE(SUM(dnv.cant), 0) AS totalItems,
+                       COALESCE(SUM(dnv.cant * p.precio), 0) AS totalMonto
                 FROM `NotaVenta` nv
                 INNER JOIN `Cliente` cl ON cl.ci = nv.ciCliente
                 LEFT JOIN `DetalleNotaVenta` dnv ON dnv.nroNotaVenta = nv.nro
+                LEFT JOIN `Producto` p ON p.cod = dnv.codProducto
                 GROUP BY nv.nro, nv.fechaHora, nv.ciCliente, cl.nombres, cl.apPaterno, cl.apMaterno
                 ORDER BY nv.nro DESC";
         $resultado = $this->db->query($sql);
         return $resultado ? $resultado->fetch_all(MYSQLI_ASSOC) : [];
+    }
+
+    public function obtenerHistorialCliente($usuario) {
+        $stmt = $this->db->prepare("CALL sp_historial_compras_cliente(?)");
+        if (!$stmt) return [];
+        $stmt->bind_param('s', $usuario);
+        $stmt->execute();
+        $resultado = $stmt->get_result();
+        $datos = $resultado ? $resultado->fetch_all(MYSQLI_ASSOC) : [];
+        $stmt->close();
+        $this->limpiarResultadosPendientes();
+        return $datos;
+    }
+
+    public function obtenerClientePorUsuario($usuario) {
+        $stmt = $this->db->prepare("CALL sp_obtener_cliente_por_usuario(?)");
+        if (!$stmt) return null;
+        $stmt->bind_param('s', $usuario);
+        $stmt->execute();
+        $resultado = $stmt->get_result();
+        $dato = ($resultado && $resultado->num_rows > 0) ? $resultado->fetch_assoc() : null;
+        $stmt->close();
+        $this->limpiarResultadosPendientes();
+        return $dato;
+    }
+
+    public function actualizarPerfilCliente($ci, $usuario, $correo, $direccion, $nroCelular) {
+        $stmt = $this->db->prepare("CALL sp_actualizar_perfil_cliente(?, ?, ?, ?, ?)");
+        if (!$stmt) return false;
+        $stmt->bind_param('sssss', $ci, $usuario, $correo, $direccion, $nroCelular);
+        $ok = $stmt->execute();
+        $stmt->close();
+        $this->limpiarResultadosPendientes();
+        return $ok;
     }
 
     public function obtenerDetallesPorNota($nroNota) {

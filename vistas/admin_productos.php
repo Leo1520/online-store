@@ -6,7 +6,8 @@
         <div class="alert alert-success"><?php echo htmlspecialchars($mensaje); ?></div>
     <?php endif; ?>
 
-    <form id="formProducto" method="POST" action="index.php?pagina=admin_productos" class="card card-body mb-4">
+    <form id="formProducto" method="POST" action="index.php?pagina=admin_productos"
+          class="card card-body mb-4" enctype="multipart/form-data">
         <h5><?php echo !empty($productoEditar) ? 'Editar producto' : 'Nuevo producto'; ?></h5>
         <input type="hidden" name="accion" value="<?php echo !empty($productoEditar) ? 'editar_producto' : 'crear_producto'; ?>">
         <input type="hidden" name="id_producto" value="<?php echo !empty($productoEditar) ? (int)$productoEditar['id_producto'] : 0; ?>">
@@ -25,7 +26,14 @@
             </div>
             <div class="form-group col-md-2">
                 <label>Imagen</label>
-                <input type="text" name="imagen" class="form-control" value="<?php echo !empty($productoEditar) ? htmlspecialchars($productoEditar['imagen']) : 'sudadera.png'; ?>" required>
+                <input type="file" name="imagen_file" class="form-control-file mb-1" accept="image/*">
+                <input type="text" name="imagen" class="form-control form-control-sm"
+                       value="<?php echo !empty($productoEditar) ? htmlspecialchars($productoEditar['imagen']) : 'sudadera.png'; ?>"
+                       placeholder="o nombre de archivo">
+                <?php if (!empty($productoEditar)): ?>
+                    <img src="recursos/imagenes/<?php echo htmlspecialchars($productoEditar['imagen']); ?>"
+                         alt="" style="height:40px;margin-top:4px;">
+                <?php endif; ?>
             </div>
             <div class="form-group col-md-2">
                 <label>Estado</label>
@@ -100,6 +108,21 @@
         <button class="btn btn-success" type="submit">Guardar stock</button>
     </form>
 
+    <?php
+    $productosStockBajo = array_filter($productos, function($p){ return (int)$p['stock'] <= 5 && strtolower($p['estado']) === 'activo'; });
+    ?>
+    <?php if (!empty($productosStockBajo)): ?>
+    <div class="alert alert-warning">
+        <i class="bi bi-exclamation-triangle-fill"></i>
+        <strong>Stock bajo</strong> — Los siguientes productos activos tienen 5 unidades o menos:
+        <ul class="mb-0 mt-1">
+            <?php foreach ($productosStockBajo as $p): ?>
+                <li><?php echo htmlspecialchars($p['nombre']); ?> — stock: <strong><?php echo (int)$p['stock']; ?></strong></li>
+            <?php endforeach; ?>
+        </ul>
+    </div>
+    <?php endif; ?>
+
     <h5>Lista de productos</h5>
     <div class="table-responsive mb-4">
         <table class="table table-bordered table-sm">
@@ -117,14 +140,21 @@
             </thead>
             <tbody>
                 <?php foreach ($productos as $producto): ?>
-                    <tr>
+                    <tr <?php echo ((int)$producto['stock'] <= 5 && strtolower($producto['estado']) === 'activo') ? 'class="table-warning"' : ''; ?>>
                         <td><?php echo (int)$producto['id_producto']; ?></td>
                         <td><?php echo htmlspecialchars($producto['nombre']); ?></td>
                         <td><?php echo htmlspecialchars($producto['categoria'] ?? ''); ?></td>
                         <td><?php echo htmlspecialchars($producto['marca'] ?? ''); ?></td>
                         <td><?php echo htmlspecialchars($producto['estado']); ?></td>
                         <td>$<?php echo number_format($producto['precio'], 2); ?></td>
-                        <td><?php echo (int)$producto['stock']; ?></td>
+                        <td>
+                            <?php echo (int)$producto['stock']; ?>
+                            <?php if ((int)$producto['stock'] <= 5 && strtolower($producto['estado']) === 'activo'): ?>
+                                <span class="badge badge-warning ml-1" title="Stock bajo">
+                                    <i class="bi bi-exclamation-triangle"></i>
+                                </span>
+                            <?php endif; ?>
+                        </td>
                         <td>
                             <a class="btn btn-warning btn-sm" href="index.php?pagina=admin_productos&editar_producto=<?php echo (int)$producto['id_producto']; ?>">Editar</a>
                             <a class="btn btn-danger btn-sm" href="index.php?pagina=admin_productos&eliminar_producto=<?php echo (int)$producto['id_producto']; ?>">Eliminar</a>

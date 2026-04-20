@@ -9,12 +9,16 @@ $nombre       = trim($_GET['nombre']   ?? '');
 $codCategoria = (int)($_GET['categoria'] ?? 0);
 $precioMin    = (float)($_GET['precioMin'] ?? 0);
 $precioMax    = (float)($_GET['precioMax'] ?? 0);
+$orden        = trim($_GET['orden']    ?? '');
 
-$hayFiltros = $nombre !== '' || $codCategoria > 0 || $precioMin > 0 || $precioMax > 0;
+$ordenesPermitidos = ['precio_asc', 'precio_desc', 'nombre_asc', 'nombre_desc', ''];
+if (!in_array($orden, $ordenesPermitidos)) $orden = '';
+
+$hayFiltros = $nombre !== '' || $codCategoria > 0 || $precioMin > 0 || $precioMax > 0 || $orden !== '';
 
 $productoModel = new Producto();
 $productos = $hayFiltros
-    ? $productoModel->buscar($nombre, $codCategoria, $precioMin, $precioMax)
+    ? $productoModel->buscar($nombre, $codCategoria, $precioMin, $precioMax, $orden)
     : $productoModel->obtenerTodos();
 
 $categoriaModel = new Categoria();

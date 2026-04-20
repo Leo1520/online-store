@@ -28,6 +28,9 @@ class Cuenta {
         $dato = ($resultado && $resultado->num_rows > 0) ? $resultado->fetch_assoc() : null;
         $stmt->close();
         $this->limpiarResultadosPendientes();
+        if ($dato && !isset($dato['rol'])) {
+            $dato['rol'] = ($dato['usuario'] === 'admin') ? 'admin' : 'cliente';
+        }
         return $dato;
     }
 

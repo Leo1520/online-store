@@ -3,8 +3,8 @@ require_once __DIR__ . '/../modelos/Cuenta.php';
 
 class AutenticacionControlador {
     public function login() {
-        $mensaje = null;
-        $tipoMensaje = null;
+        $mensaje     = isset($_GET['msg'])  ? trim($_GET['msg'])  : null;
+        $tipoMensaje = isset($_GET['msg'])  ? 'success'          : null;
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $usuario = trim($_POST['usuario'] ?? '');
@@ -15,9 +15,9 @@ class AutenticacionControlador {
                 $cuenta = $cuentaModel->verificarCredenciales($usuario, $password);
 
                 if ($cuenta) {
-                    // Login exitoso - guardar en sesión
-                    $_SESSION['usuario'] = $cuenta['usuario'];
-                    $_SESSION['es_admin'] = ($cuenta['usuario'] === 'admin');
+                    $_SESSION['usuario']  = $cuenta['usuario'];
+                    $_SESSION['rol']      = $cuenta['rol'] ?? 'cliente';
+                    $_SESSION['es_admin'] = ($_SESSION['rol'] === 'admin');
 
                     header('Location: index.php?pagina=inicio');
                     exit();

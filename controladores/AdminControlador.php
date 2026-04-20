@@ -282,36 +282,44 @@ class AdminControlador {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $accion = $_POST['accion'] ?? '';
 
-            if ($accion === 'crear_producto') {
-                $nombre = trim($_POST['nombre'] ?? '');
-                $descripcion = trim($_POST['descripcion'] ?? '');
-                $precio = (float)($_POST['precio'] ?? 0);
-                $imagen = trim($_POST['imagen'] ?? 'sudadera.png');
-                $estado = trim($_POST['estado'] ?? 'activo');
-                $codMarca = (int)($_POST['codMarca'] ?? 0);
+            if ($accion === 'crear_producto' || $accion === 'editar_producto') {
+                $nombre       = trim($_POST['nombre']       ?? '');
+                $descripcion  = trim($_POST['descripcion']  ?? '');
+                $precio       = (float)($_POST['precio']    ?? 0);
+                $imagen       = trim($_POST['imagen']       ?? 'sudadera.png');
+                $estado       = trim($_POST['estado']       ?? 'activo');
+                $codMarca     = (int)($_POST['codMarca']    ?? 0);
                 $codIndustria = (int)($_POST['codIndustria'] ?? 0);
                 $codCategoria = (int)($_POST['codCategoria'] ?? 0);
 
-                if ($nombre !== '' && $descripcion !== '' && $precio > 0 && $codMarca > 0 && $codIndustria > 0 && $codCategoria > 0) {
-                    $productoModel->agregar($nombre, $descripcion, $precio, $imagen, $codMarca, $codIndustria, $codCategoria, $estado);
-                    $mensaje = 'Producto creado correctamente.';
+                // Subida de imagen si se proporcionó archivo
+                if (!empty($_FILES['imagen_file']['name'])) {
+                    $ext      = strtolower(pathinfo($_FILES['imagen_file']['name'], PATHINFO_EXTENSION));
+                    $permitidos = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
+                    $maxBytes = 5 * 1024 * 1024;
+
+                    if (in_array($ext, $permitidos) && $_FILES['imagen_file']['size'] <= $maxBytes && $_FILES['imagen_file']['error'] === 0) {
+                        $nombreArchivo = uniqid('img_', true) . '.' . $ext;
+                        $destino       = __DIR__ . '/../recursos/imagenes/' . $nombreArchivo;
+                        if (move_uploaded_file($_FILES['imagen_file']['tmp_name'], $destino)) {
+                            $imagen = $nombreArchivo;
+                        }
+                    } else {
+                        $mensaje = 'Imagen invalida. Use jpg, png, gif o webp de maximo 5 MB.';
+                    }
                 }
-            }
 
-            if ($accion === 'editar_producto') {
-                $idProducto = (int)($_POST['id_producto'] ?? 0);
-                $nombre = trim($_POST['nombre'] ?? '');
-                $descripcion = trim($_POST['descripcion'] ?? '');
-                $precio = (float)($_POST['precio'] ?? 0);
-                $imagen = trim($_POST['imagen'] ?? 'sudadera.png');
-                $estado = trim($_POST['estado'] ?? 'activo');
-                $codMarca = (int)($_POST['codMarca'] ?? 0);
-                $codIndustria = (int)($_POST['codIndustria'] ?? 0);
-                $codCategoria = (int)($_POST['codCategoria'] ?? 0);
-
-                if ($idProducto > 0 && $nombre !== '' && $descripcion !== '' && $precio > 0 && $codMarca > 0 && $codIndustria > 0 && $codCategoria > 0) {
-                    $productoModel->actualizar($idProducto, $nombre, $descripcion, $precio, $imagen, $codMarca, $codIndustria, $codCategoria, $estado);
-                    $mensaje = 'Producto actualizado correctamente.';
+                if (!$mensaje && $nombre !== '' && $descripcion !== '' && $precio > 0 && $codMarca > 0 && $codIndustria > 0 && $codCategoria > 0) {
+                    if ($accion === 'crear_producto') {
+                        $productoModel->agregar($nombre, $descripcion, $precio, $imagen, $codMarca, $codIndustria, $codCategoria, $estado);
+                        $mensaje = 'Producto creado correctamente.';
+                    } else {
+                        $idProducto = (int)($_POST['id_producto'] ?? 0);
+                        if ($idProducto > 0) {
+                            $productoModel->actualizar($idProducto, $nombre, $descripcion, $precio, $imagen, $codMarca, $codIndustria, $codCategoria, $estado);
+                            $mensaje = 'Producto actualizado correctamente.';
+                        }
+                    }
                 }
             }
 

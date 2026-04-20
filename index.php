@@ -10,6 +10,9 @@ $paginasPermitidas = [
     'pago_exitoso',
     'login',
     'logout',
+    'registro',
+    'mi_cuenta',
+    'producto',
     'admin_catalogos',
     'admin_sucursales',
     'admin_clientes',
@@ -55,6 +58,18 @@ switch ($pagina) {
     case 'logout':
         require_once __DIR__ . '/controladores/AutenticacionControlador.php';
         (new AutenticacionControlador())->logout();
+        break;
+    case 'registro':
+        require_once __DIR__ . '/controladores/RegistroControlador.php';
+        (new RegistroControlador())->index();
+        break;
+    case 'mi_cuenta':
+        require_once __DIR__ . '/controladores/MiCuentaControlador.php';
+        (new MiCuentaControlador())->index();
+        break;
+    case 'producto':
+        require_once __DIR__ . '/controladores/ProductoControlador.php';
+        (new ProductoControlador())->detalle();
         break;
     case 'admin_catalogos':
         require_once __DIR__ . '/controladores/AdminControlador.php';

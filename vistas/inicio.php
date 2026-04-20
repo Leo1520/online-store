@@ -38,6 +38,16 @@
                 <input type="number" id="filtroPrecioMax" class="form-control"
                        placeholder="Sin limite" min="0" step="0.01">
             </div>
+            <div class="form-group col-md-2 mb-2">
+                <label class="font-weight-bold"><i class="bi bi-sort-down"></i> Ordenar</label>
+                <select id="filtroOrden" class="form-control">
+                    <option value="">Relevancia</option>
+                    <option value="precio_asc">Precio: menor a mayor</option>
+                    <option value="precio_desc">Precio: mayor a menor</option>
+                    <option value="nombre_asc">Nombre: A-Z</option>
+                    <option value="nombre_desc">Nombre: Z-A</option>
+                </select>
+            </div>
             <div class="form-group col-md-1 mb-2">
                 <label class="d-block">&nbsp;</label>
                 <button id="btnLimpiar" class="btn btn-outline-secondary btn-block"
@@ -85,6 +95,9 @@
                         <small class="text-muted">Stock: <span class="producto-stock"></span></small>
                     </p>
                     <div class="mt-auto pt-2">
+                        <a class="btn btn-outline-secondary btn-block btn-detalle mb-1" href="#">
+                            <i class="bi bi-eye"></i> Ver detalle
+                        </a>
                         <button class="btn btn-primary btn-agregar btn-block" data-id="">
                             <i class="bi bi-cart-plus"></i> Agregar al carrito
                         </button>
@@ -106,11 +119,12 @@
     var debounceId = null;
 
     // --- Filtros ---
-    var inputBusqueda  = document.getElementById('filtroBusqueda');
+    var inputBusqueda   = document.getElementById('filtroBusqueda');
     var selectCategoria = document.getElementById('filtroCategoria');
-    var inputMin       = document.getElementById('filtroPrecioMin');
-    var inputMax       = document.getElementById('filtroPrecioMax');
-    var btnLimpiar     = document.getElementById('btnLimpiar');
+    var inputMin        = document.getElementById('filtroPrecioMin');
+    var inputMax        = document.getElementById('filtroPrecioMax');
+    var selectOrden     = document.getElementById('filtroOrden');
+    var btnLimpiar      = document.getElementById('btnLimpiar');
 
     function obtenerFiltros() {
         return new URLSearchParams({
@@ -118,6 +132,7 @@
             categoria: selectCategoria.value,
             precioMin: inputMin.value || 0,
             precioMax: inputMax.value || 0,
+            orden:     selectOrden.value,
         });
     }
 
@@ -126,6 +141,7 @@
         selectCategoria.value = '0';
         inputMin.value        = '';
         inputMax.value        = '';
+        selectOrden.value     = '';
         cargarProductos();
     }
 
@@ -139,6 +155,7 @@
     });
 
     selectCategoria.addEventListener('change', cargarProductos);
+    selectOrden.addEventListener('change', cargarProductos);
 
     // --- Toast ---
     function mostrarToast(mensaje, exito) {
@@ -173,7 +190,8 @@
             var nodo   = document.importNode(plantilla.content, true);
             var imgSrc = 'recursos/imagenes/' + p.imagen;
 
-            nodo.querySelector('.producto-imagen-link').href     = imgSrc;
+            var detalleUrl = 'index.php?pagina=producto&id=' + p.id_producto;
+            nodo.querySelector('.producto-imagen-link').href     = detalleUrl;
             nodo.querySelector('.producto-imagen').src           = imgSrc;
             nodo.querySelector('.producto-imagen').alt           = p.nombre;
             nodo.querySelector('.producto-nombre').textContent      = p.nombre;
@@ -182,6 +200,8 @@
             nodo.querySelector('.producto-categoria').textContent   = p.categoria || 'N/D';
             nodo.querySelector('.producto-precio').textContent      = parseFloat(p.precio).toFixed(2);
             nodo.querySelector('.producto-stock').textContent       = parseInt(p.stock) || 0;
+
+            nodo.querySelector('.btn-detalle').href = detalleUrl;
 
             var btn = nodo.querySelector('.btn-agregar');
             btn.dataset.id = p.id_producto;
@@ -228,7 +248,8 @@
                 var hayFiltro = inputBusqueda.value.trim() !== '' ||
                                 selectCategoria.value !== '0'    ||
                                 inputMin.value !== ''            ||
-                                inputMax.value !== '';
+                                inputMax.value !== ''            ||
+                                selectOrden.value !== '';
 
                 contador.textContent = hayFiltro
                     ? data.total + ' producto(s) encontrado(s).'

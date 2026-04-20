@@ -9,7 +9,8 @@
                     <th>Nro</th>
                     <th>Fecha</th>
                     <th>Cliente</th>
-                    <th>Total Items</th>
+                    <th>Items</th>
+                    <th>Total $</th>
                     <th>Detalle</th>
                 </tr>
             </thead>
@@ -20,6 +21,7 @@
                         <td><?php echo htmlspecialchars($venta['fechaHora']); ?></td>
                         <td><?php echo htmlspecialchars($venta['cliente']); ?> (<?php echo htmlspecialchars($venta['ciCliente']); ?>)</td>
                         <td><?php echo (int)$venta['totalItems']; ?></td>
+                        <td><strong>$<?php echo number_format((float)($venta['totalMonto'] ?? 0), 2); ?></strong></td>
                         <td>
                             <?php if (!empty($detalles[$venta['nro']])): ?>
                                 <ul class="mb-0 pl-3">

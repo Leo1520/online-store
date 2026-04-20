@@ -113,7 +113,7 @@ class Producto {
         return $resultado->fetch_assoc();
     }
 
-    public function buscar($nombre = '', $codCategoria = 0, $precioMin = 0, $precioMax = 0) {
+    public function buscar($nombre = '', $codCategoria = 0, $precioMin = 0, $precioMax = 0, $orden = '') {
         $nombre       = trim($nombre);
         $codCategoria = (int)$codCategoria;
         $precioMin    = (float)$precioMin;
@@ -127,6 +127,20 @@ class Producto {
         $datos = $resultado ? $resultado->fetch_all(MYSQLI_ASSOC) : [];
         $stmt->close();
         $this->limpiarResultadosPendientes();
+        return $this->aplicarOrden($datos, $orden);
+    }
+
+    private function aplicarOrden(array $datos, string $orden): array {
+        if (empty($orden) || empty($datos)) return $datos;
+        usort($datos, function ($a, $b) use ($orden) {
+            switch ($orden) {
+                case 'precio_asc':  return $a['precio'] <=> $b['precio'];
+                case 'precio_desc': return $b['precio'] <=> $a['precio'];
+                case 'nombre_asc':  return strcmp($a['nombre'], $b['nombre']);
+                case 'nombre_desc': return strcmp($b['nombre'], $a['nombre']);
+                default: return 0;
+            }
+        });
         return $datos;
     }
 
