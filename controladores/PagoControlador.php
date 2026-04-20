@@ -1,27 +1,28 @@
 <?php
 require_once __DIR__ . '/../modelos/Producto.php';
 require_once __DIR__ . '/../modelos/Venta.php';
+require_once __DIR__ . '/../vendor/autoload.php';
+require_once __DIR__ . '/../config/stripe.php';
 
 class PagoControlador {
+
     public function index() {
         if (empty($_SESSION['carrito'])) {
-            header("Location: index.php?pagina=carrito");
+            header('Location: index.php?pagina=carrito');
             exit();
         }
 
         $modelo = new Producto();
-        $items = [];
-        $total = 0;
+        $items  = [];
+        $total  = 0;
 
         foreach ($_SESSION['carrito'] as $itemCarrito) {
             $producto = $modelo->obtenerPorId($itemCarrito['id_producto']);
-            if (!$producto) {
-                continue;
-            }
+            if (!$producto) continue;
 
             $cantidad = (int)$itemCarrito['cantidad'];
             $subtotal = (float)$producto['precio'] * $cantidad;
-            $total += $subtotal;
+            $total   += $subtotal;
 
             $items[] = [
                 'producto' => $producto,
@@ -30,32 +31,65 @@ class PagoControlador {
             ];
         }
 
-        $errorPago = null;
+        $stripeConfigurado = (
+            defined('STRIPE_PUBLISHABLE_KEY') &&
+            strpos(STRIPE_PUBLISHABLE_KEY, 'REEMPLAZA') === false
+        );
 
-        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            if (empty($_SESSION['usuario'])) {
-                header('Location: index.php?pagina=login');
-                exit();
-            }
-            $venta = new Venta();
-            $nroVenta = $venta->registrarVenta($_SESSION['carrito'], $_SESSION['usuario']);
-
-            if ($nroVenta !== false) {
-                $_SESSION['carrito'] = [];
-                header("Location: index.php?pagina=pago_exitoso&nro=" . (int)$nroVenta);
-                exit();
-            }
-
-            $errorPago = "No se pudo registrar la compra en la base de datos. Intenta nuevamente.";
-        }
-
-        $titulo = "Proceso de Pago";
+        $titulo = 'Proceso de Pago';
         require_once __DIR__ . '/../vistas/pago.php';
     }
 
     public function exitoso() {
-        $nroVenta = isset($_GET['nro']) ? (int)$_GET['nro'] : null;
-        $titulo = "Compra Exitosa";
+        $sessionId = trim($_GET['session_id'] ?? '');
+        $nroVenta  = null;
+        $error     = null;
+
+        // Pago via Stripe
+        if ($sessionId !== '') {
+            if (empty($_SESSION['usuario'])) {
+                header('Location: index.php?pagina=login');
+                exit();
+            }
+
+            // Evitar registrar la misma venta dos veces (recarga de página)
+            if (isset($_SESSION['stripe_session_registrada']) &&
+                $_SESSION['stripe_session_registrada'] === $sessionId) {
+                $nroVenta = $_SESSION['ultimo_nro_venta'] ?? null;
+            } else {
+                try {
+                    \Stripe\Stripe::setApiKey(STRIPE_SECRET_KEY);
+                    $session = \Stripe\Checkout\Session::retrieve($sessionId);
+
+                    if ($session->payment_status === 'paid') {
+                        if (!empty($_SESSION['carrito'])) {
+                            $venta    = new Venta();
+                            $nroVenta = $venta->registrarVenta($_SESSION['carrito'], $_SESSION['usuario']);
+
+                            if ($nroVenta !== false) {
+                                $_SESSION['stripe_session_registrada'] = $sessionId;
+                                $_SESSION['ultimo_nro_venta']          = $nroVenta;
+                                $_SESSION['carrito']                   = [];
+                            } else {
+                                $error = 'El pago fue exitoso pero no se pudo registrar la venta. Contacta al soporte.';
+                            }
+                        } else {
+                            // Carrito ya vacío = venta ya fue registrada antes
+                            $nroVenta = $_SESSION['ultimo_nro_venta'] ?? null;
+                        }
+                    } else {
+                        $error = 'El pago no fue completado. Estado: ' . $session->payment_status;
+                    }
+                } catch (\Stripe\Exception\ApiErrorException $e) {
+                    $error = 'Error al verificar el pago: ' . $e->getMessage();
+                }
+            }
+        } else {
+            // Flujo simulado (sin Stripe)
+            $nroVenta = isset($_GET['nro']) ? (int)$_GET['nro'] : null;
+        }
+
+        $titulo = 'Compra Exitosa';
         require_once __DIR__ . '/../vistas/pago_exitoso.php';
     }
 }
