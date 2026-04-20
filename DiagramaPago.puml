@@ -1,0 +1,94 @@
+@startuml DiagramaPago
+!theme plain
+skinparam backgroundColor #FFFFFF
+skinparam SequenceLifeLineBkg #FFFFFF
+skinparam ArrowColor #000000
+skinparam ActorBackgroundColor #E3F2FD
+skinparam SequenceGroupBkg #FFF3E0
+skinparam NoteBkgColor #FFFFCC
+skinparam NoteBorderColor #FF9800
+skinparam ParticipantBackgroundColor #667eea
+skinparam ParticipantBorderColor #333333
+skinparam ParticipantFontColor #FFFFFF
+
+title Modulo de Forma de Pago\nRegistro de Venta
+
+actor Usuario
+participant Vista
+participant Controlador
+participant Modelo  
+database BaseDatos
+
+== Sesion 1: Acceso a Pago ==
+
+Usuario -> Vista: GET pago
+activate Vista
+Vista -> Controlador: Cargar controlador
+activate Controlador
+Controlador -> Controlador: Validar carrito
+Controlador -> Vista: Pasar items
+Vista -> Usuario: Mostrar resumen
+deactivate Vista
+
+== Sesion 2: Confirmacion ==
+
+Usuario -> Vista: Click Confirmar
+activate Vista
+Vista -> Controlador: POST pago
+activate Controlador
+Controlador -> Controlador: Validar usuario
+Controlador -> Modelo: registrarVenta
+activate Modelo
+
+== Sesion 3: Registro en BD ==
+
+Modelo -> Modelo: Validar datos
+Modelo -> BaseDatos: sp_obtener_ci_cliente
+activate BaseDatos
+BaseDatos -> BaseDatos: SELECT ci FROM Cliente
+BaseDatos -->> Modelo: Retorna CI
+deactivate BaseDatos
+
+== Sesion 4: Crear Venta ==
+
+Modelo -> Modelo: BEGIN TRANSACTION
+Modelo -> BaseDatos: sp_crear_nota_venta
+activate BaseDatos
+BaseDatos -> BaseDatos: INSERT INTO NotaVenta
+BaseDatos -->> Modelo: Retorna nro_venta
+deactivate BaseDatos
+
+== Sesion 5: Procesar Productos ==
+
+loop Para cada producto
+    Modelo -> BaseDatos: sp_existe_producto
+    activate BaseDatos
+    BaseDatos -->> Modelo: existe
+    deactivate BaseDatos
+    
+    Modelo -> BaseDatos: sp_insertar_detalle_venta
+    activate BaseDatos
+    BaseDatos -->> Modelo: OK
+    deactivate BaseDatos
+    
+    Modelo -> BaseDatos: sp_descontar_stock
+    activate BaseDatos
+    BaseDatos -->> Modelo: OK
+    deactivate BaseDatos
+end
+
+== Sesion 6: Confirmar ==
+
+Modelo -> Modelo: COMMIT TRANSACTION
+Modelo -->> Controlador: nro_venta
+deactivate Modelo
+
+== Sesion 7: Limpiar ==
+
+Controlador -> Controlador: unset carrito
+Controlador -> Usuario: Redirect pago_exitoso
+deactivate Controlador
+Vista -> Usuario: Confirmacion exitosa
+deactivate Vista
+
+@enduml

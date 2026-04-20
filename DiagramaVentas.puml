@@ -1,0 +1,120 @@
+@startuml DiagramaVentas
+!theme plain
+skinparam backgroundColor #FFFFFF
+skinparam SequenceLifeLineBkg #FFFFFF
+skinparam ArrowColor #000000
+skinparam ActorBackgroundColor #E3F2FD
+skinparam SequenceGroupBkg #FFF3E0
+skinparam NoteBkgColor #FFFFCC
+skinparam NoteBorderColor #FF9800
+skinparam ParticipantBackgroundColor #667eea
+skinparam ParticipantBorderColor #333333
+skinparam ParticipantFontColor #FFFFFF
+
+title Modulo de Ventas\nCarrito de Compras
+
+actor Usuario
+participant Vista
+participant Controlador
+participant Modelo
+database BaseDatos
+
+== Sesion 1: Acceso al Carrito ==
+
+Usuario -> Vista: GET carrito
+activate Vista
+Vista -> Controlador: Cargar controlador
+activate Controlador
+Controlador -> Controlador: Obtener SESSION carrito
+Controlador -> Vista: Pasar carrito
+Vista -> Usuario: Mostrar lista productos
+deactivate Vista
+
+== Sesion 2: Ver Detalles ==
+
+Usuario -> Vista: Ver detalles producto
+activate Vista
+Vista -> Controlador: GET carrito
+activate Controlador
+Controlador -> Modelo: obtenerPorId
+activate Modelo
+Modelo -> BaseDatos: SELECT FROM Producto
+activate BaseDatos
+BaseDatos -->> Modelo: Retorna datos
+deactivate BaseDatos
+Modelo -->> Controlador: Array datos
+Controlador -> Vista: Pasar datos
+Vista -> Usuario: Mostrar detalles
+deactivate Modelo
+deactivate Controlador
+deactivate Vista
+
+== Sesion 3: Actualizar Cantidad ==
+
+Usuario -> Vista: Click cantidad
+activate Vista
+Usuario -> Vista: Cambiar cantidad
+Vista -> Controlador: POST carrito
+activate Controlador
+Controlador -> Controlador: Obtener id_producto
+Controlador -> Controlador: Validar cantidad
+Controlador -> Modelo: obtenerPorId
+activate Modelo
+Modelo -> BaseDatos: SELECT stock
+activate BaseDatos
+BaseDatos -->> Modelo: Retorna stock
+deactivate BaseDatos
+Modelo -->> Controlador: Stock actual
+deactivate Modelo
+Controlador -> Controlador: Actualizar SESSION
+Controlador -> Vista: Actualizar vista
+Vista -> Usuario: Mostrar cantidad nueva
+deactivate Controlador
+deactivate Vista
+
+== Sesion 4: Eliminar Producto ==
+
+Usuario -> Vista: Click Eliminar
+activate Vista
+Vista -> Controlador: POST carrito
+activate Controlador
+Controlador -> Controlador: Obtener id_producto
+Controlador -> Controlador: Eliminar de SESSION
+Controlador -> Vista: Actualizar vista
+Vista -> Usuario: Producto eliminado
+deactivate Controlador
+deactivate Vista
+
+== Sesion 5: Vaciar Carrito ==
+
+Usuario -> Vista: Click Vaciar
+activate Vista
+Vista -> Controlador: POST carrito
+activate Controlador
+Controlador -> Controlador: unset SESSION carrito
+Controlador -> Vista: Limpiar vista
+Vista -> Usuario: Carrito vacio
+deactivate Controlador
+deactivate Vista
+
+== Sesion 6: Ver Resumen ==
+
+Usuario -> Vista: Desplazarse a resumen
+activate Vista
+Vista -> Vista: Calcular totales
+Vista -> Usuario: Mostrar resumen
+deactivate Vista
+
+== Sesion 7: Proceder al Pago ==
+
+Usuario -> Vista: Click Pago
+activate Vista
+Vista -> Usuario: Redirigir a pago
+deactivate Vista
+Usuario -> Controlador: GET pago
+activate Controlador
+Controlador -> Vista: Cargar vista pago
+Vista -> Usuario: Mostrar formulario pago
+deactivate Controlador
+
+@enduml
