@@ -1,0 +1,251 @@
+@startuml DiagramaPago
+!theme plain
+skinparam backgroundColor #FFFFFF
+skinparam SequenceLifeLineBkg #FFFFFF
+skinparam ArrowColor #000000
+skinparam ActorBackgroundColor #E3F2FD
+skinparam SequenceGroupBkg #FFF3E0
+skinparam NoteBkgColor #FFFFCC
+skinparam NoteBorderColor #FF9800
+skinparam ParticipantBackgroundColor #667eea
+skinparam ParticipantBorderColor #333333
+skinparam ParticipantFontColor #FFFFFF
+
+title MODULO DE FORMA DE PAGO - REGISTRO DE VENTA
+
+actor "Usuario/Cliente" as USUARIO
+participant "Vista Pago\n(pago.php)" as VISTA
+participant "PagoControlador\n(index.php)" as CONTROLADOR
+participant "VentaModelo\n(Venta.php)" as MODELO
+database "Base de Datos" as BD
+
+== SESION 1: ACCESO AL FORMULARIO DE PAGO ==
+
+USUARIO -> VISTA: 1. GET /pago
+activate VISTA
+VISTA -> CONTROLADOR: 2. Cargar controlador
+activate CONTROLADOR
+
+CONTROLADOR -> CONTROLADOR: 3. Validar carrito\nno este vacio
+
+if (Carrito vacio?) then (Si)
+    CONTROLADOR -> USUARIO: Redirigir a /carrito
+    deactivate CONTROLADOR
+    deactivate VISTA
+else (No)
+    CONTROLADOR -> CONTROLADOR: 4. Obtener items del carrito\nde sesion
+    
+    note right of CONTROLADOR
+      Sesion carrito contiene:
+      {id_producto: 1, cantidad: 2}
+      {id_producto: 3, cantidad: 1}
+    end note
+    
+    CONTROLADOR -> VISTA: 5. Pasar items a vista
+    VISTA -> USUARIO: 6. Mostrar resumen de compra
+    
+    note right of VISTA
+      Mostrar tabla con:
+      - Nombre producto
+      - Cantidad
+      - Precio unitario
+      - Subtotal
+      - Total a pagar
+      - Botones: Confirmar/Volver
+    end note
+end
+
+== SESION 2: VALIDACION DEL USUARIO ==
+
+USUARIO -> VISTA: 7. Revisar resumen
+USUARIO -> VISTA: 8. Click en Confirmar Pago
+activate VISTA
+
+VISTA -> CONTROLADOR: 9. POST /pago\nFormulario de pago
+
+CONTROLADOR -> CONTROLADOR: 10. Validar SESSION usuario
+
+note right of CONTROLADOR
+  Verificar que usuario
+  esta logueado en sesion
+end note
+
+if (Usuario logueado?) then (No)
+    CONTROLADOR -> USUARIO: Redirigir a /login
+    USUARIO -> USUARIO: Usuario debe loguearse
+    deactivate CONTROLADOR
+    deactivate VISTA
+else (Si)
+    CONTROLADOR -> CONTROLADOR: 13. Obtener usuario\nde sesion
+    
+    note right of CONTROLADOR
+      SESSION usuario = admin
+    end note
+    
+    == SESION 3: REGISTRO DE VENTA ==
+    
+    CONTROLADOR -> MODELO: 14. registrarVenta\n(carrito, usuario)
+    activate MODELO
+    
+    MODELO -> MODELO: 15. Validar carrito\nno vacio
+    MODELO -> MODELO: 16. Validar usuario\nno vacio
+    
+    MODELO -> BD: 17. sp_obtener_ci_cliente\n_por_usuario(usuario)
+    activate BD
+    BD -> BD: 18. SELECT ci FROM Cliente\nWHERE usuarioCuenta = admin
+    BD -->> MODELO: 19. Retorna CI = 78945612
+    deactivate BD
+    
+    note right of MODELO
+      Obtener identificacion
+      del cliente para registro
+    end note
+    
+    if (Cliente existe?) then (No)
+        MODELO -->> CONTROLADOR: FALSE
+        CONTROLADOR -> VISTA: Error: Cliente no existe
+        deactivate MODELO
+        deactivate CONTROLADOR
+        deactivate VISTA
+    else (Si)
+        
+        == SESION 4: CREAR NOTA DE VENTA ==
+        
+        MODELO -> MODELO: 20. BEGIN TRANSACTION
+        
+        note right of MODELO
+          Inicio de transaccion atomica
+          Todas las operaciones siguientes
+          se guardan juntas o nada
+        end note
+        
+        MODELO -> BD: 21. sp_crear_nota_venta\n(ci_cliente, @nro_venta)
+        activate BD
+        BD -> BD: 22. SELECT MAX(nro)\nFROM NotaVenta
+        BD -> BD: 23. SET @nro_venta = MAX + 1
+        BD -> BD: 24. INSERT INTO NotaVenta
+        BD -->> MODELO: 25. Retorna @nro_venta = 1
+        deactivate BD
+        
+        note right of MODELO
+          Se crea la factura/nota
+          con numero secuencial
+        end note
+        
+        == SESION 5: REGISTRAR LINEAS DE VENTA ==
+        
+        loop Para cada producto en carrito
+            MODELO -> BD: 26. sp_existe_producto\n(cod_producto)
+            activate BD
+            BD -> BD: 27. SELECT COUNT(*)\nFROM Producto
+            BD -->> MODELO: 28. Retorna existe 1/0
+            deactivate BD
+            
+            alt Producto NO existe
+                MODELO -> MODELO: 29. SKIP - Continuar
+            else Producto existe
+                MODELO -> BD: 30. sp_insertar_detalle_venta\n(nro, cod_producto, item, cant)
+                activate BD
+                BD -> BD: 31. INSERT INTO DetalleNotaVenta
+                BD -->> MODELO: 32. OK
+                deactivate BD
+                
+                note right of MODELO
+                  Se registra cada linea
+                  de producto en la venta
+                end note
+                
+                MODELO -> BD: 33. sp_descontar_stock\n(cod_producto, cantidad)
+                activate BD
+                BD -> BD: 34. UPDATE DetalleProductoSucursal
+                BD -->> MODELO: 35. OK
+                deactivate BD
+                
+                note right of MODELO
+                  Se reduce el stock
+                  del producto vendido
+                end note
+                
+                if (Stock insuficiente?) then (Si)
+                    MODELO -> MODELO: 36. ROLLBACK TRANSACTION
+                    
+                    note right of MODELO
+                      Se revierten TODOS
+                      los cambios
+                    end note
+                    
+                    MODELO -->> CONTROLADOR: 37. Retorna FALSE
+                    CONTROLADOR -> VISTA: 38. Error: Stock insuficiente
+                    VISTA -> USUARIO: 39. Mostrar error
+                    deactivate MODELO
+                    deactivate CONTROLADOR
+                    deactivate VISTA
+                end
+            end
+        end
+        
+        == SESION 6: CONFIRMAR TRANSACCION ==
+        
+        MODELO -> MODELO: 40. Minimo 1 producto\nvalido registrado?
+        
+        if (No hay productos validos) then (No)
+            MODELO -> MODELO: 41. ROLLBACK TRANSACTION
+            MODELO -->> CONTROLADOR: 42. Retorna FALSE
+            CONTROLADOR -> VISTA: 43. Error: Sin productos validos
+            deactivate MODELO
+            deactivate CONTROLADOR
+            deactivate VISTA
+        else (Si)
+            MODELO -> MODELO: 44. COMMIT TRANSACTION
+            
+            note right of MODELO
+              Se guardan TODOS
+              los cambios permanentemente
+              en la base de datos
+            end note
+            
+            MODELO -->> CONTROLADOR: 45. Retorna nro_venta = 1
+            deactivate MODELO
+            
+            == SESION 7: LIMPIAR SESION Y REDIRIGIR ==
+            
+            CONTROLADOR -> CONTROLADOR: 46. Venta exitosa?\nif nro_venta != FALSE
+            
+            CONTROLADOR -> CONTROLADOR: 47. unset SESSION carrito
+            
+            note right of CONTROLADOR
+              Limpiar carrito de sesion
+              para evitar compras duplicadas
+            end note
+            
+            CONTROLADOR -> USUARIO: 48. Redirect a\n/pago_exitoso?nro=1
+            
+            note right of CONTROLADOR
+              Redirigir con numero de venta
+              para confirmacion
+            end note
+            
+            deactivate CONTROLADOR
+            
+            USUARIO -> CONTROLADOR: 49. GET /pago_exitoso?nro=1
+            activate CONTROLADOR
+            CONTROLADOR -> VISTA: 50. Cargar vista\npago_exitoso.php
+            CONTROLADOR -> VISTA: 51. Pasar nro_venta = 1
+            deactivate CONTROLADOR
+            
+            VISTA -> USUARIO: 52. Mostrar confirmacion:\nCompra 1 Exitosa
+            
+            note right of VISTA
+              Mostrar:
+              - Numero de venta: 1
+              - Total pagado: 910
+              - Fecha y hora
+              - Botones: Inicio / Ver Compra
+            end note
+            
+            deactivate VISTA
+        end
+    end
+end
+
+@enduml
