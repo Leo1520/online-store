@@ -410,9 +410,33 @@
 
     fetch('api/carrito.php?accion=obtener').then(function (r) { return r.json(); }).then(function (d) {
         actualizarContadorNavbar(d.cantidad);
-        // Poblar carritoActual para que renderProductos calcule stock disponible
         (d.items || []).forEach(function(item) { carritoActual[item.id_producto] = item.cantidad; });
     });
+
+    // Leer parámetro ?buscar= de la URL (viene del buscador del encabezado desde otra página)
+    (function () {
+        var params  = new URLSearchParams(window.location.search);
+        var termino = params.get('buscar');
+        if (termino && termino.trim().length >= 3) {
+            // Pre-llenar buscador del encabezado y el filtro interno
+            var hb = document.getElementById('headerBusqueda');
+            if (hb) hb.value = termino.trim();
+            // esperar a que cargarCategorias() pobló los productos
+            var intentos = 0;
+            var esperar = setInterval(function () {
+                intentos++;
+                var fb = document.getElementById('filtroBusqueda');
+                if (fb && window.todosLosProductos && todosLosProductos.length > 0) {
+                    clearInterval(esperar);
+                    fb.value = termino.trim();
+                    fb.dispatchEvent(new Event('input'));
+                    window.scrollTo({ top: document.getElementById('gridProductos').offsetTop - 100, behavior: 'smooth' });
+                }
+                if (intentos > 30) clearInterval(esperar);
+            }, 100);
+        }
+    })();
+
     cargarCategorias();
 }());
 </script>

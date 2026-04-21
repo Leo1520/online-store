@@ -282,11 +282,16 @@
             </a>
 
             <!-- Buscador (solo en inicio) -->
-            <form class="search-box d-none d-md-flex flex-grow-1 mx-3" onsubmit="return false;">
-                <input type="text" id="headerBusqueda" class="form-control" placeholder="¿Qué estás buscando? Ej: televisor, lavadora...">
-                <button class="btn-search" type="button" onclick="buscarDesdeHeader()">
+            <form class="search-box d-none d-md-flex flex-grow-1 mx-3" onsubmit="buscarDesdeHeader(); return false;" style="position:relative;">
+                <input type="text" id="headerBusqueda" class="form-control"
+                       placeholder="¿Qué estás buscando? Ej: televisor, lavadora..."
+                       minlength="3" autocomplete="off">
+                <button class="btn-search" type="submit">
                     <i class="bi bi-search"></i>
                 </button>
+                <div class="invalid-tooltip" style="top:44px;left:0;white-space:nowrap;font-size:12px;">
+                    Escribe al menos 3 letras para buscar.
+                </div>
             </form>
 
             <!-- Acciones derecha -->
@@ -676,10 +681,22 @@ document.addEventListener('DOMContentLoaded', function () {
 function buscarDesdeHeader() {
     var q = document.getElementById('headerBusqueda');
     if (!q) return;
+    var termino = q.value.trim();
+    if (termino.length < 3) {
+        q.classList.add('is-invalid');
+        q.focus();
+        return;
+    }
+    q.classList.remove('is-invalid');
     var filtroBusqueda = document.getElementById('filtroBusqueda');
     if (filtroBusqueda) {
-        filtroBusqueda.value = q.value;
+        // Estamos en inicio — disparar filtro directo
+        filtroBusqueda.value = termino;
         filtroBusqueda.dispatchEvent(new Event('input'));
+        window.scrollTo({ top: document.getElementById('gridProductos') ? document.getElementById('gridProductos').offsetTop - 100 : 400, behavior: 'smooth' });
+    } else {
+        // Otra página — redirigir a inicio con búsqueda
+        window.location.href = 'index.php?pagina=inicio&buscar=' + encodeURIComponent(termino);
     }
 }
 function filtrarCategoria(id) {
@@ -688,7 +705,14 @@ function filtrarCategoria(id) {
 }
 document.addEventListener('DOMContentLoaded', function () {
     var hb = document.getElementById('headerBusqueda');
-    if (hb) hb.addEventListener('keydown', function (e) { if (e.key === 'Enter') buscarDesdeHeader(); });
+    if (!hb) return;
+    // Quitar estado inválido al escribir
+    hb.addEventListener('input', function () {
+        if (this.value.trim().length >= 3) this.classList.remove('is-invalid');
+    });
+    hb.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter') buscarDesdeHeader();
+    });
 });
 </script>
 
