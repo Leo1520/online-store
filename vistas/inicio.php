@@ -116,6 +116,289 @@
     </div>
 </div>
 
+<!-- ═══ OFERTAS DEL DÍA ═══ -->
+<div class="oferta-section mt-4 mb-2">
+    <div class="container">
+
+        <!-- Cabecera de sección -->
+        <div class="oferta-header">
+            <div class="oferta-header-left">
+                <div class="oferta-fuego">
+                    <i class="bi bi-lightning-charge-fill"></i>
+                </div>
+                <div>
+                    <div class="oferta-titulo">OFERTAS DEL DÍA</div>
+                    <div class="oferta-subtitulo">¡Ofertas únicas que no vuelven!</div>
+                </div>
+            </div>
+            <div class="oferta-header-right">
+                <span class="oc-termina">Termina en:</span>
+                <div class="oferta-contador">
+                    <div class="oc-bloque">
+                        <span class="oc-num" id="ocHoras">00</span>
+                        <span class="oc-lbl">Horas</span>
+                    </div>
+                    <span class="oc-sep">:</span>
+                    <div class="oc-bloque">
+                        <span class="oc-num" id="ocMinutos">00</span>
+                        <span class="oc-lbl">Min</span>
+                    </div>
+                    <span class="oc-sep">:</span>
+                    <div class="oc-bloque">
+                        <span class="oc-num" id="ocSegundos">00</span>
+                        <span class="oc-lbl">Seg</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tarjetas productos -->
+        <div class="oferta-grid" id="ofertaProductos">
+            <div class="text-center py-4" style="color:#fff;opacity:.7;width:100%;">
+                <span class="spinner-border spinner-border-sm"></span> Cargando ofertas...
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<style>
+@keyframes pulso {
+    0%,100% { transform: scale(1); }
+    50%      { transform: scale(1.08); }
+}
+@keyframes brillar {
+    0%   { background-position: -200% center; }
+    100% { background-position: 200% center; }
+}
+
+.oferta-section {
+    background: linear-gradient(135deg, #1B3A6B 0%, #0f2340 50%, #1a3a6b 100%);
+    padding: 28px 0 32px;
+    position: relative;
+    overflow: hidden;
+}
+.oferta-section::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    pointer-events: none;
+}
+
+/* Cabecera */
+.oferta-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 22px; flex-wrap: wrap; gap: 16px;
+}
+.oferta-header-left { display: flex; align-items: center; gap: 14px; }
+.oferta-fuego {
+    width: 52px; height: 52px; border-radius: 50%;
+    background: var(--amarillo);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 26px; color: #fff;
+    box-shadow: 0 0 20px rgba(245,166,35,.6);
+    animation: pulso 2s ease-in-out infinite;
+    flex-shrink: 0;
+}
+.oferta-titulo {
+    font-size: 22px; font-weight: 900; color: var(--amarillo);
+    letter-spacing: 2px; text-transform: uppercase;
+    text-shadow: 0 2px 8px rgba(245,166,35,.4);
+}
+.oferta-subtitulo { font-size: 13px; color: rgba(255,255,255,.7); margin-top: 2px; }
+
+/* Contador */
+.oferta-header-right { display: flex; align-items: center; gap: 12px; }
+.oc-termina { font-size: 12px; color: rgba(255,255,255,.6); font-weight: 600; text-transform: uppercase; letter-spacing: 1px; }
+.oferta-contador { display: flex; align-items: center; gap: 6px; }
+.oc-bloque { display: flex; flex-direction: column; align-items: center; }
+.oc-num {
+    font-size: 28px; font-weight: 900; color: #fff;
+    background: rgba(255,255,255,.15);
+    border: 1px solid rgba(255,255,255,.25);
+    backdrop-filter: blur(4px);
+    border-radius: 8px; padding: 4px 10px;
+    min-width: 52px; text-align: center; line-height: 1.2;
+}
+.oc-lbl { font-size: 9px; color: rgba(255,255,255,.5); margin-top: 4px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
+.oc-sep { font-size: 24px; font-weight: 900; color: var(--amarillo); margin-bottom: 14px; }
+
+/* Grid de tarjetas */
+.oferta-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+}
+@media (max-width: 767px) { .oferta-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 480px) { .oferta-grid { grid-template-columns: 1fr; } }
+
+.oferta-prod-card {
+    background: #fff;
+    border-radius: 14px;
+    overflow: hidden;
+    position: relative;
+    transition: transform .25s, box-shadow .25s;
+    box-shadow: 0 4px 16px rgba(0,0,0,.2);
+}
+.oferta-prod-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 12px 32px rgba(0,0,0,.3);
+}
+
+/* Badge descuento */
+.op-badge-desc {
+    position: absolute; top: 12px; left: 12px;
+    background: #e53935; color: #fff;
+    font-size: 12px; font-weight: 900;
+    padding: 4px 10px; border-radius: 20px;
+    z-index: 2; box-shadow: 0 2px 8px rgba(229,57,53,.4);
+}
+
+/* Badge stock urgencia */
+.op-badge-stock {
+    position: absolute; top: 12px; right: 12px;
+    background: #fff3e0; color: #e65100;
+    font-size: 10px; font-weight: 700;
+    padding: 3px 8px; border-radius: 20px;
+    z-index: 2; border: 1px solid #ffcc80;
+}
+
+.op-img-wrap {
+    background: #f8f9ff;
+    display: flex; align-items: center; justify-content: center;
+    height: 160px; padding: 14px;
+}
+.op-img-wrap img {
+    max-height: 132px; max-width: 100%;
+    object-fit: contain; transition: transform .3s;
+}
+.oferta-prod-card:hover .op-img-wrap img { transform: scale(1.06); }
+
+.op-body { padding: 14px 14px 16px; }
+.op-categoria {
+    font-size: 10px; font-weight: 700; text-transform: uppercase;
+    color: var(--azul-claro); letter-spacing: .8px; margin-bottom: 4px;
+}
+.op-nombre {
+    font-size: 13px; font-weight: 700; color: #222;
+    line-height: 1.35; margin-bottom: 10px;
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
+.op-precios { display: flex; align-items: baseline; gap: 8px; margin-bottom: 4px; }
+.op-precio-ahora { font-size: 20px; font-weight: 900; color: var(--azul); }
+.op-precio-antes { font-size: 12px; color: #bbb; text-decoration: line-through; }
+.op-cuotas { font-size: 11px; color: #888; margin-bottom: 12px; }
+
+.btn-oferta {
+    width: 100%;
+    background: linear-gradient(90deg, var(--azul) 0%, var(--azul-claro) 100%);
+    color: #fff; border: none; border-radius: 8px;
+    padding: 9px; font-size: 13px; font-weight: 700;
+    cursor: pointer; transition: opacity .2s, transform .1s;
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+}
+.btn-oferta:hover  { opacity: .9; transform: scale(1.02); }
+.btn-oferta:active { transform: scale(.98); }
+.btn-oferta:disabled { opacity: .55; cursor: not-allowed; transform: none; }
+.btn-oferta.agregado { background: linear-gradient(90deg, #1a6b3a, #28a745); }
+.btn-oferta.sin-stock { background: #ccc; }
+</style>
+
+<script>
+/* Contador regresivo — reinicia cada 24h desde medianoche */
+(function () {
+    function tick() {
+        var ahora     = new Date();
+        var manana    = new Date(ahora);
+        manana.setHours(24, 0, 0, 0);
+        var diff = Math.floor((manana - ahora) / 1000);
+        var h = Math.floor(diff / 3600);
+        var m = Math.floor((diff % 3600) / 60);
+        var s = diff % 60;
+        var pad = function(n) { return String(n).padStart(2, '0'); };
+        document.getElementById('ocHoras').textContent    = pad(h);
+        document.getElementById('ocMinutos').textContent  = pad(m);
+        document.getElementById('ocSegundos').textContent = pad(s);
+    }
+    tick();
+    setInterval(tick, 1000);
+})();
+
+/* Cargar 3 productos destacados para la sección oferta */
+(function () {
+    fetch('api/productos.php')
+        .then(function(r) { return r.json(); })
+        .then(function(d) {
+            var activos = (d.productos || []).filter(function(p) {
+                return (p.estado || '').toLowerCase() === 'activo' && parseInt(p.stock) > 0;
+            });
+            // Tomar 3 productos: los de mayor precio (más llamativos como oferta)
+            activos.sort(function(a, b) { return parseFloat(b.precio) - parseFloat(a.precio); });
+            var seleccion = activos.slice(0, 3);
+            var cont = document.getElementById('ofertaProductos');
+            if (!seleccion.length) { cont.innerHTML = ''; return; }
+
+            var html = '';
+            seleccion.forEach(function(p) {
+                var img    = p.imagen ? 'recursos/imagenes/' + p.imagen : 'recursos/imagenes/no-image.png';
+                var precio = parseFloat(p.precio);
+                var antes  = (precio * 1.25).toFixed(2);
+                var ahora  = precio.toFixed(2);
+                var cuota  = (precio / 12).toFixed(2);
+                var stock  = parseInt(p.stock) || 0;
+                html += '<div class="oferta-prod-card">'
+                    + '<span class="op-badge-desc">−20%</span>'
+                    + (stock <= 5 && stock > 0 ? '<span class="op-badge-stock">¡Últimas ' + stock + '!</span>' : '')
+                    + '<div class="op-img-wrap">'
+                    +   '<a href="index.php?pagina=producto&id=' + p.id_producto + '">'
+                    +     '<img src="' + img + '" alt="' + p.nombre + '" onerror="this.src=\'recursos/imagenes/no-image.png\'">'
+                    +   '</a>'
+                    + '</div>'
+                    + '<div class="op-body">'
+                    +   '<div class="op-categoria">' + (p.categoria || 'Producto') + '</div>'
+                    +   '<div class="op-nombre">' + p.nombre + '</div>'
+                    +   '<div class="op-precios">'
+                    +     '<span class="op-precio-ahora">Bs. ' + ahora + '</span>'
+                    +     '<span class="op-precio-antes">Bs. ' + antes + '</span>'
+                    +   '</div>'
+                    +   '<div class="op-cuotas"><i class="bi bi-credit-card mr-1"></i>12 cuotas de Bs. ' + cuota + '</div>'
+                    +   '<button class="btn-oferta btn-agregar-oferta" data-id="' + p.id_producto + '" data-stock="' + stock + '">'
+                    +     '<i class="bi bi-cart-plus"></i> Agregar al carrito'
+                    +   '</button>'
+                    + '</div>'
+                    + '</div>';
+            });
+            cont.innerHTML = html;
+
+            cont.addEventListener('click', function(e) {
+                var btn = e.target.closest('.btn-agregar-oferta');
+                if (!btn || btn.disabled) return;
+                btn.disabled = true;
+                btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Agregando...';
+                fetch('api/carrito.php?accion=agregar&id=' + btn.dataset.id)
+                    .then(function(r) { return r.json(); })
+                    .then(function(res) {
+                        if (res.ok) {
+                            btn.classList.add('agregado');
+                            btn.innerHTML = '<i class="bi bi-check-lg"></i> ¡Agregado!';
+                            var badge = document.getElementById('carritoContador');
+                            if (badge) { badge.textContent = res.cantidad; badge.style.display = 'flex'; }
+                            setTimeout(function() {
+                                btn.classList.remove('agregado');
+                                btn.innerHTML = '<i class="bi bi-cart-plus"></i> Agregar al carrito';
+                                btn.disabled = false;
+                            }, 2000);
+                        } else {
+                            btn.classList.add('sin-stock');
+                            btn.innerHTML = '<i class="bi bi-x-circle"></i> Sin stock';
+                        }
+                    })
+                    .catch(function() { btn.disabled = false; btn.innerHTML = '<i class="bi bi-cart-plus"></i> Agregar al carrito'; });
+            });
+        });
+})();
+</script>
+
 <!-- ═══ PRODUCTOS ═══ -->
 <div class="container mt-4" id="productos">
 
