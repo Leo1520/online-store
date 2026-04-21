@@ -95,6 +95,9 @@ class PagoControlador {
             } else {
                 try {
                     \Stripe\Stripe::setApiKey(STRIPE_SECRET_KEY);
+                    $caBundle   = __DIR__ . '/../vendor/stripe/stripe-php/data/ca-certificates.crt';
+                    $curlClient = new \Stripe\HttpClient\CurlClient([CURLOPT_CAINFO => $caBundle]);
+                    \Stripe\ApiRequestor::setHttpClient($curlClient);
                     $session = \Stripe\Checkout\Session::retrieve($sessionId);
 
                     if ($session->payment_status === 'paid') {
