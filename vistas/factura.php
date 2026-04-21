@@ -79,7 +79,7 @@
     <button class="btn-pdf secondary" onclick="window.print()">
         🖨️ Imprimir
     </button>
-    <button class="btn-pdf secondary" onclick="history.back()">
+    <button class="btn-pdf secondary" onclick="volverPagina()">
         ← Volver
     </button>
 </div>
@@ -184,6 +184,17 @@
 </div>
 
 <script>
+function volverPagina() {
+    // Si la ventana fue abierta con target="_blank", cerrarla
+    if (window.opener) {
+        window.close();
+    } else if (history.length > 1) {
+        history.back();
+    } else {
+        window.location.href = 'index.php?pagina=mi_cuenta';
+    }
+}
+
 document.getElementById('btnDescargarPDF').addEventListener('click', function () {
     var btn = this;
     btn.disabled = true;
