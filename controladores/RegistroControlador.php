@@ -42,9 +42,7 @@ class RegistroControlador {
             }
         }
 
-        $titulo = 'Registro - Tienda en Línea';
-        require_once __DIR__ . '/../vistas/layout/encabezado.php';
-        require_once __DIR__ . '/../vistas/registro.php';
-        require_once __DIR__ . '/../vistas/layout/pie.php';
+        header('Location: index.php?pagina=inicio');
+        exit();
     }
 }

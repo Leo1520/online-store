@@ -160,8 +160,8 @@
                 Hola, <strong style="color:#fff;"><?php echo htmlspecialchars($_SESSION['usuario']); ?></strong>
                 &nbsp;|&nbsp; <a href="index.php?pagina=logout">Cerrar sesión</a>
             <?php else: ?>
-                <a href="index.php?pagina=login">Iniciar sesión</a> &nbsp;|&nbsp;
-                <a href="index.php?pagina=registro">Crear cuenta</a>
+                <a href="#" data-toggle="modal" data-target="#modalLogin">Iniciar sesión</a> &nbsp;|&nbsp;
+                <a href="#" data-toggle="modal" data-target="#modalRegistro">Crear cuenta</a>
             <?php endif; ?>
         </span>
     </div>
@@ -206,9 +206,13 @@
                         </a>
                     <?php endif; ?>
                 <?php else: ?>
-                    <a href="index.php?pagina=login">
+                    <a href="#" data-toggle="modal" data-target="#modalLogin">
                         <i class="bi bi-person-circle"></i>
                         <span>Ingresar</span>
+                    </a>
+                    <a href="#" data-toggle="modal" data-target="#modalRegistro">
+                        <i class="bi bi-person-plus-fill"></i>
+                        <span>Registrarse</span>
                     </a>
                 <?php endif; ?>
 
@@ -278,6 +282,265 @@
         </div>
     </div>
 </nav>
+
+<!-- Modal Login -->
+<div class="modal fade" id="modalLogin" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-dialog-centered" style="max-width:420px;">
+        <div class="modal-content" style="border-radius:14px;overflow:hidden;border:none;">
+
+            <!-- Header -->
+            <div class="modal-header border-0 pb-0" style="background:var(--azul);">
+                <div class="w-100 text-center py-3">
+                    <i class="bi bi-lightning-charge-fill" style="font-size:2rem;color:var(--amarillo);"></i>
+                    <h5 class="text-white font-weight-bold mt-1 mb-0">Bienvenido a Electrohogar</h5>
+                    <p class="text-white-50 small mb-0">Ingresa a tu cuenta</p>
+                </div>
+                <button type="button" class="close" data-dismiss="modal" style="position:absolute;top:12px;right:16px;color:#fff;opacity:.7;">
+                    <span>&times;</span>
+                </button>
+            </div>
+
+            <!-- Body -->
+            <div class="modal-body px-4 py-4">
+                <div id="loginError" class="alert alert-danger py-2" style="display:none;font-size:13px;"></div>
+
+                <form id="formLoginModal">
+                    <div class="form-group">
+                        <label class="small font-weight-bold" style="color:var(--azul);">
+                            <i class="bi bi-person mr-1"></i>Usuario
+                        </label>
+                        <input type="text" id="loginUsuario" name="usuario" class="form-control"
+                               placeholder="Tu nombre de usuario" autocomplete="username"
+                               style="border-radius:8px;">
+                    </div>
+                    <div class="form-group">
+                        <label class="small font-weight-bold" style="color:var(--azul);">
+                            <i class="bi bi-lock mr-1"></i>Contraseña
+                        </label>
+                        <div class="input-group">
+                            <input type="password" id="loginPassword" name="password" class="form-control"
+                                   placeholder="Tu contraseña" autocomplete="current-password"
+                                   style="border-radius:8px 0 0 8px;">
+                            <div class="input-group-append">
+                                <button type="button" class="btn btn-outline-secondary"
+                                        style="border-radius:0 8px 8px 0;"
+                                        onclick="togglePassword()">
+                                    <i class="bi bi-eye" id="iconOjo"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="submit" id="btnLoginModal" class="btn btn-block font-weight-bold mt-3"
+                            style="background:var(--azul);color:#fff;border-radius:8px;padding:10px;">
+                        <i class="bi bi-box-arrow-in-right mr-1"></i>Ingresar
+                    </button>
+                </form>
+
+                <hr class="my-3">
+                <p class="text-center text-muted small mb-0">
+                    ¿No tenés cuenta?
+                    <a href="#" data-dismiss="modal" data-toggle="modal" data-target="#modalRegistro"
+                       style="color:var(--azul);font-weight:700;">
+                        Registrate gratis
+                    </a>
+                </p>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script>
+function togglePassword() {
+    var inp  = document.getElementById('loginPassword');
+    var icon = document.getElementById('iconOjo');
+    if (inp.type === 'password') { inp.type = 'text';     icon.className = 'bi bi-eye-slash'; }
+    else                         { inp.type = 'password'; icon.className = 'bi bi-eye'; }
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+    var form   = document.getElementById('formLoginModal');
+    var errDiv = document.getElementById('loginError');
+    var btn    = document.getElementById('btnLoginModal');
+
+    if (!form) return;
+
+    form.addEventListener('submit', function (e) {
+        e.preventDefault();
+        errDiv.style.display = 'none';
+
+        var usuario  = document.getElementById('loginUsuario').value.trim();
+        var password = document.getElementById('loginPassword').value.trim();
+
+        if (!usuario || !password) {
+            errDiv.textContent = 'Ingresa usuario y contraseña.';
+            errDiv.style.display = '';
+            return;
+        }
+
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm mr-1"></span>Ingresando...';
+
+        var fd = new FormData();
+        fd.append('usuario',  usuario);
+        fd.append('password', password);
+
+        fetch('api/login.php', { method: 'POST', body: fd })
+            .then(function (r) { return r.json(); })
+            .then(function (d) {
+                if (d.ok) {
+                    window.location.reload();
+                } else {
+                    errDiv.textContent   = d.mensaje;
+                    errDiv.style.display = '';
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="bi bi-box-arrow-in-right mr-1"></i>Ingresar';
+                }
+            })
+            .catch(function () {
+                errDiv.textContent   = 'Error de conexión. Intenta nuevamente.';
+                errDiv.style.display = '';
+                btn.disabled = false;
+                btn.innerHTML = '<i class="bi bi-box-arrow-in-right mr-1"></i>Ingresar';
+            });
+    });
+
+    // Abrir modal si viene de redirect de login
+    <?php if (isset($_GET['pagina']) && $_GET['pagina'] === 'login'): ?>
+    $('#modalLogin').modal('show');
+    <?php endif; ?>
+});
+</script>
+
+<!-- Modal Registro -->
+<div class="modal fade" id="modalRegistro" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-dialog-centered modal-lg" style="max-width:580px;">
+        <div class="modal-content" style="border-radius:14px;overflow:hidden;border:none;">
+
+            <div class="modal-header border-0 pb-0" style="background:var(--azul);">
+                <div class="w-100 text-center py-3">
+                    <i class="bi bi-person-plus-fill" style="font-size:2rem;color:var(--amarillo);"></i>
+                    <h5 class="text-white font-weight-bold mt-1 mb-0">Crear cuenta en Electrohogar</h5>
+                    <p class="text-white-50 small mb-0">Es gratis y rápido</p>
+                </div>
+                <button type="button" class="close" data-dismiss="modal"
+                        style="position:absolute;top:12px;right:16px;color:#fff;opacity:.7;">
+                    <span>&times;</span>
+                </button>
+            </div>
+
+            <div class="modal-body px-4 py-4">
+                <div id="registroError"   class="alert alert-danger  py-2" style="display:none;font-size:13px;"></div>
+                <div id="registroExito"   class="alert alert-success py-2" style="display:none;font-size:13px;"></div>
+
+                <form id="formRegistroModal">
+                    <div class="form-row">
+                        <div class="form-group col-6">
+                            <label class="small font-weight-bold" style="color:var(--azul);">Usuario</label>
+                            <input type="text" name="usuario" class="form-control" placeholder="nombreusuario" style="border-radius:8px;">
+                        </div>
+                        <div class="form-group col-6">
+                            <label class="small font-weight-bold" style="color:var(--azul);">Contraseña</label>
+                            <input type="password" name="password" class="form-control" placeholder="Mínimo 4 caracteres" style="border-radius:8px;">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group col-4">
+                            <label class="small font-weight-bold" style="color:var(--azul);">CI</label>
+                            <input type="text" name="ci" class="form-control" placeholder="12345678" style="border-radius:8px;">
+                        </div>
+                        <div class="form-group col-8">
+                            <label class="small font-weight-bold" style="color:var(--azul);">Nombres</label>
+                            <input type="text" name="nombres" class="form-control" placeholder="Tu nombre" style="border-radius:8px;">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group col-6">
+                            <label class="small font-weight-bold" style="color:var(--azul);">Apellido Paterno</label>
+                            <input type="text" name="apPaterno" class="form-control" placeholder="Apellido" style="border-radius:8px;">
+                        </div>
+                        <div class="form-group col-6">
+                            <label class="small font-weight-bold" style="color:var(--azul);">Apellido Materno</label>
+                            <input type="text" name="apMaterno" class="form-control" placeholder="Apellido" style="border-radius:8px;">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group col-6">
+                            <label class="small font-weight-bold" style="color:var(--azul);">Correo electrónico</label>
+                            <input type="email" name="correo" class="form-control" placeholder="correo@ejemplo.com" style="border-radius:8px;">
+                        </div>
+                        <div class="form-group col-6">
+                            <label class="small font-weight-bold" style="color:var(--azul);">Celular</label>
+                            <input type="text" name="nroCelular" class="form-control" placeholder="70000000" style="border-radius:8px;">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="small font-weight-bold" style="color:var(--azul);">Dirección</label>
+                        <input type="text" name="direccion" class="form-control" placeholder="Tu dirección" style="border-radius:8px;">
+                    </div>
+
+                    <button type="submit" id="btnRegistroModal" class="btn btn-block font-weight-bold"
+                            style="background:var(--amarillo);color:#fff;border-radius:8px;padding:10px;">
+                        <i class="bi bi-person-check-fill mr-1"></i>Crear mi cuenta
+                    </button>
+                </form>
+
+                <hr class="my-3">
+                <p class="text-center text-muted small mb-0">
+                    ¿Ya tenés cuenta?
+                    <a href="#" data-dismiss="modal" data-toggle="modal" data-target="#modalLogin"
+                       style="color:var(--azul);font-weight:700;">Iniciá sesión</a>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    var form    = document.getElementById('formRegistroModal');
+    var errDiv  = document.getElementById('registroError');
+    var okDiv   = document.getElementById('registroExito');
+    var btn     = document.getElementById('btnRegistroModal');
+    if (!form) return;
+
+    form.addEventListener('submit', function (e) {
+        e.preventDefault();
+        errDiv.style.display = 'none';
+        okDiv.style.display  = 'none';
+
+        var fd = new FormData(form);
+        var vacio = false;
+        fd.forEach(function (v) { if (!v.trim()) vacio = true; });
+        if (vacio) { errDiv.textContent = 'Todos los campos son obligatorios.'; errDiv.style.display = ''; return; }
+
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm mr-1"></span>Creando cuenta...';
+
+        fetch('api/registro.php', { method: 'POST', body: fd })
+            .then(function (r) { return r.json(); })
+            .then(function (d) {
+                if (d.ok) {
+                    okDiv.textContent   = '¡Cuenta creada! Bienvenido a Electrohogar.';
+                    okDiv.style.display = '';
+                    setTimeout(function () { window.location.reload(); }, 1200);
+                } else {
+                    errDiv.textContent   = d.mensaje;
+                    errDiv.style.display = '';
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="bi bi-person-check-fill mr-1"></i>Crear mi cuenta';
+                }
+            })
+            .catch(function () {
+                errDiv.textContent = 'Error de conexión.';
+                errDiv.style.display = '';
+                btn.disabled = false;
+                btn.innerHTML = '<i class="bi bi-person-check-fill mr-1"></i>Crear mi cuenta';
+            });
+    });
+});
+</script>
 
 <script>
 function buscarDesdeHeader() {
