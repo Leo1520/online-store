@@ -45,7 +45,7 @@
         .header-main .logo-text:hover { text-decoration: none; }
 
         /* Buscador */
-        .search-box { max-width: 460px; width: 100%; }
+        .search-box { max-width: 460px; width: 100%; position: relative; }
         .search-box .form-control {
             border: none;
             border-radius: 25px 0 0 25px;
@@ -61,6 +61,56 @@
             font-weight: 600;
         }
         .search-box .btn-search:hover { background: var(--amarillo-hover); }
+
+        /* Dropdown sugerencias */
+        .search-dropdown {
+            display: none;
+            position: absolute;
+            top: calc(100% + 6px);
+            left: 0; right: 0;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0,0,0,.18);
+            z-index: 2000;
+            overflow: hidden;
+            border: 1px solid #e8ecf8;
+        }
+        .search-dropdown.visible { display: block; }
+        .sd-item {
+            display: flex; align-items: center; gap: 12px;
+            padding: 10px 16px; cursor: pointer;
+            border-bottom: 1px solid #f4f6fb;
+            text-decoration: none; color: inherit;
+            transition: background .15s;
+        }
+        .sd-item:last-of-type { border-bottom: none; }
+        .sd-item:hover { background: #f0f4ff; }
+        .sd-item img {
+            width: 44px; height: 44px; object-fit: contain;
+            border-radius: 8px; border: 1px solid #eee;
+            background: #fafafa; flex-shrink: 0;
+        }
+        .sd-item-info { flex: 1; min-width: 0; }
+        .sd-item-info .nombre {
+            font-size: 13px; font-weight: 600; color: #222;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+        .sd-item-info .precio { font-size: 12px; color: var(--azul); font-weight: 700; margin-top: 2px; }
+        .sd-ver-todos {
+            display: block; padding: 11px 16px;
+            background: #f8f9ff; font-size: 13px; font-weight: 700;
+            color: var(--azul); text-align: center; cursor: pointer;
+            border-top: 2px solid #e8ecf8;
+        }
+        .sd-ver-todos:hover { background: #e8eeff; text-decoration: none; color: var(--azul); }
+        .sd-cargando, .sd-vacio {
+            padding: 18px 16px; text-align: center;
+            font-size: 13px; color: #aaa;
+        }
+        .sd-min {
+            padding: 14px 16px; text-align: center;
+            font-size: 12px; color: #bbb;
+        }
 
         /* Íconos header derecha */
         .header-actions a {
@@ -250,6 +300,79 @@
             text-align: center; padding: 40px 20px; color: #aaa;
         }
         .carrito-empty i { font-size: 48px; display: block; margin-bottom: 10px; }
+
+        /* Mega-menú categorías */
+        .mega-overlay {
+            display: none; position: fixed; inset: 0;
+            background: rgba(0,0,0,.45); z-index: 1020;
+        }
+        .mega-overlay.activo { display: block; }
+
+        .mega-panel {
+            display: none;
+            position: absolute; left: 0; right: 0;
+            background: #fff; z-index: 1025;
+            border-radius: 0 0 14px 14px;
+            box-shadow: 0 12px 40px rgba(0,0,0,.18);
+            max-height: 520px;
+            overflow: hidden;
+        }
+        .mega-panel.activo { display: flex; }
+
+        .mega-sidebar {
+            width: 230px; min-width: 230px;
+            background: #f4f6fb;
+            border-right: 1px solid #e8ecf8;
+            overflow-y: auto;
+            padding: 8px 0;
+        }
+        .mega-sidebar .mega-cat-item {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 11px 18px; cursor: pointer;
+            font-size: 13px; font-weight: 600; color: #444;
+            border-left: 3px solid transparent;
+            transition: all .15s;
+            text-decoration: none;
+        }
+        .mega-sidebar .mega-cat-item:hover,
+        .mega-sidebar .mega-cat-item.activo {
+            background: #fff; color: var(--azul);
+            border-left-color: var(--amarillo);
+        }
+        .mega-sidebar .mega-cat-item i { font-size: 16px; margin-right: 8px; color: var(--azul-claro); }
+        .mega-cat-todas {
+            display: flex; align-items: center;
+            padding: 13px 18px; font-size: 13px; font-weight: 700;
+            color: var(--azul); border-bottom: 1px solid #e8ecf8;
+            cursor: pointer; background: #fff;
+        }
+        .mega-cat-todas i { margin-right: 8px; }
+
+        .mega-content {
+            flex: 1; padding: 24px 28px; overflow-y: auto;
+            display: flex; flex-direction: column;
+        }
+        .mega-content-titulo {
+            font-size: 16px; font-weight: 800; color: var(--azul);
+            border-bottom: 2px solid var(--amarillo); padding-bottom: 10px; margin-bottom: 18px;
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .mega-content-titulo a { font-size: 12px; font-weight: 600; color: var(--azul-claro); }
+        .mega-productos-grid {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 14px;
+        }
+        .mega-prod-card {
+            border: 1px solid #eee; border-radius: 10px; padding: 10px;
+            text-align: center; cursor: pointer; text-decoration: none; color: inherit;
+            transition: box-shadow .15s, transform .15s;
+            background: #fff;
+        }
+        .mega-prod-card:hover { box-shadow: 0 4px 14px rgba(27,58,107,.12); transform: translateY(-2px); color: inherit; text-decoration: none; }
+        .mega-prod-card img { width: 70px; height: 70px; object-fit: contain; margin-bottom: 6px; }
+        .mega-prod-card .mp-nombre { font-size: 11px; font-weight: 600; color: #333; line-height: 1.3; margin-bottom: 4px; }
+        .mega-prod-card .mp-precio { font-size: 12px; font-weight: 800; color: var(--azul); }
+        .mega-empty { text-align: center; padding: 40px 20px; color: #bbb; font-size: 14px; }
+        .mega-spinner { text-align: center; padding: 40px; color: var(--azul); }
     </style>
 </head>
 <body>
@@ -282,16 +405,14 @@
             </a>
 
             <!-- Buscador (solo en inicio) -->
-            <form class="search-box d-none d-md-flex flex-grow-1 mx-3" onsubmit="buscarDesdeHeader(); return false;" style="position:relative;">
+            <form class="search-box d-none d-md-flex flex-grow-1 mx-3" onsubmit="buscarDesdeHeader(); return false;">
                 <input type="text" id="headerBusqueda" class="form-control"
                        placeholder="¿Qué estás buscando? Ej: televisor, lavadora..."
-                       minlength="3" autocomplete="off">
+                       autocomplete="off">
                 <button class="btn-search" type="submit">
                     <i class="bi bi-search"></i>
                 </button>
-                <div class="invalid-tooltip" style="top:44px;left:0;white-space:nowrap;font-size:12px;">
-                    Escribe al menos 3 letras para buscar.
-                </div>
+                <div class="search-dropdown" id="searchDropdown"></div>
             </form>
 
             <!-- Acciones derecha -->
@@ -335,14 +456,26 @@
     </div>
 </div>
 
+<!-- Mega overlay -->
+<div class="mega-overlay" id="megaOverlay" onclick="cerrarMega()"></div>
+
 <!-- Navbar categorías -->
-<nav class="navbar navbar-expand-lg navbar-dark p-0" style="background:var(--azul-claro);">
+<nav class="navbar navbar-expand-lg navbar-dark p-0" style="background:var(--azul-claro); position:relative;">
     <div class="container">
         <button class="navbar-toggler my-1" type="button" data-toggle="collapse" data-target="#navCats">
             <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navCats">
             <ul class="navbar-nav mr-auto">
+                <!-- Botón Categorías -->
+                <li class="nav-item">
+                    <a class="nav-link font-weight-bold" href="#" id="btnMegaMenu"
+                       onclick="toggleMega(event)"
+                       style="background:var(--amarillo);color:#fff!important;padding:10px 16px!important;font-size:13px;">
+                        <i class="bi bi-grid-fill mr-1"></i>Categorías
+                        <i class="bi bi-chevron-down ml-1" id="megaChevron" style="font-size:10px;transition:transform .2s;"></i>
+                    </a>
+                </li>
                 <li class="nav-item">
                     <a class="nav-link" href="index.php?pagina=inicio" style="font-size:13px;">
                         <i class="bi bi-house-fill mr-1"></i>Inicio
@@ -382,6 +515,25 @@
         </div>
     </div>
 </nav>
+
+<!-- Mega-panel (posicionado relativo al nav) -->
+<div style="position:relative;">
+    <div class="mega-panel container-fluid px-0" id="megaPanel" style="left:0;right:0;">
+        <!-- Sidebar izquierdo: lista categorías -->
+        <div class="mega-sidebar" id="megaSidebar">
+            <div class="mega-cat-todas" onclick="seleccionarMegaCat(0, 'Todas las categorías', this)">
+                <i class="bi bi-grid-fill"></i>Todas las categorías
+            </div>
+            <div id="megaCatList">
+                <div class="mega-spinner"><span class="spinner-border spinner-border-sm"></span></div>
+            </div>
+        </div>
+        <!-- Contenido derecho: productos de la categoría -->
+        <div class="mega-content" id="megaContent">
+            <div class="mega-spinner"><span class="spinner-border spinner-border-sm"></span> Cargando...</div>
+        </div>
+    </div>
+</div>
 
 </div><!-- fin cabecera-fija -->
 
@@ -682,41 +834,211 @@ function buscarDesdeHeader() {
     var q = document.getElementById('headerBusqueda');
     if (!q) return;
     var termino = q.value.trim();
-    if (termino.length < 3) {
-        q.classList.add('is-invalid');
-        q.focus();
-        return;
-    }
-    q.classList.remove('is-invalid');
+    cerrarDropdown();
+    if (termino.length < 3) return;
     var filtroBusqueda = document.getElementById('filtroBusqueda');
     if (filtroBusqueda) {
-        // Estamos en inicio — disparar filtro directo
         filtroBusqueda.value = termino;
         filtroBusqueda.dispatchEvent(new Event('input'));
-        window.scrollTo({ top: document.getElementById('gridProductos') ? document.getElementById('gridProductos').offsetTop - 100 : 400, behavior: 'smooth' });
+        window.scrollTo({ top: (document.getElementById('gridProductos') || {offsetTop:400}).offsetTop - 100, behavior: 'smooth' });
     } else {
-        // Otra página — redirigir a inicio con búsqueda
         window.location.href = 'index.php?pagina=inicio&buscar=' + encodeURIComponent(termino);
     }
 }
+
 function filtrarCategoria(id) {
     var sel = document.getElementById('filtroCategoria');
     if (sel) { sel.value = id; sel.dispatchEvent(new Event('change')); }
 }
+
+function cerrarDropdown() {
+    var dd = document.getElementById('searchDropdown');
+    if (dd) { dd.classList.remove('visible'); dd.innerHTML = ''; }
+}
+
 document.addEventListener('DOMContentLoaded', function () {
     var hb = document.getElementById('headerBusqueda');
-    if (!hb) return;
-    // Quitar estado inválido al escribir
+    var dd = document.getElementById('searchDropdown');
+    if (!hb || !dd) return;
+
+    var timer = null;
+    var ultimaBusqueda = '';
+
     hb.addEventListener('input', function () {
-        if (this.value.trim().length >= 3) this.classList.remove('is-invalid');
+        var termino = this.value.trim();
+        clearTimeout(timer);
+
+        if (termino.length < 3) {
+            if (termino.length === 0) {
+                cerrarDropdown();
+            } else {
+                dd.innerHTML = '<div class="sd-min"><i class="bi bi-search mr-1"></i>Escribe al menos 3 letras</div>';
+                dd.classList.add('visible');
+            }
+            return;
+        }
+
+        if (termino === ultimaBusqueda) return;
+
+        dd.innerHTML = '<div class="sd-cargando"><span class="spinner-border spinner-border-sm mr-2"></span>Buscando...</div>';
+        dd.classList.add('visible');
+
+        timer = setTimeout(function () {
+            ultimaBusqueda = termino;
+            fetch('api/productos.php?nombre=' + encodeURIComponent(termino))
+                .then(function(r) { return r.json(); })
+                .then(function(d) {
+                    var productos = (d.productos || []).filter(function(p) {
+                        return p.estado === 'activo' || p.estado === 'Activo';
+                    }).slice(0, 7);
+                    var total = d.total || 0;
+
+                    if (productos.length === 0) {
+                        dd.innerHTML = '<div class="sd-vacio"><i class="bi bi-search mr-1"></i>Sin resultados para "<strong>' + termino + '</strong>"</div>';
+                        return;
+                    }
+
+                    var html = '';
+                    productos.forEach(function(p) {
+                        var img = p.imagen ? 'recursos/imagenes/' + p.imagen : 'recursos/imagenes/no-image.png';
+                        var precio = 'Bs. ' + parseFloat(p.precio).toFixed(2);
+                        html += '<a class="sd-item" href="index.php?pagina=producto&id=' + p.id_producto + '" onclick="cerrarDropdown()">'
+                            + '<img src="' + img + '" alt="' + p.nombre + '" onerror="this.src=\'recursos/imagenes/no-image.png\'">'
+                            + '<div class="sd-item-info">'
+                            +   '<div class="nombre">' + p.nombre + '</div>'
+                            +   '<div class="precio">' + precio + '</div>'
+                            + '</div>'
+                            + '</a>';
+                    });
+                    html += '<a class="sd-ver-todos" href="index.php?pagina=inicio&buscar=' + encodeURIComponent(termino) + '" onclick="cerrarDropdown()">'
+                        + '<i class="bi bi-grid mr-1"></i>Ver todos los productos (' + total + ')'
+                        + '</a>';
+                    dd.innerHTML = html;
+                })
+                .catch(function() { cerrarDropdown(); });
+        }, 300);
     });
+
     hb.addEventListener('keydown', function (e) {
-        if (e.key === 'Enter') buscarDesdeHeader();
+        if (e.key === 'Enter') { e.preventDefault(); buscarDesdeHeader(); }
+        if (e.key === 'Escape') cerrarDropdown();
+    });
+
+    // Cerrar al hacer click fuera
+    document.addEventListener('click', function(e) {
+        if (!hb.contains(e.target) && !dd.contains(e.target)) cerrarDropdown();
     });
 });
 </script>
 
 <script>
+/* ====== Mega-menú Categorías ====== */
+var megaDatos = null; // cache { categorias, productos }
+var megaCatActiva = 0;
+
+function toggleMega(e) {
+    e.preventDefault();
+    var panel = document.getElementById('megaPanel');
+    var activo = panel.classList.contains('activo');
+    if (activo) { cerrarMega(); } else { abrirMega(); }
+}
+
+function abrirMega() {
+    var panel   = document.getElementById('megaPanel');
+    var overlay = document.getElementById('megaOverlay');
+    var chevron = document.getElementById('megaChevron');
+    panel.classList.add('activo');
+    overlay.classList.add('activo');
+    if (chevron) chevron.style.transform = 'rotate(180deg)';
+    if (!megaDatos) cargarDatosMega();
+}
+
+function cerrarMega() {
+    var panel   = document.getElementById('megaPanel');
+    var overlay = document.getElementById('megaOverlay');
+    var chevron = document.getElementById('megaChevron');
+    panel.classList.remove('activo');
+    overlay.classList.remove('activo');
+    if (chevron) chevron.style.transform = 'rotate(0deg)';
+}
+
+function cargarDatosMega() {
+    fetch('api/productos.php')
+        .then(function(r) { return r.json(); })
+        .then(function(d) {
+            megaDatos = d;
+            renderMegaSidebar(d.categorias || []);
+            renderMegaProductos(0, 'Todas las categorías', d.productos || []);
+        });
+}
+
+var iconosCatMega = {
+    'televisor':'bi-tv','tv':'bi-tv','refriger':'bi-snow','lavadora':'bi-droplet',
+    'cocina':'bi-fire','horno':'bi-fire','audio':'bi-speaker','celular':'bi-phone',
+    'computador':'bi-laptop','laptop':'bi-laptop','climatiz':'bi-wind','aire':'bi-thermometer',
+    'iluminac':'bi-lightbulb','hogar':'bi-house','mueble':'bi-lamp','electro':'bi-plug',
+};
+function iconoCatMega(nombre) {
+    var n = nombre.toLowerCase();
+    for (var k in iconosCatMega) { if (n.indexOf(k) !== -1) return iconosCatMega[k]; }
+    return 'bi-tag';
+}
+
+function renderMegaSidebar(categorias) {
+    var list = document.getElementById('megaCatList');
+    if (!list) return;
+    var html = '';
+    categorias.forEach(function(c) {
+        html += '<a class="mega-cat-item" data-id="' + c.cod + '" href="#"'
+            + ' onclick="seleccionarMegaCat(' + c.cod + ', \'' + c.nombre.replace(/'/g,"\\'") + '\', this); return false;">'
+            + '<span><i class="bi ' + iconoCatMega(c.nombre) + '"></i>' + c.nombre + '</span>'
+            + '<i class="bi bi-chevron-right" style="font-size:11px;color:#bbb;"></i>'
+            + '</a>';
+    });
+    list.innerHTML = html;
+}
+
+function seleccionarMegaCat(id, nombre, el) {
+    megaCatActiva = id;
+    // Marcar activo en sidebar
+    document.querySelectorAll('.mega-cat-item, .mega-cat-todas').forEach(function(i) { i.classList.remove('activo'); });
+    if (el) el.classList.add('activo');
+    // Filtrar productos
+    var prods = megaDatos ? (megaDatos.productos || []) : [];
+    if (id > 0) prods = prods.filter(function(p) { return p.codCategoria == id || p.categoria == nombre; });
+    renderMegaProductos(id, nombre, prods);
+}
+
+function renderMegaProductos(id, nombre, productos) {
+    var content = document.getElementById('megaContent');
+    if (!content) return;
+    var activos = productos.filter(function(p) { return (p.estado||'').toLowerCase() === 'activo'; }).slice(0, 12);
+    var verUrl  = id > 0
+        ? 'index.php?pagina=inicio&categoria=' + id
+        : 'index.php?pagina=inicio';
+
+    var html = '<div class="mega-content-titulo">'
+        + nombre
+        + '<a href="' + verUrl + '" onclick="cerrarMega();">Ver categoría completa <i class="bi bi-arrow-right"></i></a>'
+        + '</div>';
+
+    if (activos.length === 0) {
+        html += '<div class="mega-empty"><i class="bi bi-box-seam" style="font-size:2rem;display:block;margin-bottom:8px;"></i>Sin productos en esta categoría.</div>';
+    } else {
+        html += '<div class="mega-productos-grid">';
+        activos.forEach(function(p) {
+            var img = p.imagen ? 'recursos/imagenes/' + p.imagen : 'recursos/imagenes/no-image.png';
+            html += '<a class="mega-prod-card" href="index.php?pagina=producto&id=' + p.id_producto + '" onclick="cerrarMega();">'
+                + '<img src="' + img + '" alt="' + p.nombre + '" onerror="this.src=\'recursos/imagenes/no-image.png\'">'
+                + '<div class="mp-nombre">' + p.nombre + '</div>'
+                + '<div class="mp-precio">Bs. ' + parseFloat(p.precio).toFixed(2) + '</div>'
+                + '</a>';
+        });
+        html += '</div>';
+    }
+    content.innerHTML = html;
+}
+
 /* ====== Carrito Drawer ====== */
 function abrirCarrito() {
     document.getElementById('carritoOverlay').classList.add('activo');
