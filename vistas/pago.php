@@ -6,15 +6,11 @@
     $sinStock = array_filter($items, function($i) {
         return (int)($i['producto']['stock'] ?? 0) < (int)$i['cantidad'];
     });
-    $stripeConfigurado = defined('STRIPE_PUBLISHABLE_KEY') && strpos(STRIPE_PUBLISHABLE_KEY, 'REEMPLAZA') === false;
-    $mpConfigurado     = defined('MP_ACCESS_TOKEN')        && strpos(MP_ACCESS_TOKEN, 'REEMPLAZA') === false;
     ?>
 
-    <!-- Resumen del pedido -->
+    <!-- Resumen -->
     <div class="card shadow-sm mb-4">
-        <div class="card-header bg-light font-weight-bold">
-            <i class="bi bi-bag"></i> Resumen del pedido
-        </div>
+        <div class="card-header bg-light font-weight-bold"><i class="bi bi-bag"></i> Resumen del pedido</div>
         <div class="card-body p-0">
             <table class="table table-sm mb-0">
                 <thead class="thead-light">
@@ -41,81 +37,66 @@
 
     <?php if (!empty($sinStock)): ?>
         <div class="alert alert-warning">
-            <strong><i class="bi bi-exclamation-triangle"></i> Sin stock suficiente:</strong>
-            <ul class="mb-0 mt-1">
-                <?php foreach ($sinStock as $i): ?>
-                    <li><?php echo htmlspecialchars($i['producto']['nombre']); ?>
-                        — pedido: <?php echo (int)$i['cantidad']; ?>,
-                        disponible: <?php echo (int)($i['producto']['stock'] ?? 0); ?></li>
-                <?php endforeach; ?>
-            </ul>
+            <strong><i class="bi bi-exclamation-triangle"></i> Sin stock suficiente.</strong>
         </div>
-        <a href="index.php?pagina=carrito" class="btn btn-warning btn-block">
-            <i class="bi bi-pencil"></i> Editar carrito
-        </a>
-
+        <a href="index.php?pagina=carrito" class="btn btn-warning btn-block">Editar carrito</a>
     <?php else: ?>
 
-        <!-- Opciones de pago -->
-        <div class="row">
-
-            <!-- ── Stripe (tarjeta) ── -->
-            <div class="col-md-6 mb-3">
-                <div class="card shadow-sm h-100">
-                    <div class="card-header bg-primary text-white">
-                        <i class="bi bi-credit-card-fill"></i> Pagar con tarjeta
-                    </div>
-                    <div class="card-body d-flex flex-column align-items-center justify-content-center text-center">
-                        <?php if ($stripeConfigurado): ?>
-                            <p class="text-muted small mb-3">Visa, Mastercard y más.<br>Procesado por <strong>Stripe</strong>.</p>
-                            <button id="btnStripe" class="btn btn-primary btn-block">
-                                <i class="bi bi-credit-card"></i>
-                                Pagar $<?php echo number_format($total, 2); ?>
-                            </button>
-                            <div id="stripeError" class="alert alert-danger mt-2 w-100" style="display:none;"></div>
-                        <?php else: ?>
-                            <p class="text-muted small">Stripe no configurado.<br>Edita <code>config/stripe.php</code>.</p>
-                            <form method="POST" action="index.php?pagina=pago" class="w-100">
-                                <button type="submit" class="btn btn-secondary btn-block">Pago simulado</button>
-                            </form>
-                        <?php endif; ?>
-                    </div>
-                </div>
-            </div>
-
-            <!-- ── MercadoPago QR ── -->
-            <div class="col-md-6 mb-3">
-                <div class="card shadow-sm h-100">
-                    <div class="card-header bg-success text-white">
-                        <i class="bi bi-qr-code"></i> Pagar con QR
-                    </div>
-                    <div class="card-body d-flex flex-column align-items-center justify-content-center text-center" id="mpPanel">
-                        <?php if ($mpConfigurado): ?>
-                            <p class="text-muted small mb-3">Escanea el QR con tu app de<br><strong>MercadoPago</strong>.</p>
-                            <button id="btnGenerarQR" class="btn btn-success btn-block">
-                                <i class="bi bi-qr-code-scan"></i> Generar QR
-                            </button>
-                            <!-- QR se inyecta aquí -->
-                            <div id="qrContainer" style="display:none;" class="mt-3 w-100">
-                                <img id="qrImg" src="" alt="QR de pago" class="img-fluid border rounded mb-2" style="max-width:200px;">
-                                <p class="text-muted small mb-1">Escanea con MercadoPago</p>
-                                <div id="qrEstado" class="badge badge-secondary">Esperando pago...</div>
-                                <div class="mt-2">
-                                    <a id="linkMP" href="#" target="_blank" class="btn btn-outline-success btn-sm">
-                                        Abrir en navegador
-                                    </a>
-                                </div>
+    <div class="row">
+        <!-- Tarjeta simulada -->
+        <div class="col-md-6 mb-3">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-primary text-white"><i class="bi bi-credit-card-fill"></i> Pagar con tarjeta</div>
+                <div class="card-body">
+                    <p class="text-muted small"><i class="bi bi-info-circle"></i> Modo demo — usa cualquier dato</p>
+                    <form id="formTarjeta">
+                        <div class="form-group">
+                            <label class="small font-weight-bold">Número de tarjeta</label>
+                            <input type="text" id="nroTarjeta" class="form-control" placeholder="1234 5678 9012 3456" maxlength="19">
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group col-7">
+                                <label class="small font-weight-bold">Vencimiento</label>
+                                <input type="text" id="vencimiento" class="form-control" placeholder="MM/AA" maxlength="5">
                             </div>
-                            <div id="mpError" class="alert alert-danger mt-2 w-100" style="display:none;"></div>
-                        <?php else: ?>
-                            <p class="text-muted small">MercadoPago no configurado.<br>Edita <code>config/stripe.php</code> con tu <code>MP_ACCESS_TOKEN</code>.</p>
-                            <a href="https://www.mercadopago.com/developers/panel/app" target="_blank" class="btn btn-outline-success btn-sm">Obtener credenciales</a>
-                        <?php endif; ?>
-                    </div>
+                            <div class="form-group col-5">
+                                <label class="small font-weight-bold">CVV</label>
+                                <input type="text" id="cvv" class="form-control" placeholder="123" maxlength="3">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="small font-weight-bold">Titular</label>
+                            <input type="text" id="titular" class="form-control" placeholder="Nombre en la tarjeta">
+                        </div>
+                        <div id="errorTarjeta" class="alert alert-danger" style="display:none;"></div>
+                        <button type="submit" class="btn btn-primary btn-block">
+                            <i class="bi bi-lock-fill"></i> Pagar $<?php echo number_format($total, 2); ?>
+                        </button>
+                    </form>
                 </div>
             </div>
+        </div>
 
-        </div><!-- /row -->
+        <!-- QR Demo -->
+        <div class="col-md-6 mb-3">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-success text-white"><i class="bi bi-qr-code"></i> Pagar con QR</div>
+                <div class="card-body d-flex flex-column align-items-center justify-content-center text-center">
+                    <p class="text-muted small mb-2">Escanea el QR con tu app de pagos</p>
+                    <img src="recursos/imagenes/QR_Electrohogar.jpeg" alt="QR de pago" class="img-fluid border rounded" style="max-width:200px;">
+                    <div class="mt-3 w-100">
+                        <p class="mb-1 small text-muted">Monto a pagar:</p>
+                        <h4 id="montoQR" class="text-success font-weight-bold">$<?php echo number_format($total, 2); ?></h4>
+                    </div>
+                    <form id="formQR" class="w-100 mt-2">
+                        <button type="submit" class="btn btn-success btn-block">
+                            <i class="bi bi-check-circle-fill"></i> Pagar con QR
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <?php endif; ?>
 
@@ -126,99 +107,79 @@
 
 <script>
 (function () {
-    // ── Stripe ──
-    var btnStripe = document.getElementById('btnStripe');
-    if (btnStripe) {
-        btnStripe.addEventListener('click', function () {
-            btnStripe.disabled = true;
-            btnStripe.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Redirigiendo...';
-            document.getElementById('stripeError').style.display = 'none';
-
-            fetch('api/stripe_checkout.php')
-                .then(function(r) { return r.json(); })
-                .then(function(d) {
-                    if (d.error) {
-                        document.getElementById('stripeError').textContent = d.error;
-                        document.getElementById('stripeError').style.display = '';
-                        btnStripe.disabled = false;
-                        btnStripe.innerHTML = '<i class="bi bi-credit-card"></i> Pagar $<?php echo number_format($total, 2); ?>';
-                        if (d.login) window.location.href = 'index.php?pagina=login';
-                        return;
-                    }
-                    window.location.href = d.url;
-                })
-                .catch(function () {
-                    document.getElementById('stripeError').textContent = 'Error de conexión.';
-                    document.getElementById('stripeError').style.display = '';
-                    btnStripe.disabled = false;
-                    btnStripe.innerHTML = '<i class="bi bi-credit-card"></i> Pagar $<?php echo number_format($total, 2); ?>';
-                });
+    // Formato tarjeta
+    var nro = document.getElementById('nroTarjeta');
+    var ven = document.getElementById('vencimiento');
+    if (nro) {
+        nro.addEventListener('input', function () {
+            var v = this.value.replace(/\D/g, '').substring(0, 16);
+            this.value = v.replace(/(.{4})/g, '$1 ').trim();
+        });
+    }
+    if (ven) {
+        ven.addEventListener('input', function () {
+            var v = this.value.replace(/\D/g, '').substring(0, 4);
+            if (v.length >= 2) v = v.substring(0,2) + '/' + v.substring(2);
+            this.value = v;
         });
     }
 
-    // ── MercadoPago QR ──
-    var btnQR      = document.getElementById('btnGenerarQR');
-    var qrContainer = document.getElementById('qrContainer');
-    var pollingId  = null;
+    // Submit tarjeta simulada
+    var form = document.getElementById('formTarjeta');
+    if (form) {
+        form.addEventListener('submit', function (e) {
+            e.preventDefault();
+            var err = document.getElementById('errorTarjeta');
+            var digitos = (document.getElementById('nroTarjeta').value.replace(/\s/g,'')).length;
+            var cvv     = document.getElementById('cvv').value.trim();
+            var titular = document.getElementById('titular').value.trim();
+            var venc    = document.getElementById('vencimiento').value.trim();
 
-    if (btnQR) {
-        btnQR.addEventListener('click', function () {
-            btnQR.disabled = true;
-            btnQR.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Generando QR...';
-            document.getElementById('mpError').style.display = 'none';
+            if (digitos < 16)        { err.textContent = 'Número de tarjeta inválido.';  err.style.display=''; return; }
+            if (!/^\d{2}\/\d{2}$/.test(venc)) { err.textContent = 'Vencimiento inválido (MM/AA).'; err.style.display=''; return; }
+            if (cvv.length < 3)      { err.textContent = 'CVV inválido.';                err.style.display=''; return; }
+            if (titular.length < 3)  { err.textContent = 'Ingresa el nombre del titular.'; err.style.display=''; return; }
 
-            fetch('api/mp_checkout.php')
-                .then(function(r) { return r.json(); })
-                .then(function(d) {
-                    if (d.error) {
-                        document.getElementById('mpError').textContent = d.error;
-                        document.getElementById('mpError').style.display = '';
-                        btnQR.disabled = false;
-                        btnQR.innerHTML = '<i class="bi bi-qr-code-scan"></i> Generar QR';
-                        if (d.login) window.location.href = 'index.php?pagina=login';
-                        return;
-                    }
+            err.style.display = 'none';
+            var btn = form.querySelector('button[type=submit]');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Procesando...';
 
-                    // Generar imagen QR con API pública (sin librerías)
-                    var qrUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=' + encodeURIComponent(d.qr_url);
-                    document.getElementById('qrImg').src = qrUrl;
-                    document.getElementById('linkMP').href = d.init_point;
-                    btnQR.style.display = 'none';
-                    qrContainer.style.display = '';
-
-                    // Polling cada 4 segundos
-                    pollingId = setInterval(verificarPago, 4000);
-                })
-                .catch(function () {
-                    document.getElementById('mpError').textContent = 'Error al generar QR.';
-                    document.getElementById('mpError').style.display = '';
-                    btnQR.disabled = false;
-                    btnQR.innerHTML = '<i class="bi bi-qr-code-scan"></i> Generar QR';
-                });
+            // Simular 1.5s de "procesamiento"
+            setTimeout(function () {
+                var f = document.createElement('form');
+                f.method = 'POST';
+                f.action = 'index.php?pagina=pago';
+                document.body.appendChild(f);
+                f.submit();
+            }, 1500);
         });
     }
 
-    function verificarPago() {
-        fetch('api/mp_verificar.php')
-            .then(function(r) { return r.json(); })
-            .then(function(d) {
-                var badge = document.getElementById('qrEstado');
-                if (d.status === 'pagado') {
-                    clearInterval(pollingId);
-                    badge.className = 'badge badge-success';
-                    badge.textContent = '¡Pago confirmado!';
-                    setTimeout(function () {
-                        window.location.href = 'index.php?pagina=pago_exitoso&metodo=mp&status=approved&payment_id=0&nro=' + (d.nroVenta || '');
-                    }, 1200);
-                } else if (d.status === 'pendiente') {
-                    badge.className = 'badge badge-warning';
-                    badge.textContent = 'Pago pendiente...';
-                } else if (d.status === 'esperando') {
-                    badge.className = 'badge badge-secondary';
-                    badge.textContent = 'Esperando pago...';
-                }
-            });
-    }
 }());
 </script>
+
+<?php if (empty($sinStock)): ?>
+<script>
+(function () {
+    var formQR = document.getElementById('formQR');
+    if (!formQR) return;
+    formQR.addEventListener('submit', function (e) {
+        e.preventDefault();
+        var btn = formQR.querySelector('button[type=submit]');
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Procesando...';
+        document.getElementById('montoQR').textContent = '$0.00';
+        setTimeout(function () {
+            var f = document.createElement('form');
+            f.method = 'POST';
+            f.action = 'index.php?pagina=pago&metodo=qr';
+            document.body.appendChild(f);
+            f.submit();
+        }, 1500);
+    });
+}());
+</script>
+<?php endif; ?>
+
 <?php require_once __DIR__ . '/layout/pie.php'; ?>

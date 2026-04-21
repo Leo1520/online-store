@@ -100,13 +100,6 @@
                                             <span>
                                                 <strong>Pedido #<?php echo (int)$compra['nro']; ?></strong>
                                                 <small class="text-muted ml-2"><?php echo htmlspecialchars($compra['fechaHora']); ?></small>
-                                                <?php
-                                                    $est = $compra['estado'] ?? 'pendiente';
-                                                    $bc  = ['pendiente'=>'badge-secondary','procesando'=>'badge-warning','enviado'=>'badge-info','entregado'=>'badge-success','cancelado'=>'badge-danger'];
-                                                ?>
-                                                <span class="badge <?php echo $bc[$est] ?? 'badge-secondary'; ?> ml-2">
-                                                    <?php echo ucfirst($est); ?>
-                                                </span>
                                             </span>
                                             <span class="badge badge-light border">
                                                 $<?php echo number_format((float)$compra['totalMonto'], 2); ?>
@@ -118,7 +111,7 @@
                                          data-parent="#historialAccordion">
                                         <div class="card-body pt-0">
                                             <?php if (!empty($detalles[$compra['nro']])): ?>
-                                                <table class="table table-sm mb-0">
+                                                <table class="table table-sm mb-2">
                                                     <thead>
                                                         <tr>
                                                             <th>Producto</th>
@@ -139,6 +132,10 @@
                                                     </tbody>
                                                 </table>
                                             <?php endif; ?>
+                                            <a href="index.php?pagina=factura&nro=<?php echo (int)$compra['nro']; ?>"
+                                               target="_blank" class="btn btn-sm btn-outline-secondary">
+                                                <i class="bi bi-file-earmark-text"></i> Descargar Factura
+                                            </a>
                                         </div>
                                     </div>
                                 </div>

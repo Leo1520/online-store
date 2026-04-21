@@ -36,9 +36,11 @@
                     <a href="index.php?pagina=inicio" class="btn btn-primary mr-2">
                         <i class="bi bi-shop"></i> Seguir comprando
                     </a>
-                    <a href="index.php?pagina=mi_cuenta" class="btn btn-outline-secondary">
-                        <i class="bi bi-bag-check"></i> Mis pedidos
+                    <?php if ($nroVenta): ?>
+                    <a href="index.php?pagina=factura&nro=<?php echo (int)$nroVenta; ?>" target="_blank" class="btn btn-outline-secondary">
+                        <i class="bi bi-file-earmark-text"></i> Factura
                     </a>
+                    <?php endif; ?>
                 </div>
             </div>
         </div>

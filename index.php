@@ -8,6 +8,7 @@ $paginasPermitidas = [
     'carrito',
     'pago',
     'pago_exitoso',
+    'factura',
     'login',
     'logout',
     'registro',
@@ -51,6 +52,10 @@ switch ($pagina) {
     case 'pago_exitoso':
         require_once __DIR__ . '/controladores/PagoControlador.php';
         (new PagoControlador())->exitoso();
+        break;
+    case 'factura':
+        require_once __DIR__ . '/controladores/FacturaControlador.php';
+        (new FacturaControlador())->ver();
         break;
     case 'login':
         require_once __DIR__ . '/controladores/AutenticacionControlador.php';

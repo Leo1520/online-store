@@ -12,6 +12,24 @@ class PagoControlador {
             exit();
         }
 
+        // POST = pago simulado (tarjeta demo o QR demo)
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            if (empty($_SESSION['usuario'])) {
+                header('Location: index.php?pagina=login');
+                exit();
+            }
+            $metodo = trim($_GET['metodo'] ?? 'tarjeta');
+            $venta    = new Venta();
+            $nroVenta = $venta->registrarVenta($_SESSION['carrito'], $_SESSION['usuario']);
+            if ($nroVenta !== false) {
+                $_SESSION['carrito'] = [];
+                header('Location: index.php?pagina=pago_exitoso&nro=' . (int)$nroVenta . '&metodo=' . $metodo);
+            } else {
+                header('Location: index.php?pagina=pago_exitoso&error=1');
+            }
+            exit();
+        }
+
         $modelo = new Producto();
         $items  = [];
         $total  = 0;
@@ -31,11 +49,6 @@ class PagoControlador {
             ];
         }
 
-        $stripeConfigurado = (
-            defined('STRIPE_PUBLISHABLE_KEY') &&
-            strpos(STRIPE_PUBLISHABLE_KEY, 'REEMPLAZA') === false
-        );
-
         $titulo = 'Proceso de Pago';
         require_once __DIR__ . '/../vistas/pago.php';
     }
@@ -51,8 +64,69 @@ class PagoControlador {
             exit();
         }
 
+        // ── Retorno desde PayPal (navegador) ──
+        if ($metodo === 'paypal') {
+            $orderId  = trim($_GET['token'] ?? '');
+            $payerId  = trim($_GET['PayerID'] ?? '');
+
+            if (!$orderId || !$payerId) {
+                $error = 'Pago cancelado o no completado.';
+            } elseif (!empty($_SESSION['paypal_venta_registrada'])) {
+                $nroVenta = $_SESSION['ultimo_nro_venta'] ?? null;
+            } else {
+                $ppBase = PAYPAL_MODE === 'sandbox'
+                    ? 'https://api-m.sandbox.paypal.com'
+                    : 'https://api-m.paypal.com';
+
+                // Token
+                $ch = curl_init("$ppBase/v1/oauth2/token");
+                curl_setopt_array($ch, [
+                    CURLOPT_RETURNTRANSFER => true,
+                    CURLOPT_POST           => true,
+                    CURLOPT_POSTFIELDS     => 'grant_type=client_credentials',
+                    CURLOPT_USERPWD        => PAYPAL_CLIENT_ID . ':' . PAYPAL_SECRET,
+                    CURLOPT_HTTPHEADER     => ['Accept: application/json'],
+                ]);
+                $tokenData   = json_decode(curl_exec($ch), true);
+                curl_close($ch);
+                $accessToken = $tokenData['access_token'] ?? null;
+
+                if (!$accessToken) {
+                    $error = 'No se pudo autenticar con PayPal.';
+                } else {
+                    // Capturar orden
+                    $ch = curl_init("$ppBase/v2/checkout/orders/$orderId/capture");
+                    curl_setopt_array($ch, [
+                        CURLOPT_RETURNTRANSFER => true,
+                        CURLOPT_POST           => true,
+                        CURLOPT_POSTFIELDS     => '{}',
+                        CURLOPT_HTTPHEADER     => [
+                            'Content-Type: application/json',
+                            'Authorization: Bearer ' . $accessToken,
+                        ],
+                    ]);
+                    $capture = json_decode(curl_exec($ch), true);
+                    curl_close($ch);
+
+                    if (($capture['status'] ?? '') === 'COMPLETED') {
+                        $venta    = new Venta();
+                        $nroVenta = $venta->registrarVenta($_SESSION['carrito'], $_SESSION['usuario']);
+                        if ($nroVenta !== false) {
+                            $_SESSION['paypal_venta_registrada'] = true;
+                            $_SESSION['ultimo_nro_venta']        = $nroVenta;
+                            $_SESSION['carrito']                 = [];
+                            unset($_SESSION['paypal_order_id']);
+                        } else {
+                            $error = 'Pago aprobado pero no se pudo registrar la venta.';
+                        }
+                    } else {
+                        $error = 'El pago no fue completado por PayPal.';
+                    }
+                }
+            }
+
         // ── Retorno desde MercadoPago ──
-        if ($metodo === 'mp') {
+        } elseif ($metodo === 'mp') {
             $paymentId = (int)($_GET['payment_id'] ?? 0);
             $status    = trim($_GET['status'] ?? '');
 
@@ -124,7 +198,11 @@ class PagoControlador {
 
         // ── Flujo simulado ──
         } else {
-            $nroVenta = isset($_GET['nro']) ? (int)$_GET['nro'] : null;
+            if (!empty($_GET['error'])) {
+                $error = 'No se pudo registrar la venta. Intenta nuevamente.';
+            } else {
+                $nroVenta = isset($_GET['nro']) ? (int)$_GET['nro'] : null;
+            }
         }
 
         $titulo = 'Compra Exitosa';

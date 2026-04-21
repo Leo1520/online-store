@@ -371,7 +371,7 @@ class AdminControlador {
         if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accion']) && $_POST['accion'] === 'cambiar_estado') {
             $nro    = (int)($_POST['nro'] ?? 0);
             $estado = trim($_POST['estado'] ?? '');
-            $permitidos = ['pendiente', 'procesando', 'enviado', 'entregado', 'cancelado'];
+            $permitidos = ['pendiente', 'procesando', 'enviado', 'entregado', 'cancelado', 'facturado'];
             if ($nro > 0 && in_array($estado, $permitidos)) {
                 $notaModel->actualizarEstado($nro, $estado);
             }
@@ -382,8 +382,20 @@ class AdminControlador {
         $ventas = $notaModel->obtenerTodasConResumen();
 
         $detalles = [];
+        $clientesExtra = [];
+        $db = \Database::conectar();
         foreach ($ventas as $venta) {
-            $detalles[$venta['nro']] = $notaModel->obtenerDetallesPorNota((int)$venta['nro']);
+            $nro = (int)$venta['nro'];
+            $detalles[$nro] = $notaModel->obtenerDetallesPorNota($nro);
+            $ci = $venta['ciCliente'];
+            if (!isset($clientesExtra[$ci])) {
+                $stmt = $db->prepare("SELECT correo, direccion, nroCelular FROM Cliente WHERE ci = ?");
+                $stmt->bind_param('s', $ci);
+                $stmt->execute();
+                $res = $stmt->get_result();
+                $clientesExtra[$ci] = $res ? $res->fetch_assoc() : [];
+                $stmt->close();
+            }
         }
 
         $titulo = 'Administracion - Ventas';
