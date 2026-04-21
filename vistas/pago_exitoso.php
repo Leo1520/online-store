@@ -124,7 +124,7 @@
                 <i class="bi bi-shop mr-1"></i>Seguir comprando
             </a>
             <?php if ($nroVenta): ?>
-            <a href="index.php?pagina=factura&nro=<?php echo (int)$nroVenta; ?>" target="_blank" class="btn btn-amarillo">
+            <a href="index.php?pagina=factura&nro=<?php echo (int)$nroVenta; ?>" class="btn btn-amarillo">
                 <i class="bi bi-file-earmark-pdf mr-1"></i>Ver factura
             </a>
             <?php endif; ?>

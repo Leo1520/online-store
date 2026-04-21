@@ -185,10 +185,7 @@
 
 <script>
 function volverPagina() {
-    // Si la ventana fue abierta con target="_blank", cerrarla
-    if (window.opener) {
-        window.close();
-    } else if (history.length > 1) {
+    if (history.length > 1) {
         history.back();
     } else {
         window.location.href = 'index.php?pagina=mi_cuenta';
