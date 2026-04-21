@@ -125,86 +125,11 @@
     <input type="hidden" id="filtroPrecioMin">
     <input type="hidden" id="filtroPrecioMax">
 
-    <!-- ═══ BARRA DE FILTROS SLIM ═══ -->
-    <div class="slim-bar mb-4">
-        <div class="slim-left">
-            <div class="slim-search">
-                <i class="bi bi-search"></i>
-                <input type="text" id="filtroBusquedaVis" placeholder="Buscar producto...">
-            </div>
-            <button class="slim-precio-btn" id="btnPrecioToggle" onclick="togglePrecio()">
-                <i class="bi bi-funnel"></i> Precio
-                <i class="bi bi-chevron-down" id="iconPrecioChevron" style="font-size:11px;margin-left:2px;transition:transform .2s;"></i>
-            </button>
-        </div>
-        <div class="slim-right">
-            <span class="text-muted" style="font-size:13px;" id="contadorResultados"></span>
-            <select id="filtroOrden" class="slim-select">
-                <option value="">Relevancia</option>
-                <option value="precio_asc">Menor precio</option>
-                <option value="precio_desc">Mayor precio</option>
-                <option value="nombre_asc">A – Z</option>
-                <option value="nombre_desc">Z – A</option>
-            </select>
-            <select id="porPagina" class="slim-select" style="width:70px;">
-                <option value="6">6</option>
-                <option value="12" selected>12</option>
-                <option value="24">24</option>
-                <option value="48">48</option>
-            </select>
-            <button id="btnLimpiar" class="slim-limpiar" title="Limpiar filtros">
-                <i class="bi bi-x-circle"></i>
-            </button>
-        </div>
-    </div>
-
-    <!-- Panel precio colapsable -->
-    <div id="panelPrecio" class="precio-panel mb-3" style="display:none;">
-        <div class="precio-panel-inner">
-            <div class="precio-grupo">
-                <label>Precio mínimo (Bs.)</label>
-                <input type="number" id="filtroPrecioMinVis" class="form-control form-control-sm" placeholder="0" min="0">
-            </div>
-            <div class="precio-grupo">
-                <label>Precio máximo (Bs.)</label>
-                <input type="number" id="filtroPrecioMaxVis" class="form-control form-control-sm" placeholder="Sin límite" min="0">
-            </div>
-            <button class="btn btn-azul btn-sm" onclick="aplicarPrecio()" style="border-radius:8px;align-self:flex-end;">
-                <i class="bi bi-check-lg mr-1"></i>Aplicar
-            </button>
-        </div>
-    </div>
-
-<style>
-    .slim-bar {
-        background: #fff; border-radius: 12px;
-        box-shadow: 0 2px 10px rgba(0,0,0,.06);
-        padding: 10px 16px;
-        display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;
-    }
-    .slim-left, .slim-right { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-    .slim-search {
-        display: flex; align-items: center; gap: 8px;
-        background: #f4f6fa; border-radius: 20px; padding: 7px 14px;
-        border: 1.5px solid #e0e6f0; min-width: 200px;
-    }
-    .slim-search i { color: #aaa; font-size: 14px; }
-    .slim-search input { border: none; background: transparent; outline: none; font-size: 13px; width: 100%; }
-    .slim-precio-btn {
-        padding: 7px 14px; border-radius: 20px; border: 1.5px solid #dde4f0;
-        background: #fff; font-size: 13px; font-weight: 600; color: #555;
-        cursor: pointer; display: flex; align-items: center; gap: 5px; transition: all .18s;
-    }
-    .slim-precio-btn:hover, .slim-precio-btn.activo { border-color: var(--azul); color: var(--azul); background: #f0f4ff; }
-    .slim-select { border: 1.5px solid #dde4f0; border-radius: 8px; font-size: 13px; padding: 6px 10px; background: #fff; color: #555; }
-    .slim-limpiar { border: none; background: none; color: #ccc; font-size: 18px; cursor: pointer; padding: 4px; }
-    .slim-limpiar:hover { color: #dc3545; }
-    .precio-panel { background: #fff; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,.07); padding: 16px 20px; }
-    .precio-panel-inner { display: flex; gap: 14px; align-items: flex-start; flex-wrap: wrap; }
-    .precio-grupo { display: flex; flex-direction: column; gap: 4px; }
-    .precio-grupo label { font-size: 12px; font-weight: 700; color: var(--azul); }
-    .precio-grupo input { width: 150px; }
-</style>
+    <!-- inputs ocultos para limpiar filtros -->
+    <span id="contadorResultados" style="display:none;"></span>
+    <select id="filtroOrden" style="display:none;"></select>
+    <select id="porPagina" style="display:none;"><option value="12" selected>12</option></select>
+    <button id="btnLimpiar" style="display:none;"></button>
 
     <!-- Spinner -->
     <div id="cargando" class="text-center py-5">
@@ -280,10 +205,6 @@
     var selectOrden     = document.getElementById('filtroOrden');
     var btnLimpiar      = document.getElementById('btnLimpiar');
 
-    // Controles visuales
-    var visBusqueda     = document.getElementById('filtroBusquedaVis');
-    var visMin          = document.getElementById('filtroPrecioMinVis');
-    var visMax          = document.getElementById('filtroPrecioMaxVis');
 
     function obtenerFiltros() {
         return new URLSearchParams({
@@ -295,25 +216,9 @@
         });
     }
 
-    // Sincronizar búsqueda visual → hidden → cargar
-    if (visBusqueda) {
-        visBusqueda.addEventListener('input', function () {
-            inputBusqueda.value = this.value;
-            clearTimeout(debounceId);
-            debounceId = setTimeout(cargarProductos, 400);
-        });
-    }
-
     btnLimpiar.addEventListener('click', function () {
         inputBusqueda.value = ''; selectCategoria.value = '0';
         inputMin.value = ''; inputMax.value = ''; selectOrden.value = '';
-        if (visBusqueda) visBusqueda.value = '';
-        if (visMin) visMin.value = '';
-        if (visMax) visMax.value = '';
-        // Resetear pills
-        document.querySelectorAll('.cat-pill').forEach(function(p) { p.classList.remove('activo'); });
-        var todas = document.querySelector('.cat-pill[data-id="0"]');
-        if (todas) todas.classList.add('activo');
         cargarProductos();
     });
 
@@ -497,29 +402,7 @@
     cargarCategorias();
 }());
 
-function togglePrecio() {
-    var panel   = document.getElementById('panelPrecio');
-    var btn     = document.getElementById('btnPrecioToggle');
-    var chevron = document.getElementById('iconPrecioChevron');
-    var visible = panel.style.display !== 'none';
-    panel.style.display = visible ? 'none' : 'block';
-    btn.classList.toggle('activo', !visible);
-    chevron.style.transform = visible ? 'rotate(0deg)' : 'rotate(180deg)';
-}
 
-function aplicarPrecio() {
-    var min = document.getElementById('filtroPrecioMinVis').value;
-    var max = document.getElementById('filtroPrecioMaxVis').value;
-    document.getElementById('filtroPrecioMin').value = min;
-    document.getElementById('filtroPrecioMax').value = max;
-    // cerrar panel y recargar
-    document.getElementById('panelPrecio').style.display = 'none';
-    document.getElementById('btnPrecioToggle').classList.remove('activo');
-    document.getElementById('iconPrecioChevron').style.transform = 'rotate(0deg)';
-    // disparar recarga
-    var sel = document.getElementById('filtroCategoria');
-    if (sel) sel.dispatchEvent(new Event('change'));
-}
 </script>
 
 <?php require_once __DIR__ . '/layout/pie.php'; ?>
