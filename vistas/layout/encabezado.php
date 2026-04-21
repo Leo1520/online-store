@@ -147,9 +147,115 @@
             color: var(--azul);
             font-weight: 700;
         }
+
+        /* Carrito drawer */
+        .carrito-overlay {
+            display: none;
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,.5);
+            z-index: 1040;
+        }
+        .carrito-overlay.activo { display: block; }
+
+        .carrito-drawer {
+            position: fixed;
+            top: 0; right: 0;
+            width: 360px; max-width: 95vw;
+            height: 100vh;
+            background: #fff;
+            z-index: 1050;
+            display: flex;
+            flex-direction: column;
+            transform: translateX(100%);
+            transition: transform .3s ease;
+            box-shadow: -4px 0 24px rgba(0,0,0,.18);
+        }
+        .carrito-drawer.activo { transform: translateX(0); }
+
+        .carrito-drawer-header {
+            background: var(--azul);
+            color: #fff;
+            padding: 16px 18px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-shrink: 0;
+        }
+        .carrito-drawer-header h5 { margin: 0; font-weight: 700; font-size: 16px; }
+        .carrito-drawer-close {
+            background: none; border: none; color: #fff;
+            font-size: 22px; cursor: pointer; line-height: 1; opacity: .8;
+        }
+        .carrito-drawer-close:hover { opacity: 1; }
+
+        .carrito-drawer-body {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px;
+        }
+
+        .carrito-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        .carrito-item img {
+            width: 56px; height: 56px;
+            object-fit: contain;
+            border-radius: 8px;
+            border: 1px solid #eee;
+            background: #fafafa;
+        }
+        .carrito-item-info { flex: 1; min-width: 0; }
+        .carrito-item-info .nombre {
+            font-size: 13px; font-weight: 600;
+            color: var(--azul);
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+        .carrito-item-info .precio { font-size: 12px; color: #888; }
+        .carrito-item-controls {
+            display: flex; align-items: center; gap: 4px; margin-top: 5px;
+        }
+        .carrito-item-controls button {
+            width: 24px; height: 24px;
+            border: 1px solid #ddd; background: #f8f8f8;
+            border-radius: 4px; font-size: 14px; line-height: 1;
+            cursor: pointer; display: flex; align-items: center; justify-content: center;
+        }
+        .carrito-item-controls button:hover { background: var(--azul); color: #fff; border-color: var(--azul); }
+        .carrito-item-controls span {
+            width: 28px; text-align: center; font-size: 13px; font-weight: 600;
+        }
+        .carrito-item-subtotal { font-size: 13px; font-weight: 700; color: var(--azul); white-space: nowrap; }
+        .btn-eliminar-item {
+            background: none; border: none; color: #ccc;
+            font-size: 16px; cursor: pointer; padding: 0 2px;
+        }
+        .btn-eliminar-item:hover { color: #dc3545; }
+
+        .carrito-drawer-footer {
+            padding: 16px;
+            border-top: 2px solid #f0f0f0;
+            flex-shrink: 0;
+            background: #fff;
+        }
+        .carrito-total-row {
+            display: flex; justify-content: space-between;
+            font-size: 16px; font-weight: 700;
+            color: var(--azul); margin-bottom: 12px;
+        }
+        .carrito-empty {
+            text-align: center; padding: 40px 20px; color: #aaa;
+        }
+        .carrito-empty i { font-size: 48px; display: block; margin-bottom: 10px; }
     </style>
 </head>
 <body>
+
+<!-- Cabecera fija -->
+<div id="cabecera-fija" style="position:sticky;top:0;z-index:1030;">
 
 <!-- Barra superior -->
 <div class="barra-top d-none d-md-block">
@@ -159,9 +265,6 @@
             <?php if (isset($_SESSION['usuario'])): ?>
                 Hola, <strong style="color:#fff;"><?php echo htmlspecialchars($_SESSION['usuario']); ?></strong>
                 &nbsp;|&nbsp; <a href="index.php?pagina=logout">Cerrar sesión</a>
-            <?php else: ?>
-                <a href="#" data-toggle="modal" data-target="#modalLogin">Iniciar sesión</a> &nbsp;|&nbsp;
-                <a href="#" data-toggle="modal" data-target="#modalRegistro">Crear cuenta</a>
             <?php endif; ?>
         </span>
     </div>
@@ -216,7 +319,7 @@
                     </a>
                 <?php endif; ?>
 
-                <a href="index.php?pagina=carrito" style="position:relative;">
+                <a href="#" onclick="abrirCarrito(); return false;" style="position:relative;">
                     <i class="bi bi-cart3"></i>
                     <span id="carritoContador" class="badge-carrito" style="display:none;">0</span>
                     <span>Carrito</span>
@@ -271,17 +374,37 @@
                 </li>
                 <?php endif; ?>
             </ul>
-            <ul class="navbar-nav ml-auto">
-                <li class="nav-item">
-                    <a class="nav-link font-weight-bold" href="index.php?pagina=pago"
-                       style="font-size:13px; color:var(--amarillo) !important;">
-                        <i class="bi bi-bag-check-fill mr-1"></i>Finalizar compra
-                    </a>
-                </li>
-            </ul>
         </div>
     </div>
 </nav>
+
+</div><!-- fin cabecera-fija -->
+
+<!-- Carrito Overlay -->
+<div class="carrito-overlay" id="carritoOverlay" onclick="cerrarCarrito()"></div>
+
+<!-- Carrito Drawer -->
+<div class="carrito-drawer" id="carritoDrawer">
+    <div class="carrito-drawer-header">
+        <h5><i class="bi bi-cart3 mr-2"></i>Mi Carrito</h5>
+        <button class="carrito-drawer-close" onclick="cerrarCarrito()">&times;</button>
+    </div>
+    <div class="carrito-drawer-body" id="carritoDrawerBody">
+        <div class="carrito-empty"><i class="bi bi-cart-x"></i>Tu carrito está vacío</div>
+    </div>
+    <div class="carrito-drawer-footer" id="carritoDrawerFooter" style="display:none;">
+        <div class="carrito-total-row">
+            <span>Total</span>
+            <span id="carritoDrawerTotal">Bs. 0.00</span>
+        </div>
+        <a href="index.php?pagina=pago" class="btn btn-amarillo btn-block font-weight-bold">
+            <i class="bi bi-credit-card mr-1"></i>Finalizar compra
+        </a>
+        <button onclick="cerrarCarrito()" class="btn btn-outline-secondary btn-block btn-sm mt-2">
+            Seguir comprando
+        </button>
+    </div>
+</div>
 
 <!-- Modal Login -->
 <div class="modal fade" id="modalLogin" tabindex="-1" role="dialog">
@@ -559,5 +682,104 @@ function filtrarCategoria(id) {
 document.addEventListener('DOMContentLoaded', function () {
     var hb = document.getElementById('headerBusqueda');
     if (hb) hb.addEventListener('keydown', function (e) { if (e.key === 'Enter') buscarDesdeHeader(); });
+});
+</script>
+
+<script>
+/* ====== Carrito Drawer ====== */
+function abrirCarrito() {
+    document.getElementById('carritoOverlay').classList.add('activo');
+    document.getElementById('carritoDrawer').classList.add('activo');
+    cargarCarritoDrawer();
+}
+
+function cerrarCarrito() {
+    document.getElementById('carritoOverlay').classList.remove('activo');
+    document.getElementById('carritoDrawer').classList.remove('activo');
+}
+
+function cargarCarritoDrawer() {
+    fetch('api/carrito.php?accion=obtener')
+        .then(function(r) { return r.json(); })
+        .then(function(d) { renderCarritoDrawer(d); })
+        .catch(function() {});
+}
+
+function renderCarritoDrawer(d) {
+    var body   = document.getElementById('carritoDrawerBody');
+    var footer = document.getElementById('carritoDrawerFooter');
+    var badge  = document.getElementById('carritoContador');
+
+    if (d.cantidad > 0) {
+        badge.textContent   = d.cantidad;
+        badge.style.display = '';
+    } else {
+        badge.style.display = 'none';
+    }
+
+    if (!d.items || d.items.length === 0) {
+        body.innerHTML      = '<div class="carrito-empty"><i class="bi bi-cart-x"></i>Tu carrito está vacío</div>';
+        footer.style.display = 'none';
+        return;
+    }
+
+    var html = '';
+    d.items.forEach(function(item) {
+        var img = item.imagen
+            ? 'recursos/imagenes/' + item.imagen
+            : 'recursos/imagenes/no-image.png';
+        var precio   = parseFloat(item.precio).toFixed(2);
+        var subtotal = parseFloat(item.subtotal).toFixed(2);
+        html += '<div class="carrito-item" id="citem-' + item.id_producto + '">'
+            + '<img src="' + img + '" alt="' + item.nombre + '" onerror="this.src=\'recursos/imagenes/no-image.png\'">'
+            + '<div class="carrito-item-info">'
+            +   '<div class="nombre">' + item.nombre + '</div>'
+            +   '<div class="precio">Bs. ' + precio + ' c/u</div>'
+            +   '<div class="carrito-item-controls">'
+            +     '<button onclick="cambiarCantidadDrawer(' + item.id_producto + ',' + (item.cantidad - 1) + ')">&#8722;</button>'
+            +     '<span>' + item.cantidad + '</span>'
+            +     '<button onclick="cambiarCantidadDrawer(' + item.id_producto + ',' + (item.cantidad + 1) + ')">&#43;</button>'
+            +   '</div>'
+            + '</div>'
+            + '<div class="d-flex flex-column align-items-end">'
+            +   '<span class="carrito-item-subtotal">Bs. ' + subtotal + '</span>'
+            +   '<button class="btn-eliminar-item mt-1" onclick="eliminarItemDrawer(' + item.id_producto + ')" title="Eliminar">'
+            +     '<i class="bi bi-trash"></i>'
+            +   '</button>'
+            + '</div>'
+            + '</div>';
+    });
+
+    body.innerHTML = html;
+    document.getElementById('carritoDrawerTotal').textContent = 'Bs. ' + parseFloat(d.total).toFixed(2);
+    footer.style.display = '';
+}
+
+function cambiarCantidadDrawer(id, nuevaCantidad) {
+    fetch('api/carrito.php?accion=actualizar&id=' + id + '&cantidad=' + nuevaCantidad)
+        .then(function(r) { return r.json(); })
+        .then(function(d) { renderCarritoDrawer(d); })
+        .catch(function() {});
+}
+
+function eliminarItemDrawer(id) {
+    fetch('api/carrito.php?accion=eliminar&id=' + id)
+        .then(function(r) { return r.json(); })
+        .then(function(d) { renderCarritoDrawer(d); })
+        .catch(function() {});
+}
+
+/* Actualizar badge al cargar la página */
+document.addEventListener('DOMContentLoaded', function () {
+    fetch('api/carrito.php?accion=obtener')
+        .then(function(r) { return r.json(); })
+        .then(function(d) {
+            var badge = document.getElementById('carritoContador');
+            if (badge && d.cantidad > 0) {
+                badge.textContent   = d.cantidad;
+                badge.style.display = '';
+            }
+        })
+        .catch(function() {});
 });
 </script>
