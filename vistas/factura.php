@@ -47,21 +47,44 @@
         .qr-factura img { width: 90px; height: 90px; border: 1px solid #ddd; border-radius: 4px; }
         .qr-factura p { font-size: 10px; color: #aaa; text-align: center; margin-top: 4px; }
 
-        /* Botón imprimir */
-        .btn-imprimir { display: block; width: 200px; margin: 0 auto 20px; padding: 10px; background: #1a73e8; color: #fff; text-align: center; border: none; border-radius: 5px; cursor: pointer; font-size: 14px; }
-        .btn-imprimir:hover { background: #1558b0; }
+        /* Botones acción */
+        .barra-acciones {
+            display: flex; justify-content: center; gap: 10px;
+            margin: 0 auto 24px; max-width: 750px; padding: 0 10px;
+            flex-wrap: wrap;
+        }
+        .btn-pdf {
+            display: flex; align-items: center; gap: 8px;
+            padding: 11px 24px; border: none; border-radius: 8px;
+            font-size: 14px; font-weight: 700; cursor: pointer; transition: opacity .2s;
+        }
+        .btn-pdf:hover { opacity: .88; }
+        .btn-pdf.primary { background: #1B3A6B; color: #fff; }
+        .btn-pdf.secondary { background: #f0f4ff; color: #1B3A6B; border: 1.5px solid #c5d0ee; }
+        .btn-pdf:disabled { opacity: .55; cursor: not-allowed; }
 
         @media print {
-            .btn-imprimir { display: none; }
+            .barra-acciones { display: none; }
             .page { border: none; margin: 0; padding: 20px; }
         }
     </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 </head>
 <body>
 
-<button class="btn-imprimir" onclick="window.print()">🖨️ Imprimir / Guardar PDF</button>
+<div class="barra-acciones">
+    <button class="btn-pdf primary" id="btnDescargarPDF">
+        ⬇️ Descargar PDF
+    </button>
+    <button class="btn-pdf secondary" onclick="window.print()">
+        🖨️ Imprimir
+    </button>
+    <button class="btn-pdf secondary" onclick="history.back()">
+        ← Volver
+    </button>
+</div>
 
-<div class="page">
+<div class="page" id="facturaPage">
 
     <!-- Encabezado -->
     <div class="header">
@@ -159,5 +182,33 @@
     </div>
 
 </div>
+
+<script>
+document.getElementById('btnDescargarPDF').addEventListener('click', function () {
+    var btn = this;
+    btn.disabled = true;
+    btn.textContent = '⏳ Generando PDF...';
+
+    var elemento = document.getElementById('facturaPage');
+    var opciones = {
+        margin:       [10, 10, 10, 10],
+        filename:     'Factura_<?php echo str_pad((int)$nroVenta, 6, "0", STR_PAD_LEFT); ?>.pdf',
+        image:        { type: 'jpeg', quality: 0.98 },
+        html2canvas:  { scale: 2, useCORS: true, logging: false },
+        jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' },
+        pagebreak:    { mode: 'avoid-all' }
+    };
+
+    html2pdf().set(opciones).from(elemento).save()
+        .then(function () {
+            btn.disabled = false;
+            btn.textContent = '⬇️ Descargar PDF';
+        })
+        .catch(function () {
+            btn.disabled = false;
+            btn.textContent = '⬇️ Descargar PDF';
+        });
+});
+</script>
 </body>
 </html>
