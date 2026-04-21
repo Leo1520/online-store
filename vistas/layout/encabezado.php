@@ -397,9 +397,16 @@
             <span>Total</span>
             <span id="carritoDrawerTotal">Bs. 0.00</span>
         </div>
-        <a href="index.php?pagina=pago" class="btn btn-amarillo btn-block font-weight-bold">
-            <i class="bi bi-credit-card mr-1"></i>Finalizar compra
-        </a>
+        <?php if (isset($_SESSION['usuario'])): ?>
+            <a href="index.php?pagina=pago" class="btn btn-amarillo btn-block font-weight-bold">
+                <i class="bi bi-credit-card mr-1"></i>Finalizar compra
+            </a>
+        <?php else: ?>
+            <button type="button" class="btn btn-amarillo btn-block font-weight-bold"
+                    onclick="cerrarCarrito(); $('#modalLogin').modal('show');">
+                <i class="bi bi-lock-fill mr-1"></i>Inicia sesión para pagar
+            </button>
+        <?php endif; ?>
         <button onclick="cerrarCarrito()" class="btn btn-outline-secondary btn-block btn-sm mt-2">
             Seguir comprando
         </button>
@@ -758,8 +765,24 @@ function renderCarritoDrawer(d) {
 function cambiarCantidadDrawer(id, nuevaCantidad) {
     fetch('api/carrito.php?accion=actualizar&id=' + id + '&cantidad=' + nuevaCantidad)
         .then(function(r) { return r.json(); })
-        .then(function(d) { renderCarritoDrawer(d); })
+        .then(function(d) {
+            if (!d.ok) {
+                mostrarAlertaDrawer(d.mensaje);
+            } else {
+                renderCarritoDrawer(d);
+            }
+        })
         .catch(function() {});
+}
+
+function mostrarAlertaDrawer(msg) {
+    var body = document.getElementById('carritoDrawerBody');
+    var alerta = document.createElement('div');
+    alerta.className = 'alert alert-danger py-2 px-3 mx-0 mb-2';
+    alerta.style.fontSize = '13px';
+    alerta.textContent = msg;
+    body.insertAdjacentElement('afterbegin', alerta);
+    setTimeout(function() { if (alerta.parentNode) alerta.parentNode.removeChild(alerta); }, 3000);
 }
 
 function eliminarItemDrawer(id) {

@@ -1,15 +1,5 @@
 <?php require_once __DIR__ . '/layout/encabezado.php'; ?>
 
-<!-- Toast de notificacion -->
-<div aria-live="polite" aria-atomic="true" style="position:fixed;top:70px;right:20px;z-index:9999;min-width:280px;">
-    <div id="toastCarrito" class="toast" role="alert" data-delay="3000">
-        <div class="toast-header bg-success text-white">
-            <strong class="mr-auto"><i class="bi bi-cart-check"></i> Carrito</strong>
-            <button type="button" class="ml-2 mb-1 close text-white" data-dismiss="toast">&times;</button>
-        </div>
-        <div class="toast-body" id="toastMensaje"></div>
-    </div>
-</div>
 
 <div class="container mt-5">
     <nav aria-label="breadcrumb" class="mb-3">
@@ -48,26 +38,26 @@
 
             <h2 class="text-success my-3">$<?php echo number_format((float)$producto['precio'], 2); ?></h2>
 
-            <?php $stock = (int)$producto['stock']; ?>
-            <?php if ($stock > 0): ?>
-                <p class="text-success">
+            <?php $stockServidor = (int)$producto['stock']; ?>
+            <p id="infoStock" class="<?php echo $stockServidor > 0 ? 'text-success' : 'text-danger'; ?>">
+                <?php if ($stockServidor > 0): ?>
                     <i class="bi bi-check-circle-fill"></i>
-                    En stock: <strong><?php echo $stock; ?> unidades disponibles</strong>
-                </p>
-            <?php else: ?>
-                <p class="text-danger">
+                    En stock: <strong id="stockNumero"><?php echo $stockServidor; ?></strong> unidades disponibles
+                <?php else: ?>
                     <i class="bi bi-x-circle-fill"></i> Sin stock disponible
-                </p>
-            <?php endif; ?>
+                <?php endif; ?>
+            </p>
 
             <div class="mt-3">
-                <button id="btnAgregar" class="btn btn-primary btn-lg"
+                <button id="btnAgregar" class="btn btn-azul btn-lg"
                         data-id="<?php echo (int)$producto['id_producto']; ?>"
-                        <?php echo $stock <= 0 ? 'disabled' : ''; ?>>
-                    <i class="bi bi-cart-plus"></i> Agregar al carrito
+                        data-stock="<?php echo $stockServidor; ?>"
+                        <?php echo $stockServidor <= 0 ? 'disabled' : ''; ?>>
+                    <i class="bi bi-cart-plus mr-1"></i>
+                    <?php echo $stockServidor <= 0 ? 'Sin stock' : 'Agregar al carrito'; ?>
                 </button>
                 <a href="index.php?pagina=inicio" class="btn btn-outline-secondary btn-lg ml-2">
-                    <i class="bi bi-arrow-left"></i> Volver
+                    <i class="bi bi-arrow-left mr-1"></i> Volver
                 </a>
             </div>
         </div>
@@ -76,40 +66,76 @@
 
 <script>
 (function () {
-    var btn    = document.getElementById('btnAgregar');
-    var toast  = document.getElementById('toastCarrito');
-    var toastMsg = document.getElementById('toastMensaje');
+    var btn        = document.getElementById('btnAgregar');
+    var infoStock  = document.getElementById('infoStock');
+    var stockNum   = document.getElementById('stockNumero');
+    var stockReal  = btn ? parseInt(btn.dataset.stock) || 0 : 0;
+    var enCarrito  = 0;
 
     function actualizarBadge(cantidad) {
         var badge = document.getElementById('carritoContador');
         if (!badge) return;
         badge.textContent   = cantidad;
-        badge.style.display = cantidad > 0 ? 'inline-block' : 'none';
+        badge.style.display = cantidad > 0 ? 'flex' : 'none';
     }
 
+    function actualizarVistaStock() {
+        var disponible = Math.max(0, stockReal - enCarrito);
+        if (stockNum) stockNum.textContent = disponible;
+        if (disponible <= 0) {
+            if (infoStock) {
+                infoStock.className = 'text-danger';
+                infoStock.innerHTML = '<i class="bi bi-x-circle-fill"></i> Sin stock disponible';
+            }
+            if (btn) {
+                btn.disabled = true;
+                btn.innerHTML = '<i class="bi bi-x-circle mr-1"></i>Sin stock';
+            }
+        } else {
+            if (infoStock) infoStock.className = 'text-success';
+        }
+    }
+
+    // Al cargar: obtener cantidad actual en carrito para descontar del stock
     fetch('api/carrito.php?accion=obtener')
-        .then(function(r){return r.json();})
-        .then(function(d){ actualizarBadge(d.cantidad); });
+        .then(function(r) { return r.json(); })
+        .then(function(d) {
+            actualizarBadge(d.cantidad);
+            if (btn) {
+                var id = parseInt(btn.dataset.id);
+                (d.items || []).forEach(function(item) {
+                    if (item.id_producto == id) enCarrito = item.cantidad;
+                });
+                actualizarVistaStock();
+            }
+        });
 
     if (btn) {
         btn.addEventListener('click', function () {
             var id = btn.dataset.id;
             btn.disabled = true;
-            btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Agregando...';
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm mr-1"></span>Agregando...';
 
             fetch('api/carrito.php?accion=agregar&id=' + id)
-                .then(function(r){ return r.json(); })
-                .then(function(data) {
-                    toastMsg.textContent = data.mensaje;
-                    toast.querySelector('.toast-header').className =
-                        'toast-header ' + (data.ok ? 'bg-success' : 'bg-danger') + ' text-white';
-                    $(toast).toast('show');
-                    if (data.ok) actualizarBadge(data.cantidad);
+                .then(function(r) { return r.json(); })
+                .then(function(d) {
+                    if (d.ok) {
+                        enCarrito++;
+                        actualizarBadge(d.cantidad);
+                        actualizarVistaStock();
+                    } else {
+                        // Stock agotado según servidor
+                        btn.disabled = true;
+                        btn.innerHTML = '<i class="bi bi-x-circle mr-1"></i>Sin stock';
+                        if (infoStock) {
+                            infoStock.className = 'text-danger';
+                            infoStock.innerHTML = '<i class="bi bi-x-circle-fill"></i> Sin stock disponible';
+                        }
+                    }
                 })
-                .catch(function(){ toastMsg.textContent = 'Error al conectar.'; $(toast).toast('show'); })
-                .finally(function(){
+                .catch(function() {
                     btn.disabled = false;
-                    btn.innerHTML = '<i class="bi bi-cart-plus"></i> Agregar al carrito';
+                    btn.innerHTML = '<i class="bi bi-cart-plus mr-1"></i>Agregar al carrito';
                 });
         });
     }

@@ -39,7 +39,7 @@ function calcularResumen() {
 switch ($accion) {
     case 'agregar':
         if ($id <= 0) {
-            echo json_encode(['ok' => false, 'mensaje' => 'ID de producto invalido.']);
+            echo json_encode(['ok' => false, 'mensaje' => 'ID de producto inválido.']);
             exit();
         }
 
@@ -48,6 +48,27 @@ switch ($accion) {
 
         if (!$producto || strtolower($producto['estado'] ?? '') !== 'activo') {
             echo json_encode(['ok' => false, 'mensaje' => 'Producto no disponible.']);
+            exit();
+        }
+
+        $stockDisponible = (int)($producto['stock'] ?? 0);
+
+        // Cantidad actual en carrito
+        $cantidadEnCarrito = 0;
+        foreach ($_SESSION['carrito'] as $item) {
+            if ($item['id_producto'] == $id) {
+                $cantidadEnCarrito = (int)$item['cantidad'];
+                break;
+            }
+        }
+
+        if ($stockDisponible <= 0) {
+            echo json_encode(['ok' => false, 'mensaje' => 'Producto sin stock disponible.']);
+            exit();
+        }
+
+        if ($cantidadEnCarrito >= $stockDisponible) {
+            echo json_encode(['ok' => false, 'mensaje' => 'No hay más stock disponible. Máximo: ' . $stockDisponible . ' unidades.']);
             exit();
         }
 
@@ -75,14 +96,13 @@ switch ($accion) {
 
     case 'actualizar':
         if ($id <= 0) {
-            echo json_encode(['ok' => false, 'mensaje' => 'ID invalido.']);
+            echo json_encode(['ok' => false, 'mensaje' => 'ID inválido.']);
             exit();
         }
 
         $cantidad = isset($_POST['cantidad']) ? (int)$_POST['cantidad'] : (isset($_GET['cantidad']) ? (int)$_GET['cantidad'] : 0);
 
         if ($cantidad <= 0) {
-            // Eliminar si cantidad llega a 0
             foreach ($_SESSION['carrito'] as $i => $item) {
                 if ($item['id_producto'] == $id) {
                     unset($_SESSION['carrito'][$i]);
@@ -91,6 +111,16 @@ switch ($accion) {
             }
             $_SESSION['carrito'] = array_values($_SESSION['carrito']);
         } else {
+            // Validar contra stock real
+            $modelo   = new Producto();
+            $producto = $modelo->obtenerPorId($id);
+            $stockDisponible = $producto ? (int)($producto['stock'] ?? 0) : 0;
+
+            if ($cantidad > $stockDisponible) {
+                echo json_encode(['ok' => false, 'mensaje' => 'Stock insuficiente. Máximo disponible: ' . $stockDisponible . ' unidades.']);
+                exit();
+            }
+
             $actualizado = false;
             foreach ($_SESSION['carrito'] as &$item) {
                 if ($item['id_producto'] == $id) {
@@ -101,7 +131,7 @@ switch ($accion) {
             }
             unset($item);
             if (!$actualizado) {
-                echo json_encode(['ok' => false, 'mensaje' => 'Producto no esta en el carrito.']);
+                echo json_encode(['ok' => false, 'mensaje' => 'Producto no está en el carrito.']);
                 exit();
             }
         }

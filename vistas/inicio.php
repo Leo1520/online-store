@@ -235,6 +235,7 @@
     var debounceId   = null;
 
     var todosLosProductos = [];
+    var carritoActual     = {}; // { id_producto: cantidad_en_carrito }
     var paginaActual      = 1;
 
     var inputBusqueda   = document.getElementById('filtroBusqueda');
@@ -300,11 +301,14 @@
             nodo.querySelector('.producto-descripcion').textContent = p.descripcion;
             nodo.querySelector('.producto-categoria').textContent   = p.categoria || '';
             nodo.querySelector('.producto-precio').textContent      = parseFloat(p.precio).toFixed(2);
-            nodo.querySelector('.producto-stock').textContent       = parseInt(p.stock) || 0;
+            var stockReal   = parseInt(p.stock) || 0;
+            var enCarrito   = carritoActual[p.id_producto] || 0;
+            var disponible  = Math.max(0, stockReal - enCarrito);
+            nodo.querySelector('.producto-stock').textContent       = disponible;
             nodo.querySelector('.btn-detalle').href                 = url;
             var btn = nodo.querySelector('.btn-agregar');
             btn.dataset.id = p.id_producto;
-            if ((parseInt(p.stock) || 0) === 0) { btn.disabled = true; btn.innerHTML = '<i class="bi bi-x-circle mr-1"></i>Sin stock'; }
+            if (disponible === 0) { btn.disabled = true; btn.innerHTML = '<i class="bi bi-x-circle mr-1"></i>Sin stock'; }
             grid.appendChild(nodo);
         });
     }
@@ -335,14 +339,48 @@
     grid.addEventListener('click', function (e) {
         var btn = e.target.closest('.btn-agregar');
         if (!btn || btn.disabled) return;
+        var id = parseInt(btn.dataset.id);
         btn.disabled = true;
         btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
-        fetch('api/carrito.php?accion=agregar&id=' + btn.dataset.id)
+        fetch('api/carrito.php?accion=agregar&id=' + id)
             .then(function (r) { return r.json(); })
-            .then(function (d) { mostrarToast(d.mensaje, d.ok); if (d.ok) actualizarContadorNavbar(d.cantidad); })
-            .catch(function () { mostrarToast('Error al conectar.', false); })
-            .finally(function () { btn.disabled = false; btn.innerHTML = '<i class="bi bi-cart-plus mr-1"></i>Agregar al carrito'; });
+            .then(function (d) {
+                if (d.ok) {
+                    carritoActual[id] = (carritoActual[id] || 0) + 1;
+                    actualizarContadorNavbar(d.cantidad);
+                    actualizarBtnStock(btn, id);
+                } else {
+                    // Stock agotado: deshabilitar botón directamente
+                    btn.disabled = true;
+                    btn.innerHTML = '<i class="bi bi-x-circle mr-1"></i>Sin stock';
+                }
+            })
+            .catch(function () {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="bi bi-cart-plus mr-1"></i>Agregar al carrito';
+            });
     });
+
+    function actualizarBtnStock(btn, id) {
+        var producto = todosLosProductos.find(function(p) { return p.id_producto == id; });
+        if (!producto) { btn.disabled = false; btn.innerHTML = '<i class="bi bi-cart-plus mr-1"></i>Agregar al carrito'; return; }
+        var stockReal = parseInt(producto.stock) || 0;
+        var enCarrito = carritoActual[id] || 0;
+        var disponible = stockReal - enCarrito;
+        // Actualizar etiqueta de stock en la tarjeta
+        var tarjeta = btn.closest('.col-md-4, .col-sm-6');
+        if (tarjeta) {
+            var spanStock = tarjeta.querySelector('.producto-stock');
+            if (spanStock) spanStock.textContent = Math.max(0, disponible);
+        }
+        if (disponible <= 0) {
+            btn.disabled = true;
+            btn.innerHTML = '<i class="bi bi-x-circle mr-1"></i>Sin stock';
+        } else {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="bi bi-cart-plus mr-1"></i>Agregar al carrito';
+        }
+    }
 
     function cargarProductos() {
         cargando.style.display = ''; grid.style.display = 'none'; paginacion.style.display = 'none'; contador.textContent = '';
@@ -370,7 +408,11 @@
             });
     }
 
-    fetch('api/carrito.php?accion=obtener').then(function (r) { return r.json(); }).then(function (d) { actualizarContadorNavbar(d.cantidad); });
+    fetch('api/carrito.php?accion=obtener').then(function (r) { return r.json(); }).then(function (d) {
+        actualizarContadorNavbar(d.cantidad);
+        // Poblar carritoActual para que renderProductos calcule stock disponible
+        (d.items || []).forEach(function(item) { carritoActual[item.id_producto] = item.cantidad; });
+    });
     cargarCategorias();
 }());
 </script>

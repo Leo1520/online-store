@@ -5,17 +5,18 @@ require_once __DIR__ . '/../modelos/Venta.php';
 class PagoControlador {
 
     public function index() {
+        if (empty($_SESSION['usuario'])) {
+            header('Location: index.php?pagina=login');
+            exit();
+        }
+
         if (empty($_SESSION['carrito'])) {
-            header('Location: index.php?pagina=carrito');
+            header('Location: index.php?pagina=inicio');
             exit();
         }
 
         // POST = pago simulado (tarjeta demo o QR demo)
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            if (empty($_SESSION['usuario'])) {
-                header('Location: index.php?pagina=login');
-                exit();
-            }
             $metodo   = trim($_GET['metodo'] ?? 'tarjeta');
             $venta    = new Venta();
             $nroVenta = $venta->registrarVenta($_SESSION['carrito'], $_SESSION['usuario']);
