@@ -101,7 +101,9 @@ function isAct($page) {
         'categorias' => ['categorias', 'categorias_crear', 'categorias_editar'],
         'marcas'     => ['marcas',     'marcas_crear',     'marcas_editar'],
         'industrias' => ['industrias', 'industrias_crear', 'industrias_editar'],
+        'clientes'   => ['clientes',   'clientes_crear',   'clientes_editar'],
         'vendedores' => ['vendedores', 'vendedores_crear', 'vendedores_editar'],
+        'ventas'     => ['ventas',     'ventas_detalle'],
     ];
     $grupo = $grupos[$page] ?? [$page];
     return in_array($ap, $grupo) ? 'active' : '';

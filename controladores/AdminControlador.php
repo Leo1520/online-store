@@ -303,100 +303,116 @@ class AdminControlador {
     public function clientes() {
         $this->validarAutenticacion();
 
-        $cuentaModel = new Cuenta();
-        $clienteModel = new Cliente();
-        $mensaje = isset($_GET['msg']) ? trim($_GET['msg']) : null;
-        $clienteEditar = null;
+        $clienteModel       = new Cliente();
+        $cuentaModel        = new Cuenta();
         $usuariosProtegidos = ['cliente_demo', 'admin'];
+        $mensaje            = isset($_GET['msg']) ? trim($_GET['msg']) : null;
 
-        if (isset($_GET['eliminar_cliente_ci'], $_GET['eliminar_cliente_usuario'])) {
-            $ci = trim($_GET['eliminar_cliente_ci']);
-            $usuario = trim($_GET['eliminar_cliente_usuario']);
-
+        if (isset($_GET['eliminar_ci'], $_GET['eliminar_usuario'])) {
+            $ci      = trim($_GET['eliminar_ci']);
+            $usuario = trim($_GET['eliminar_usuario']);
             if (in_array($usuario, $usuariosProtegidos, true)) {
-                header('Location: index.php?pagina=admin_clientes&msg=' . urlencode('No se puede eliminar la cuenta ' . $usuario . ' porque es una cuenta protegida.'));
+                header('Location: /admin/index.php?page=clientes&msg=' . urlencode('No se puede eliminar la cuenta protegida.'));
                 exit();
             }
-
-            $okCliente = $clienteModel->eliminarClienteYCuentaSegura($ci, $usuario);
-            if ($okCliente) {
-                header('Location: index.php?pagina=admin_clientes&msg=' . urlencode('Cliente eliminado correctamente.'));
-                exit();
-            }
-
-            header('Location: index.php?pagina=admin_clientes&msg=' . urlencode('No se pudo eliminar el cliente.'));
+            $ok  = $clienteModel->eliminarClienteYCuentaSegura($ci, $usuario);
+            $msg = $ok ? 'Cliente eliminado correctamente.' : 'No se pudo eliminar el cliente.';
+            header('Location: /admin/index.php?page=clientes&msg=' . urlencode($msg));
             exit();
         }
 
-        if (isset($_GET['eliminar_cuenta'])) {
-            $usuario = trim($_GET['eliminar_cuenta']);
+        $clientes = $clienteModel->obtenerTodos();
+        $titulo   = 'Clientes';
+        require_once __DIR__ . '/../vistas/admin_clientes.php';
+    }
 
-            if (in_array($usuario, $usuariosProtegidos, true)) {
-                header('Location: index.php?pagina=admin_clientes&msg=' . urlencode('No se puede eliminar la cuenta ' . $usuario . ' porque es una cuenta protegida.'));
-                exit();
+    public function clientesCrear() {
+        $this->validarAutenticacion();
+
+        $clienteModel = new Cliente();
+        $esEditar     = false;
+        $error        = null;
+        $cliente      = [];
+
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $usuario    = trim($_POST['usuario']    ?? '');
+            $password   = trim($_POST['password']   ?? '');
+            $ci         = trim($_POST['ci']         ?? '');
+            $nombres    = trim($_POST['nombres']    ?? '');
+            $apPaterno  = trim($_POST['apPaterno']  ?? '');
+            $apMaterno  = trim($_POST['apMaterno']  ?? '');
+            $correo     = trim($_POST['correo']     ?? '');
+            $direccion  = trim($_POST['direccion']  ?? '');
+            $nroCelular = trim($_POST['nroCelular'] ?? '');
+
+            if ($usuario === '' || $password === '' || $ci === '' || $nombres === '' || $apPaterno === '' || $apMaterno === '' || $correo === '' || $direccion === '' || $nroCelular === '') {
+                $error   = 'Completa todos los campos obligatorios.';
+                $cliente = compact('usuario', 'ci', 'nombres', 'apPaterno', 'apMaterno', 'correo', 'direccion', 'nroCelular');
+            } else {
+                $hash = password_hash($password, PASSWORD_DEFAULT);
+                $ok   = $clienteModel->crearConCuenta($usuario, $hash, $ci, $nombres, $apPaterno, $apMaterno, $correo, $direccion, $nroCelular);
+                if ($ok) {
+                    header('Location: /admin/index.php?page=clientes&msg=' . urlencode('Cliente creado correctamente.'));
+                    exit();
+                }
+                $error   = 'No se pudo crear el cliente. El usuario o CI ya existe.';
+                $cliente = compact('usuario', 'ci', 'nombres', 'apPaterno', 'apMaterno', 'correo', 'direccion', 'nroCelular');
             }
+        }
 
-            if ($cuentaModel->tieneClienteAsociado($usuario)) {
-                header('Location: index.php?pagina=admin_clientes&msg=' . urlencode('No se puede eliminar la cuenta: tiene cliente asociado.'));
-                exit();
-            }
+        $titulo = 'Nuevo Cliente';
+        require_once __DIR__ . '/../vistas/admin_clientes_form.php';
+    }
 
-            $okCuenta = $cuentaModel->eliminar($usuario);
-            $msg = $okCuenta ? 'Cuenta eliminada correctamente.' : 'No se pudo eliminar la cuenta.';
-            header('Location: index.php?pagina=admin_clientes&msg=' . urlencode($msg));
+    public function clientesEditar() {
+        $this->validarAutenticacion();
+
+        $clienteModel = new Cliente();
+        $esEditar     = true;
+        $error        = null;
+        $ci           = trim($_GET['ci']      ?? '');
+        $usuario      = trim($_GET['usuario'] ?? '');
+
+        if ($ci === '' || $usuario === '') {
+            header('Location: /admin/index.php?page=clientes');
+            exit();
+        }
+
+        $cliente = $clienteModel->obtenerPorClave($ci, $usuario);
+        if (!$cliente) {
+            header('Location: /admin/index.php?page=clientes&msg=' . urlencode('Cliente no encontrado.'));
             exit();
         }
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $accion = $_POST['accion'] ?? 'crear';
+            $usuarioCuenta = trim($_POST['usuarioCuenta'] ?? '');
+            $ciPost        = trim($_POST['ci']            ?? '');
+            $password      = trim($_POST['password']      ?? '');
+            $nombres       = trim($_POST['nombres']       ?? '');
+            $apPaterno     = trim($_POST['apPaterno']     ?? '');
+            $apMaterno     = trim($_POST['apMaterno']     ?? '');
+            $correo        = trim($_POST['correo']        ?? '');
+            $direccion     = trim($_POST['direccion']     ?? '');
+            $nroCelular    = trim($_POST['nroCelular']    ?? '');
 
-            if ($accion === 'crear') {
-                $usuario = trim($_POST['usuario'] ?? '');
-                $password = trim($_POST['password'] ?? '');
-                $ci = trim($_POST['ci'] ?? '');
-                $nombres = trim($_POST['nombres'] ?? '');
-                $apPaterno = trim($_POST['apPaterno'] ?? '');
-                $apMaterno = trim($_POST['apMaterno'] ?? '');
-                $correo = trim($_POST['correo'] ?? '');
-                $direccion = trim($_POST['direccion'] ?? '');
-                $nroCelular = trim($_POST['nroCelular'] ?? '');
-
-                if ($usuario !== '' && $password !== '' && $ci !== '' && $nombres !== '' && $apPaterno !== '' && $apMaterno !== '' && $correo !== '' && $direccion !== '' && $nroCelular !== '') {
-                    $passwordHash = password_hash($password, PASSWORD_DEFAULT);
-                    $okCreacion = $clienteModel->crearConCuenta($usuario, $passwordHash, $ci, $nombres, $apPaterno, $apMaterno, $correo, $direccion, $nroCelular);
-                    if ($okCreacion) {
-                        $mensaje = 'Cliente y cuenta creados correctamente.';
-                    } else {
-                        $mensaje = 'No se pudo crear la cuenta (puede existir ya el usuario).';
-                    }
+            if ($nombres === '' || $apPaterno === '' || $apMaterno === '' || $correo === '' || $direccion === '' || $nroCelular === '') {
+                $error   = 'Completa todos los campos obligatorios.';
+                $cliente = array_merge($cliente, compact('nombres', 'apPaterno', 'apMaterno', 'correo', 'direccion', 'nroCelular'));
+            } else {
+                $hash = $password !== '' ? password_hash($password, PASSWORD_DEFAULT) : '';
+                $ok   = $clienteModel->actualizarConPassword($ciPost, $usuarioCuenta, $nombres, $apPaterno, $apMaterno, $correo, $direccion, $nroCelular, $hash);
+                if ($ok) {
+                    header('Location: /admin/index.php?page=clientes&msg=' . urlencode('Cliente actualizado correctamente.'));
+                    exit();
                 }
-            }
-
-            if ($accion === 'editar') {
-                $usuarioCuenta = trim($_POST['usuarioCuenta'] ?? '');
-                $ci = trim($_POST['ci'] ?? '');
-                $password = trim($_POST['password'] ?? '');
-                $nombres = trim($_POST['nombres'] ?? '');
-                $apPaterno = trim($_POST['apPaterno'] ?? '');
-                $apMaterno = trim($_POST['apMaterno'] ?? '');
-                $correo = trim($_POST['correo'] ?? '');
-                $direccion = trim($_POST['direccion'] ?? '');
-                $nroCelular = trim($_POST['nroCelular'] ?? '');
-
-                if ($usuarioCuenta !== '' && $ci !== '' && $nombres !== '' && $apPaterno !== '' && $apMaterno !== '' && $correo !== '' && $direccion !== '' && $nroCelular !== '') {
-                    $passwordHash = $password !== '' ? password_hash($password, PASSWORD_DEFAULT) : '';
-                    $okActualizacion = $clienteModel->actualizarConPassword($ci, $usuarioCuenta, $nombres, $apPaterno, $apMaterno, $correo, $direccion, $nroCelular, $passwordHash);
-                    $mensaje = $okActualizacion ? 'Cliente actualizado correctamente.' : 'No se pudo actualizar el cliente.';
-                }
+                $error   = 'No se pudo actualizar el cliente.';
+                $cliente = array_merge($cliente, compact('nombres', 'apPaterno', 'apMaterno', 'correo', 'direccion', 'nroCelular'));
             }
         }
 
-        if (isset($_GET['editar_ci'], $_GET['editar_usuario'])) {
-            $clienteEditar = $clienteModel->obtenerPorClave($_GET['editar_ci'], $_GET['editar_usuario']);
-            if ($clienteEditar) {
-                $clienteEditar['password'] = '';
-            }
-        }
+        $titulo = 'Editar Cliente';
+        require_once __DIR__ . '/../vistas/admin_clientes_form.php';
+    }
 
         $cuentas = $cuentaModel->obtenerTodas();
         $clientes = $clienteModel->obtenerTodos();
@@ -576,39 +592,60 @@ class AdminControlador {
 
         $notaModel = new NotaVenta();
         $mensaje   = isset($_GET['msg']) ? trim($_GET['msg']) : null;
+        $ventas    = $notaModel->obtenerTodasConResumen();
+        $titulo    = 'Pedidos / Ventas';
+        require_once __DIR__ . '/../vistas/admin_ventas.php';
+    }
 
-        if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accion']) && $_POST['accion'] === 'cambiar_estado') {
-            $nro    = (int)($_POST['nro'] ?? 0);
-            $estado = trim($_POST['estado'] ?? '');
+    public function ventasDetalle() {
+        $this->validarAutenticacion();
+
+        $notaModel = new NotaVenta();
+        $id        = (int)($_GET['id'] ?? 0);
+
+        if ($id <= 0) {
+            header('Location: /admin/index.php?page=ventas');
+            exit();
+        }
+
+        // Cambiar estado desde el formulario del detalle
+        if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['accion'] ?? '') === 'cambiar_estado') {
+            $nro      = (int)($_POST['nro'] ?? 0);
+            $estado   = trim($_POST['estado'] ?? '');
             $permitidos = ['pendiente', 'procesando', 'enviado', 'entregado', 'cancelado', 'facturado'];
             if ($nro > 0 && in_array($estado, $permitidos)) {
                 $notaModel->actualizarEstado($nro, $estado);
             }
-            header('Location: index.php?pagina=admin_ventas');
+            header('Location: /admin/index.php?page=ventas_detalle&id=' . $id . '&msg=' . urlencode('Estado actualizado.'));
             exit();
         }
 
+        // Cargar la venta
         $ventas = $notaModel->obtenerTodasConResumen();
-
-        $detalles = [];
-        $clientesExtra = [];
-        $db = \Database::conectar();
-        foreach ($ventas as $venta) {
-            $nro = (int)$venta['nro'];
-            $detalles[$nro] = $notaModel->obtenerDetallesPorNota($nro);
-            $ci = $venta['ciCliente'];
-            if (!isset($clientesExtra[$ci])) {
-                $stmt = $db->prepare("SELECT correo, direccion, nroCelular FROM Cliente WHERE ci = ?");
-                $stmt->bind_param('s', $ci);
-                $stmt->execute();
-                $res = $stmt->get_result();
-                $clientesExtra[$ci] = $res ? $res->fetch_assoc() : [];
-                $stmt->close();
-            }
+        $venta  = null;
+        foreach ($ventas as $v) {
+            if ((int)$v['nro'] === $id) { $venta = $v; break; }
         }
 
-        $titulo = 'Administracion - Ventas';
-        require_once __DIR__ . '/../vistas/admin_ventas.php';
+        if (!$venta) {
+            header('Location: /admin/index.php?page=ventas&msg=' . urlencode('Pedido no encontrado.'));
+            exit();
+        }
+
+        $detalles = $notaModel->obtenerDetallesPorNota($id);
+
+        $db   = \Database::conectar();
+        $ci   = $venta['ciCliente'];
+        $stmt = $db->prepare("SELECT correo, direccion, nroCelular FROM Cliente WHERE ci = ?");
+        $stmt->bind_param('s', $ci);
+        $stmt->execute();
+        $res          = $stmt->get_result();
+        $clienteExtra = $res ? ($res->fetch_assoc() ?? []) : [];
+        $stmt->close();
+
+        $mensaje = isset($_GET['msg']) ? trim($_GET['msg']) : null;
+        $titulo  = 'Pedido #' . $id;
+        require_once __DIR__ . '/../vistas/admin_ventas_detalle.php';
     }
 
     public function dashboard() {

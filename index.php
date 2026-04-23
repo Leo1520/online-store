@@ -83,31 +83,17 @@ switch ($pagina) {
         (new ProductoControlador())->detalle();
         break;
     case 'admin_catalogos':
-        require_once __DIR__ . '/controladores/AdminControlador.php';
-        (new AdminControlador())->catalogos();
-        break;
+        header('Location: /admin/index.php?page=categorias'); exit();
     case 'admin_sucursales':
-        require_once __DIR__ . '/controladores/AdminControlador.php';
-        (new AdminControlador())->sucursales();
-        break;
+        header('Location: /admin/index.php?page=sucursales'); exit();
     case 'admin_clientes':
-        require_once __DIR__ . '/controladores/AdminControlador.php';
-        (new AdminControlador())->clientes();
-        break;
+        header('Location: /admin/index.php?page=clientes'); exit();
     case 'admin_productos':
-        require_once __DIR__ . '/controladores/AdminControlador.php';
-        (new AdminControlador())->productos();
-        break;
+        header('Location: /admin/index.php?page=productos'); exit();
     case 'admin_ventas':
-        require_once __DIR__ . '/controladores/AdminControlador.php';
-        (new AdminControlador())->ventas();
-        break;
+        header('Location: /admin/index.php?page=ventas'); exit();
     case 'admin_vendedores':
-        require_once __DIR__ . '/controladores/AdminControlador.php';
-        (new AdminControlador())->vendedores();
-        break;
+        header('Location: /admin/index.php?page=vendedores'); exit();
     case 'admin_almacen':
-        require_once __DIR__ . '/controladores/AdminControlador.php';
-        (new AdminControlador())->almacen();
-        break;
+        header('Location: /admin/index.php?page=almacen'); exit();
 }

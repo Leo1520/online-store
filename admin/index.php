@@ -11,43 +11,113 @@ if (!isset($_SESSION['usuario']) || !isset($_SESSION['es_admin']) || !$_SESSION[
 $page = trim($_GET['page'] ?? 'dashboard');
 
 $paginas = [
-    'dashboard', 'catalogos', 'sucursales', 'clientes',
+    'dashboard', 'catalogos', 'sucursales',
     'productos', 'productos_crear', 'productos_editar',
     'categorias', 'categorias_crear', 'categorias_editar',
     'marcas', 'marcas_crear', 'marcas_editar',
     'industrias', 'industrias_crear', 'industrias_editar',
-    'ventas', 'vendedores', 'vendedores_crear', 'vendedores_editar', 'almacen'
+    'ventas', 'ventas_detalle',
+    'clientes', 'clientes_crear', 'clientes_editar',
+    'vendedores', 'vendedores_crear', 'vendedores_editar',
+    'almacen'
 ];
 
 if (!in_array($page, $paginas)) {
     $page = 'dashboard';
 }
 
-// Requiere controladores desde la raíz del proyecto
-require_once __DIR__ . '/../controladores/AdminControlador.php';
+// ── Cargar controladores ──────────────────────────────────────
+require_once __DIR__ . '/../controladores/admin/DashboardControlador.php';
+require_once __DIR__ . '/../controladores/admin/CatalogoControlador.php';
+require_once __DIR__ . '/../controladores/admin/ProductoControlador.php';
+require_once __DIR__ . '/../controladores/admin/ClienteControlador.php';
+require_once __DIR__ . '/../controladores/admin/VendedorControlador.php';
+require_once __DIR__ . '/../controladores/admin/VentaControlador.php';
+require_once __DIR__ . '/../controladores/admin/SucursalControlador.php';
+require_once __DIR__ . '/../controladores/admin/AlmacenControlador.php';
 
-$ctrl = new AdminControlador();
-
+// ── Despachar ─────────────────────────────────────────────────
 switch ($page) {
-    case 'dashboard':        $ctrl->dashboard();        break;
-    case 'catalogos':        $ctrl->catalogos();        break;
-    case 'sucursales':       $ctrl->sucursales();       break;
-    case 'clientes':         $ctrl->clientes();         break;
-    case 'productos':        $ctrl->productos();        break;
-    case 'productos_crear':  $ctrl->productosCrear();   break;
-    case 'productos_editar': $ctrl->productosEditar();  break;
-    case 'categorias':       $ctrl->categorias();       break;
-    case 'categorias_crear': $ctrl->categoriasCrear();  break;
-    case 'categorias_editar':$ctrl->categoriasEditar(); break;
-    case 'marcas':           $ctrl->marcas();           break;
-    case 'marcas_crear':     $ctrl->marcasCrear();      break;
-    case 'marcas_editar':    $ctrl->marcasEditar();     break;
-    case 'industrias':       $ctrl->industrias();       break;
-    case 'industrias_crear': $ctrl->industriasCrear();  break;
-    case 'industrias_editar':$ctrl->industriasEditar(); break;
-    case 'ventas':           $ctrl->ventas();           break;
-    case 'vendedores':         $ctrl->vendedores();        break;
-    case 'vendedores_crear':   $ctrl->vendedoresCrear();   break;
-    case 'vendedores_editar':  $ctrl->vendedoresEditar();  break;
-    case 'almacen':          $ctrl->almacen();          break;
+    case 'dashboard':
+        (new DashboardControlador())->dashboard();
+        break;
+
+    case 'marcas':
+        (new CatalogoControlador())->marcas();
+        break;
+    case 'marcas_crear':
+        (new CatalogoControlador())->marcasCrear();
+        break;
+    case 'marcas_editar':
+        (new CatalogoControlador())->marcasEditar();
+        break;
+
+    case 'categorias':
+        (new CatalogoControlador())->categorias();
+        break;
+    case 'categorias_crear':
+        (new CatalogoControlador())->categoriasCrear();
+        break;
+    case 'categorias_editar':
+        (new CatalogoControlador())->categoriasEditar();
+        break;
+
+    case 'industrias':
+        (new CatalogoControlador())->industrias();
+        break;
+    case 'industrias_crear':
+        (new CatalogoControlador())->industriasCrear();
+        break;
+    case 'industrias_editar':
+        (new CatalogoControlador())->industriasEditar();
+        break;
+
+    case 'productos':
+        (new ProductoControlador())->productos();
+        break;
+    case 'productos_crear':
+        (new ProductoControlador())->productosCrear();
+        break;
+    case 'productos_editar':
+        (new ProductoControlador())->productosEditar();
+        break;
+
+    case 'clientes':
+        (new ClienteControlador())->clientes();
+        break;
+    case 'clientes_crear':
+        (new ClienteControlador())->clientesCrear();
+        break;
+    case 'clientes_editar':
+        (new ClienteControlador())->clientesEditar();
+        break;
+
+    case 'vendedores':
+        (new VendedorControlador())->vendedores();
+        break;
+    case 'vendedores_crear':
+        (new VendedorControlador())->vendedoresCrear();
+        break;
+    case 'vendedores_editar':
+        (new VendedorControlador())->vendedoresEditar();
+        break;
+
+    case 'ventas':
+        (new VentaControlador())->ventas();
+        break;
+    case 'ventas_detalle':
+        (new VentaControlador())->ventasDetalle();
+        break;
+
+    case 'sucursales':
+        (new SucursalControlador())->sucursales();
+        break;
+
+    case 'almacen':
+        (new AlmacenControlador())->almacen();
+        break;
+
+    case 'catalogos':
+        (new CatalogoControlador())->categorias();
+        break;
 }
