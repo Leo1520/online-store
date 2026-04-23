@@ -20,108 +20,244 @@ class AdminControlador {
         }
     }
 
-    public function catalogos() {
+    public function marcas() {
         $this->validarAutenticacion();
 
         $marcaModel = new Marca();
-        $categoriaModel = new Categoria();
-        $industriaModel = new Industria();
-        $mensaje = null;
-        $edicion = [
-            'tipo' => '',
-            'cod' => 0,
-            'nombre' => ''
-        ];
+        $mensaje = isset($_GET['msg']) ? trim($_GET['msg']) : null;
 
-        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $accion = $_POST['accion'] ?? 'crear';
-            $tipo = $_POST['tipo'] ?? '';
-            $cod = (int)($_POST['cod'] ?? 0);
-            $nombre = trim($_POST['nombre'] ?? '');
-
-            if ($nombre !== '') {
-                if ($tipo === 'marca') {
-                    if ($accion === 'editar' && $cod > 0) {
-                        $marcaModel->actualizar($cod, $nombre);
-                        $mensaje = 'Marca actualizada correctamente.';
-                    } else {
-                        $marcaModel->crear($nombre);
-                        $mensaje = 'Marca creada correctamente.';
-                    }
-                } elseif ($tipo === 'categoria') {
-                    if ($accion === 'editar' && $cod > 0) {
-                        $categoriaModel->actualizar($cod, $nombre);
-                        $mensaje = 'Categoria actualizada correctamente.';
-                    } else {
-                        $categoriaModel->crear($nombre);
-                        $mensaje = 'Categoria creada correctamente.';
-                    }
-                } elseif ($tipo === 'industria') {
-                    if ($accion === 'editar' && $cod > 0) {
-                        $industriaModel->actualizar($cod, $nombre);
-                        $mensaje = 'Industria actualizada correctamente.';
-                    } else {
-                        $industriaModel->crear($nombre);
-                        $mensaje = 'Industria creada correctamente.';
-                    }
-                }
-            }
-        }
-
-        if (isset($_GET['eliminar_tipo'], $_GET['cod'])) {
-            $tipo = $_GET['eliminar_tipo'];
-            $cod = (int)$_GET['cod'];
-
-            if ($tipo === 'marca') {
-                $marcaModel->eliminar($cod);
-            } elseif ($tipo === 'categoria') {
-                $categoriaModel->eliminar($cod);
-            } elseif ($tipo === 'industria') {
-                $industriaModel->eliminar($cod);
-            }
-
-            header('Location: index.php?pagina=admin_catalogos');
+        // Eliminar marca
+        if (isset($_GET['eliminar'])) {
+            $marcaModel->eliminar((int)$_GET['eliminar']);
+            header('Location: /admin/index.php?page=marcas&msg=' . urlencode('Marca eliminada.'));
             exit();
         }
 
         $marcas = $marcaModel->obtenerTodos();
-        $categorias = $categoriaModel->obtenerTodos();
-        $industrias = $industriaModel->obtenerTodos();
+        $titulo = 'Marcas';
+        require_once __DIR__ . '/../vistas/admin_marcas.php';
+    }
 
-        if (isset($_GET['editar_tipo'], $_GET['cod'])) {
-            $tipo = $_GET['editar_tipo'];
-            $cod = (int)$_GET['cod'];
+    public function marcasCrear() {
+        $this->validarAutenticacion();
 
-            if ($tipo === 'marca') {
-                foreach ($marcas as $fila) {
-                    if ((int)$fila['cod'] === $cod) {
-                        $edicion = ['tipo' => 'marca', 'cod' => $cod, 'nombre' => $fila['nombre']];
-                        break;
-                    }
-                }
-            }
+        $marcaModel = new Marca();
+        $error = null;
+        $esEditar = false;
+        $marca = [];
 
-            if ($tipo === 'categoria') {
-                foreach ($categorias as $fila) {
-                    if ((int)$fila['cod'] === $cod) {
-                        $edicion = ['tipo' => 'categoria', 'cod' => $cod, 'nombre' => $fila['nombre']];
-                        break;
-                    }
-                }
-            }
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $nombre = trim($_POST['nombre'] ?? '');
 
-            if ($tipo === 'industria') {
-                foreach ($industrias as $fila) {
-                    if ((int)$fila['cod'] === $cod) {
-                        $edicion = ['tipo' => 'industria', 'cod' => $cod, 'nombre' => $fila['nombre']];
-                        break;
-                    }
-                }
+            if ($nombre === '') {
+                $error = 'El nombre de la marca es obligatorio.';
+            } else {
+                $marcaModel->crear($nombre);
+                header('Location: /admin/index.php?page=marcas&msg=' . urlencode('Marca creada correctamente.'));
+                exit();
             }
         }
 
-        $titulo = 'Administracion - Catalogos';
-        require_once __DIR__ . '/../vistas/admin_catalogos.php';
+        $titulo = 'Nueva Marca';
+        require_once __DIR__ . '/../vistas/admin_marcas_form.php';
+    }
+
+    public function marcasEditar() {
+        $this->validarAutenticacion();
+
+        $marcaModel = new Marca();
+        $error = null;
+        $esEditar = true;
+        $id = (int)($_GET['id'] ?? 0);
+
+        if ($id <= 0) {
+            header('Location: /admin/index.php?page=marcas');
+            exit();
+        }
+
+        $marca = $marcaModel->obtenerPorId($id);
+        if (!$marca) {
+            header('Location: /admin/index.php?page=marcas&msg=' . urlencode('Marca no encontrada.'));
+            exit();
+        }
+
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $nombre = trim($_POST['nombre'] ?? '');
+
+            if ($nombre === '') {
+                $error = 'El nombre de la marca es obligatorio.';
+            } else {
+                $marcaModel->actualizar($id, $nombre);
+                header('Location: /admin/index.php?page=marcas&msg=' . urlencode('Marca actualizada correctamente.'));
+                exit();
+            }
+
+            // Si hay error, recargar datos
+            $marca = array_merge($marca, ['nombre' => $nombre]);
+        }
+
+        $titulo = 'Editar Marca';
+        require_once __DIR__ . '/../vistas/admin_marcas_form.php';
+    }
+
+    public function categorias() {
+        $this->validarAutenticacion();
+
+        $categoriaModel = new Categoria();
+        $mensaje = isset($_GET['msg']) ? trim($_GET['msg']) : null;
+
+        // Eliminar categoria
+        if (isset($_GET['eliminar'])) {
+            $categoriaModel->eliminar((int)$_GET['eliminar']);
+            header('Location: /admin/index.php?page=categorias&msg=' . urlencode('Categoría eliminada.'));
+            exit();
+        }
+
+        $categorias = $categoriaModel->obtenerTodos();
+        $titulo = 'Categorías';
+        require_once __DIR__ . '/../vistas/admin_categorias.php';
+    }
+
+    public function categoriasCrear() {
+        $this->validarAutenticacion();
+
+        $categoriaModel = new Categoria();
+        $error = null;
+        $esEditar = false;
+        $categoria = [];
+
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $nombre = trim($_POST['nombre'] ?? '');
+
+            if ($nombre === '') {
+                $error = 'El nombre de la categoría es obligatorio.';
+            } else {
+                $categoriaModel->crear($nombre);
+                header('Location: /admin/index.php?page=categorias&msg=' . urlencode('Categoría creada correctamente.'));
+                exit();
+            }
+        }
+
+        $titulo = 'Nueva Categoría';
+        require_once __DIR__ . '/../vistas/admin_categorias_form.php';
+    }
+
+    public function categoriasEditar() {
+        $this->validarAutenticacion();
+
+        $categoriaModel = new Categoria();
+        $error = null;
+        $esEditar = true;
+        $id = (int)($_GET['id'] ?? 0);
+
+        if ($id <= 0) {
+            header('Location: /admin/index.php?page=categorias');
+            exit();
+        }
+
+        $categoria = $categoriaModel->obtenerPorId($id);
+        if (!$categoria) {
+            header('Location: /admin/index.php?page=categorias&msg=' . urlencode('Categoría no encontrada.'));
+            exit();
+        }
+
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $nombre = trim($_POST['nombre'] ?? '');
+
+            if ($nombre === '') {
+                $error = 'El nombre de la categoría es obligatorio.';
+            } else {
+                $categoriaModel->actualizar($id, $nombre);
+                header('Location: /admin/index.php?page=categorias&msg=' . urlencode('Categoría actualizada correctamente.'));
+                exit();
+            }
+
+            // Si hay error, recargar datos
+            $categoria = array_merge($categoria, ['nombre' => $nombre]);
+        }
+
+        $titulo = 'Editar Categoría';
+        require_once __DIR__ . '/../vistas/admin_categorias_form.php';
+    }
+
+    public function industrias() {
+        $this->validarAutenticacion();
+
+        $industriaModel = new Industria();
+        $mensaje = isset($_GET['msg']) ? trim($_GET['msg']) : null;
+
+        // Eliminar industria
+        if (isset($_GET['eliminar'])) {
+            $industriaModel->eliminar((int)$_GET['eliminar']);
+            header('Location: /admin/index.php?page=industrias&msg=' . urlencode('Industria eliminada.'));
+            exit();
+        }
+
+        $industrias = $industriaModel->obtenerTodos();
+        $titulo = 'Industrias';
+        require_once __DIR__ . '/../vistas/admin_industrias.php';
+    }
+
+    public function industriasCrear() {
+        $this->validarAutenticacion();
+
+        $industriaModel = new Industria();
+        $error = null;
+        $esEditar = false;
+        $industria = [];
+
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $nombre = trim($_POST['nombre'] ?? '');
+
+            if ($nombre === '') {
+                $error = 'El nombre de la industria es obligatorio.';
+            } else {
+                $industriaModel->crear($nombre);
+                header('Location: /admin/index.php?page=industrias&msg=' . urlencode('Industria creada correctamente.'));
+                exit();
+            }
+        }
+
+        $titulo = 'Nueva Industria';
+        require_once __DIR__ . '/../vistas/admin_industrias_form.php';
+    }
+
+    public function industriasEditar() {
+        $this->validarAutenticacion();
+
+        $industriaModel = new Industria();
+        $error = null;
+        $esEditar = true;
+        $id = (int)($_GET['id'] ?? 0);
+
+        if ($id <= 0) {
+            header('Location: /admin/index.php?page=industrias');
+            exit();
+        }
+
+        $industria = $industriaModel->obtenerPorId($id);
+        if (!$industria) {
+            header('Location: /admin/index.php?page=industrias&msg=' . urlencode('Industria no encontrada.'));
+            exit();
+        }
+
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $nombre = trim($_POST['nombre'] ?? '');
+
+            if ($nombre === '') {
+                $error = 'El nombre de la industria es obligatorio.';
+            } else {
+                $industriaModel->actualizar($id, $nombre);
+                header('Location: /admin/index.php?page=industrias&msg=' . urlencode('Industria actualizada correctamente.'));
+                exit();
+            }
+
+            // Si hay error, recargar datos
+            $industria = array_merge($industria, ['nombre' => $nombre]);
+        }
+
+        $titulo = 'Editar Industria';
+        require_once __DIR__ . '/../vistas/admin_industrias_form.php';
     }
 
     public function sucursales() {
@@ -536,58 +672,110 @@ class AdminControlador {
 
         $vendedorModel = new Vendedor();
         $mensaje = isset($_GET['msg']) ? trim($_GET['msg']) : null;
-        $vendedorEditar = null;
 
         if (isset($_GET['eliminar_ci'], $_GET['eliminar_usuario'])) {
             $ci      = trim($_GET['eliminar_ci']);
             $usuario = trim($_GET['eliminar_usuario']);
 
             if ($usuario === 'admin') {
-                header('Location: index.php?pagina=admin_vendedores&msg=' . urlencode('No se puede eliminar la cuenta admin.'));
+                header('Location: /admin/index.php?page=vendedores&msg=' . urlencode('No se puede eliminar la cuenta admin.'));
                 exit();
             }
 
-            $ok = $vendedorModel->eliminarVendedorYCuenta($ci, $usuario);
+            $ok  = $vendedorModel->eliminarVendedorYCuenta($ci, $usuario);
             $msg = $ok ? 'Vendedor eliminado correctamente.' : 'No se pudo eliminar el vendedor.';
-            header('Location: index.php?pagina=admin_vendedores&msg=' . urlencode($msg));
+            header('Location: /admin/index.php?page=vendedores&msg=' . urlencode($msg));
+            exit();
+        }
+
+        $vendedores = $vendedorModel->obtenerTodos();
+        $titulo     = 'Vendedores';
+        require_once __DIR__ . '/../vistas/admin_vendedores.php';
+    }
+
+    public function vendedoresCrear() {
+        $this->validarAutenticacion();
+
+        $vendedorModel = new Vendedor();
+        $esEditar      = false;
+        $error         = null;
+        $vendedor      = [];
+
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $usuario    = trim($_POST['usuario']    ?? '');
+            $password   = trim($_POST['password']   ?? '');
+            $ci         = trim($_POST['ci']         ?? '');
+            $nombres    = trim($_POST['nombres']    ?? '');
+            $apPaterno  = trim($_POST['apPaterno']  ?? '');
+            $apMaterno  = trim($_POST['apMaterno']  ?? '');
+            $correo     = trim($_POST['correo']     ?? '');
+            $nroCelular = trim($_POST['nroCelular'] ?? '');
+
+            if ($usuario === '' || $password === '' || $ci === '' || $nombres === '' || $apPaterno === '' || $apMaterno === '' || $correo === '' || $nroCelular === '') {
+                $error    = 'Completa todos los campos obligatorios.';
+                $vendedor = compact('usuario', 'ci', 'nombres', 'apPaterno', 'apMaterno', 'correo', 'nroCelular');
+            } else {
+                $hash = password_hash($password, PASSWORD_DEFAULT);
+                $ok   = $vendedorModel->crearConCuenta($usuario, $hash, $ci, $nombres, $apPaterno, $apMaterno, $correo, $nroCelular);
+                if ($ok) {
+                    header('Location: /admin/index.php?page=vendedores&msg=' . urlencode('Vendedor creado correctamente.'));
+                    exit();
+                }
+                $error    = 'No se pudo crear el vendedor. El usuario o CI ya existe.';
+                $vendedor = compact('usuario', 'ci', 'nombres', 'apPaterno', 'apMaterno', 'correo', 'nroCelular');
+            }
+        }
+
+        $titulo = 'Nuevo Vendedor';
+        require_once __DIR__ . '/../vistas/admin_vendedores_form.php';
+    }
+
+    public function vendedoresEditar() {
+        $this->validarAutenticacion();
+
+        $vendedorModel = new Vendedor();
+        $esEditar      = true;
+        $error         = null;
+        $ci            = trim($_GET['ci']      ?? '');
+        $usuario       = trim($_GET['usuario'] ?? '');
+
+        if ($ci === '' || $usuario === '') {
+            header('Location: /admin/index.php?page=vendedores');
+            exit();
+        }
+
+        $vendedor = $vendedorModel->obtenerPorClave($ci, $usuario);
+        if (!$vendedor) {
+            header('Location: /admin/index.php?page=vendedores&msg=' . urlencode('Vendedor no encontrado.'));
             exit();
         }
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $accion       = $_POST['accion'] ?? 'crear';
-            $ci           = trim($_POST['ci'] ?? '');
-            $nombres      = trim($_POST['nombres'] ?? '');
-            $apPaterno    = trim($_POST['apPaterno'] ?? '');
-            $apMaterno    = trim($_POST['apMaterno'] ?? '');
-            $correo       = trim($_POST['correo'] ?? '');
-            $nroCelular   = trim($_POST['nroCelular'] ?? '');
-            $password     = trim($_POST['password'] ?? '');
+            $usuarioCuenta = trim($_POST['usuarioCuenta'] ?? '');
+            $ciPost        = trim($_POST['ci']            ?? '');
+            $nombres       = trim($_POST['nombres']       ?? '');
+            $apPaterno     = trim($_POST['apPaterno']     ?? '');
+            $apMaterno     = trim($_POST['apMaterno']     ?? '');
+            $correo        = trim($_POST['correo']        ?? '');
+            $nroCelular    = trim($_POST['nroCelular']    ?? '');
+            $password      = trim($_POST['password']      ?? '');
 
-            if ($accion === 'crear') {
-                $usuario = trim($_POST['usuario'] ?? '');
-                if ($usuario !== '' && $password !== '' && $ci !== '' && $nombres !== '' && $apPaterno !== '' && $apMaterno !== '' && $correo !== '' && $nroCelular !== '') {
-                    $hash = password_hash($password, PASSWORD_DEFAULT);
-                    $ok   = $vendedorModel->crearConCuenta($usuario, $hash, $ci, $nombres, $apPaterno, $apMaterno, $correo, $nroCelular);
-                    $mensaje = $ok ? 'Vendedor creado correctamente.' : 'No se pudo crear el vendedor (usuario o CI ya existe).';
+            if ($nombres === '' || $apPaterno === '' || $apMaterno === '' || $correo === '' || $nroCelular === '') {
+                $error    = 'Completa todos los campos obligatorios.';
+                $vendedor = array_merge($vendedor, compact('nombres', 'apPaterno', 'apMaterno', 'correo', 'nroCelular'));
+            } else {
+                $hash = $password !== '' ? password_hash($password, PASSWORD_DEFAULT) : '';
+                $ok   = $vendedorModel->actualizarConPassword($ciPost, $usuarioCuenta, $nombres, $apPaterno, $apMaterno, $correo, $nroCelular, $hash);
+                if ($ok) {
+                    header('Location: /admin/index.php?page=vendedores&msg=' . urlencode('Vendedor actualizado correctamente.'));
+                    exit();
                 }
-            }
-
-            if ($accion === 'editar') {
-                $usuarioCuenta = trim($_POST['usuarioCuenta'] ?? '');
-                if ($usuarioCuenta !== '' && $ci !== '' && $nombres !== '' && $apPaterno !== '' && $apMaterno !== '' && $correo !== '' && $nroCelular !== '') {
-                    $hash = $password !== '' ? password_hash($password, PASSWORD_DEFAULT) : '';
-                    $ok   = $vendedorModel->actualizarConPassword($ci, $usuarioCuenta, $nombres, $apPaterno, $apMaterno, $correo, $nroCelular, $hash);
-                    $mensaje = $ok ? 'Vendedor actualizado correctamente.' : 'No se pudo actualizar el vendedor.';
-                }
+                $error    = 'No se pudo actualizar el vendedor.';
+                $vendedor = array_merge($vendedor, compact('nombres', 'apPaterno', 'apMaterno', 'correo', 'nroCelular'));
             }
         }
 
-        if (isset($_GET['editar_ci'], $_GET['editar_usuario'])) {
-            $vendedorEditar = $vendedorModel->obtenerPorClave($_GET['editar_ci'], $_GET['editar_usuario']);
-        }
-
-        $vendedores = $vendedorModel->obtenerTodos();
-        $titulo = 'Administracion - Vendedores';
-        require_once __DIR__ . '/../vistas/admin_vendedores.php';
+        $titulo = 'Editar Vendedor';
+        require_once __DIR__ . '/../vistas/admin_vendedores_form.php';
     }
 }

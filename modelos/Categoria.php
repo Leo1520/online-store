@@ -69,26 +69,18 @@ class Categoria {
         return $stmt->execute();
     }
 
-    public function eliminar($cod) {
+    public function obtenerPorId($cod) {
         $cod = (int)$cod;
-
-        $stmtSp = $this->db->prepare("CALL sp_eliminar_categoria(?)");
-        if ($stmtSp) {
-            $stmtSp->bind_param('i', $cod);
-            $ok = $stmtSp->execute();
-            $stmtSp->close();
-            $this->limpiarResultadosPendientes();
-            if ($ok) {
-                return true;
-            }
-        }
-
-        $stmt = $this->db->prepare("DELETE FROM `Categoria` WHERE cod = ?");
+        $stmt = $this->db->prepare("SELECT cod, nombre FROM `Categoria` WHERE cod = ?");
         if (!$stmt) {
-            return false;
+            return null;
         }
         $stmt->bind_param('i', $cod);
-        return $stmt->execute();
+        $stmt->execute();
+        $resultado = $stmt->get_result();
+        $categoria = $resultado ? $resultado->fetch_assoc() : null;
+        $stmt->close();
+        return $categoria;
     }
 
     private function limpiarResultadosPendientes() {

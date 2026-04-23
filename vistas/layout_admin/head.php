@@ -97,7 +97,11 @@ function isAct($page) {
     global $ap;
     // Subpáginas comparten el estado activo con su padre
     $grupos = [
-        'productos' => ['productos', 'productos_crear', 'productos_editar'],
+        'productos'  => ['productos',  'productos_crear',  'productos_editar'],
+        'categorias' => ['categorias', 'categorias_crear', 'categorias_editar'],
+        'marcas'     => ['marcas',     'marcas_crear',     'marcas_editar'],
+        'industrias' => ['industrias', 'industrias_crear', 'industrias_editar'],
+        'vendedores' => ['vendedores', 'vendedores_crear', 'vendedores_editar'],
     ];
     $grupo = $grupos[$page] ?? [$page];
     return in_array($ap, $grupo) ? 'active' : '';
@@ -126,11 +130,17 @@ function aUrl($page, $extra = '') {
         <a href="<?php echo aUrl('productos'); ?>" class="nav-link <?php echo isAct('productos'); ?>">
             <i class="bi bi-box-seam"></i> Productos
         </a>
-        <a href="<?php echo aUrl('catalogos'); ?>" class="nav-link <?php echo isAct('catalogos'); ?>">
-            <i class="bi bi-tags"></i> Categorías / Marcas
+        <a href="<?php echo aUrl('categorias'); ?>" class="nav-link <?php echo isAct('categorias'); ?>">
+            <i class="bi bi-tag"></i> Categorías
+        </a>
+        <a href="<?php echo aUrl('marcas'); ?>" class="nav-link <?php echo isAct('marcas'); ?>">
+            <i class="bi bi-patch-check"></i> Marcas
+        </a>
+        <a href="<?php echo aUrl('industrias'); ?>" class="nav-link <?php echo isAct('industrias'); ?>">
+            <i class="bi bi-gear"></i> Industrias
         </a>
         <a href="<?php echo aUrl('sucursales'); ?>" class="nav-link <?php echo isAct('sucursales'); ?>">
-            <i class="bi bi-building"></i> Sucursales
+            <i class="bi bi-shop"></i> Sucursales
         </a>
 
         <div class="nav-section">Ventas</div>
