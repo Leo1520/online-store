@@ -20,7 +20,8 @@ $paginasPermitidas = [
     'admin_clientes',
     'admin_productos',
     'admin_ventas',
-    'admin_vendedores'
+    'admin_vendedores',
+    'admin_almacen'
 ];
 
 if (!in_array($pagina, $paginasPermitidas)) {
@@ -28,7 +29,7 @@ if (!in_array($pagina, $paginasPermitidas)) {
 }
 
 // Validar acceso a páginas administrativas
-$paginasAdmin = ['admin_catalogos', 'admin_sucursales', 'admin_clientes', 'admin_productos', 'admin_ventas', 'admin_vendedores'];
+$paginasAdmin = ['admin_catalogos', 'admin_sucursales', 'admin_clientes', 'admin_productos', 'admin_ventas', 'admin_vendedores', 'admin_almacen'];
 if (in_array($pagina, $paginasAdmin)) {
     if (!isset($_SESSION['usuario']) || !isset($_SESSION['es_admin']) || !$_SESSION['es_admin']) {
         header('Location: index.php?pagina=login');
@@ -104,5 +105,9 @@ switch ($pagina) {
     case 'admin_vendedores':
         require_once __DIR__ . '/controladores/AdminControlador.php';
         (new AdminControlador())->vendedores();
+        break;
+    case 'admin_almacen':
+        require_once __DIR__ . '/controladores/AdminControlador.php';
+        (new AdminControlador())->almacen();
         break;
 }

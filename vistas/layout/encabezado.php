@@ -501,6 +501,8 @@
                         <div class="dropdown-divider"></div>
                         <a class="dropdown-item" href="index.php?pagina=admin_ventas"><i class="bi bi-receipt mr-2 text-success"></i>Ventas</a>
                         <a class="dropdown-item" href="index.php?pagina=admin_vendedores"><i class="bi bi-person-badge mr-2 text-success"></i>Vendedores</a>
+                        <div class="dropdown-divider"></div>
+                        <a class="dropdown-item" href="index.php?pagina=admin_almacen"><i class="bi bi-archive mr-2 text-warning"></i>Almacén / Kardex</a>
                     </div>
                 </li>
                 <?php endif; ?>

@@ -9,6 +9,8 @@ require_once __DIR__ . '/../modelos/Producto.php';
 require_once __DIR__ . '/../modelos/DetalleProductoSucursal.php';
 require_once __DIR__ . '/../modelos/NotaVenta.php';
 require_once __DIR__ . '/../modelos/Vendedor.php';
+require_once __DIR__ . '/../modelos/MovimientoStock.php';
+require_once __DIR__ . '/../modelos/Traspaso.php';
 
 class AdminControlador {
     private function validarAutenticacion() {
@@ -400,6 +402,30 @@ class AdminControlador {
 
         $titulo = 'Administracion - Ventas';
         require_once __DIR__ . '/../vistas/admin_ventas.php';
+    }
+
+    public function almacen() {
+        $this->validarAutenticacion();
+
+        $msModel       = new MovimientoStock();
+        $traspasoModel = new Traspaso();
+        $sucursalModel = new Sucursal();
+        $productoModel = new Producto();
+
+        $stockCritico  = $msModel->obtenerStockCritico(5);
+        $sucursales    = $sucursalModel->obtenerTodas();
+        $productos     = $productoModel->obtenerTodos();
+        $traspasos     = $traspasoModel->listarTodos();
+
+        // Métricas para tarjetas del dashboard
+        $stockActual   = $msModel->obtenerStockActual();
+        $totalProductos = count(array_unique(array_column($stockActual, 'codProducto')));
+        $stockTotal     = array_sum(array_column($stockActual, 'stockActual'));
+        $stockComp      = array_sum(array_column($stockActual, 'stockComprometido'));
+        $totalCriticos  = count($stockCritico);
+
+        $titulo = 'Administración - Almacén';
+        require_once __DIR__ . '/../vistas/admin_almacen.php';
     }
 
     public function vendedores() {

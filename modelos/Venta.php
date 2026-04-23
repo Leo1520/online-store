@@ -40,7 +40,7 @@ class Venta {
                     throw new Exception('No se pudo registrar el detalle de venta.');
                 }
 
-                if (!$this->descontarStock($codProducto, $cantidad)) {
+                if (!$this->descontarStock($codProducto, $cantidad, $nroVenta, $usuarioSesion)) {
                     throw new Exception('Stock insuficiente para el producto ' . $codProducto . '.');
                 }
 
@@ -102,10 +102,10 @@ class Venta {
         return $nro;
     }
 
-    private function descontarStock($codProducto, $cantidad) {
-        $stmt = $this->db->prepare("CALL sp_descontar_stock_producto(?, ?)");
+    private function descontarStock($codProducto, $cantidad, $nroVenta, $usuario) {
+        $stmt = $this->db->prepare("CALL sp_descontar_stock_producto(?, ?, ?, ?)");
         if (!$stmt) return false;
-        $stmt->bind_param('ii', $codProducto, $cantidad);
+        $stmt->bind_param('iiis', $codProducto, $cantidad, $nroVenta, $usuario);
         $ok = $stmt->execute();
         $stmt->close();
         $this->limpiarResultadosPendientes();
