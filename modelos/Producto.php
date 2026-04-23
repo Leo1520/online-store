@@ -204,6 +204,15 @@ class Producto {
         return $stmt->execute();
     }
 
+    public function obtenerUltimoId(): ?int {
+        $res = $this->db->query("SELECT MAX(cod) AS ultimo FROM `Producto`");
+        if ($res) {
+            $fila = $res->fetch_assoc();
+            return $fila ? (int)$fila['ultimo'] : null;
+        }
+        return null;
+    }
+
     public function eliminar($id) {
         $id = (int)$id;
 

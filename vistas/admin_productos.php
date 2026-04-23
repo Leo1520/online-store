@@ -1,208 +1,166 @@
 <?php require_once __DIR__ . '/layout_admin/head.php'; ?>
-<div class="container mt-4">
-    <h1 class="mb-4">Administracion de Productos y Stock</h1>
 
-    <?php if (!empty($mensaje)): ?>
-        <div class="alert alert-success"><?php echo htmlspecialchars($mensaje); ?></div>
-    <?php endif; ?>
-
-    <form id="formProducto" method="POST" action="/admin/index.php?page=productos"
-          class="card card-body mb-4" enctype="multipart/form-data">
-        <h5><?php echo !empty($productoEditar) ? 'Editar producto' : 'Nuevo producto'; ?></h5>
-        <input type="hidden" name="accion" value="<?php echo !empty($productoEditar) ? 'editar_producto' : 'crear_producto'; ?>">
-        <input type="hidden" name="id_producto" value="<?php echo !empty($productoEditar) ? (int)$productoEditar['id_producto'] : 0; ?>">
-        <div class="form-row">
-            <div class="form-group col-md-3">
-                <label>Nombre</label>
-                <input type="text" name="nombre" class="form-control" value="<?php echo !empty($productoEditar) ? htmlspecialchars($productoEditar['nombre']) : ''; ?>" required>
-            </div>
-            <div class="form-group col-md-3">
-                <label>Descripcion</label>
-                <input type="text" name="descripcion" class="form-control" value="<?php echo !empty($productoEditar) ? htmlspecialchars($productoEditar['descripcion']) : ''; ?>" required>
-            </div>
-            <div class="form-group col-md-2">
-                <label>Precio</label>
-                <input type="number" name="precio" class="form-control" step="0.01" min="0.01" value="<?php echo !empty($productoEditar) ? htmlspecialchars($productoEditar['precio']) : ''; ?>" required>
-            </div>
-            <div class="form-group col-md-2">
-                <label>Imagen</label>
-                <input type="file" name="imagen_file" class="form-control-file mb-1" accept="image/*">
-                <input type="text" name="imagen" class="form-control form-control-sm"
-                       value="<?php echo !empty($productoEditar) ? htmlspecialchars($productoEditar['imagen']) : 'sudadera.png'; ?>"
-                       placeholder="o nombre de archivo">
-                <?php if (!empty($productoEditar)): ?>
-                    <img src="recursos/imagenes/<?php echo htmlspecialchars($productoEditar['imagen']); ?>"
-                         alt="" style="height:40px;margin-top:4px;">
-                <?php endif; ?>
-            </div>
-            <div class="form-group col-md-2">
-                <label>Estado</label>
-                <select name="estado" class="form-control">
-                    <option value="activo" <?php echo (!empty($productoEditar) && $productoEditar['estado'] === 'activo') ? 'selected' : ''; ?>>activo</option>
-                    <option value="inactivo" <?php echo (!empty($productoEditar) && $productoEditar['estado'] === 'inactivo') ? 'selected' : ''; ?>>inactivo</option>
-                </select>
-            </div>
-        </div>
-        <div class="form-row">
-            <div class="form-group col-md-4">
-                <label>Marca</label>
-                <select name="codMarca" class="form-control" required>
-                    <option value="">Seleccione</option>
-                    <?php foreach ($marcas as $marca): ?>
-                        <option value="<?php echo (int)$marca['cod']; ?>" <?php echo (!empty($productoEditar) && (int)$productoEditar['codMarca'] === (int)$marca['cod']) ? 'selected' : ''; ?>><?php echo htmlspecialchars($marca['nombre']); ?></option>
-                    <?php endforeach; ?>
-                </select>
-            </div>
-            <div class="form-group col-md-4">
-                <label>Industria</label>
-                <select name="codIndustria" class="form-control" required>
-                    <option value="">Seleccione</option>
-                    <?php foreach ($industrias as $industria): ?>
-                        <option value="<?php echo (int)$industria['cod']; ?>" <?php echo (!empty($productoEditar) && (int)$productoEditar['codIndustria'] === (int)$industria['cod']) ? 'selected' : ''; ?>><?php echo htmlspecialchars($industria['nombre']); ?></option>
-                    <?php endforeach; ?>
-                </select>
-            </div>
-            <div class="form-group col-md-4">
-                <label>Categoria</label>
-                <select name="codCategoria" class="form-control" required>
-                    <option value="">Seleccione</option>
-                    <?php foreach ($categorias as $categoria): ?>
-                        <option value="<?php echo (int)$categoria['cod']; ?>" <?php echo (!empty($productoEditar) && (int)$productoEditar['codCategoria'] === (int)$categoria['cod']) ? 'selected' : ''; ?>><?php echo htmlspecialchars($categoria['nombre']); ?></option>
-                    <?php endforeach; ?>
-                </select>
-            </div>
-        </div>
-        <button class="btn btn-primary" type="submit"><?php echo !empty($productoEditar) ? 'Actualizar producto' : 'Guardar producto'; ?></button>
-        <?php if (!empty($productoEditar)): ?>
-            <a href="/admin/index.php?page=productos" class="btn btn-secondary mt-2">Cancelar edicion</a>
-        <?php endif; ?>
-    </form>
-
-    <form method="POST" action="/admin/index.php?page=productos" class="card card-body mb-4">
-        <h5>Asignar stock por sucursal</h5>
-        <input type="hidden" name="accion" value="guardar_stock">
-        <div class="form-row">
-            <div class="form-group col-md-5">
-                <label>Producto</label>
-                <select name="codProducto" class="form-control" required>
-                    <option value="">Seleccione</option>
-                    <?php foreach ($productos as $producto): ?>
-                        <option value="<?php echo (int)$producto['id_producto']; ?>"><?php echo htmlspecialchars($producto['nombre']); ?></option>
-                    <?php endforeach; ?>
-                </select>
-            </div>
-            <div class="form-group col-md-5">
-                <label>Sucursal</label>
-                <select name="codSucursal" class="form-control" required>
-                    <option value="">Seleccione</option>
-                    <?php foreach ($sucursales as $sucursal): ?>
-                        <option value="<?php echo (int)$sucursal['cod']; ?>"><?php echo htmlspecialchars($sucursal['nombre']); ?></option>
-                    <?php endforeach; ?>
-                </select>
-            </div>
-            <div class="form-group col-md-2">
-                <label>Stock</label>
-                <input type="number" name="stock" class="form-control" min="0" step="1" required>
-            </div>
-        </div>
-        <button class="btn btn-success" type="submit">Guardar stock</button>
-    </form>
-
-    <?php
-    $productosStockBajo = array_filter($productos, function($p){ return (int)$p['stock'] <= 5 && strtolower($p['estado']) === 'activo'; });
-    ?>
-    <?php if (!empty($productosStockBajo)): ?>
-    <div class="alert alert-warning">
-        <i class="bi bi-exclamation-triangle-fill"></i>
-        <strong>Stock bajo</strong> — Los siguientes productos activos tienen 5 unidades o menos:
-        <ul class="mb-0 mt-1">
-            <?php foreach ($productosStockBajo as $p): ?>
-                <li><?php echo htmlspecialchars($p['nombre']); ?> — stock: <strong><?php echo (int)$p['stock']; ?></strong></li>
-            <?php endforeach; ?>
-        </ul>
+<!-- Cabecera -->
+<div class="page-header d-flex align-items-center justify-content-between">
+    <div>
+        <h4 class="mb-0 fw-bold" style="color:var(--primary)">
+            <i class="bi bi-box-seam me-2"></i>Productos
+        </h4>
+        <small class="text-muted"><?php echo count($productos); ?> productos registrados</small>
     </div>
-    <?php endif; ?>
+    <a href="/admin/index.php?page=productos_crear" class="btn fw-semibold text-white"
+       style="background:var(--accent);color:#333!important;">
+        <i class="bi bi-plus-lg me-1"></i>Nuevo Producto
+    </a>
+</div>
 
-    <h5>Lista de productos</h5>
-    <div class="table-responsive mb-4">
-        <table class="table table-bordered table-sm">
-            <thead class="thead-light">
-                <tr>
-                    <th>Cod</th>
-                    <th>Nombre</th>
-                    <th>Categoria</th>
-                    <th>Marca</th>
-                    <th>Estado</th>
-                    <th>Precio</th>
-                    <th>Stock total</th>
-                    <th>Acciones</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php foreach ($productos as $producto): ?>
-                    <tr <?php echo ((int)$producto['stock'] <= 5 && strtolower($producto['estado']) === 'activo') ? 'class="table-warning"' : ''; ?>>
-                        <td><?php echo (int)$producto['id_producto']; ?></td>
-                        <td><?php echo htmlspecialchars($producto['nombre']); ?></td>
-                        <td><?php echo htmlspecialchars($producto['categoria'] ?? ''); ?></td>
-                        <td><?php echo htmlspecialchars($producto['marca'] ?? ''); ?></td>
-                        <td><?php echo htmlspecialchars($producto['estado']); ?></td>
-                        <td>$<?php echo number_format($producto['precio'], 2); ?></td>
-                        <td>
-                            <?php echo (int)$producto['stock']; ?>
-                            <?php if ((int)$producto['stock'] <= 5 && strtolower($producto['estado']) === 'activo'): ?>
-                                <span class="badge badge-warning ml-1" title="Stock bajo">
-                                    <i class="bi bi-exclamation-triangle"></i>
-                                </span>
-                            <?php endif; ?>
-                        </td>
-                        <td>
-                            <a class="btn btn-warning btn-sm" href="/admin/index.php?page=productos&editar_producto=<?php echo (int)$producto['id_producto']; ?>">Editar</a>
-                            <a class="btn btn-danger btn-sm" href="/admin/index.php?page=productos&eliminar_producto=<?php echo (int)$producto['id_producto']; ?>">Eliminar</a>
-                        </td>
-                    </tr>
-                <?php endforeach; ?>
-            </tbody>
-        </table>
-    </div>
-
-    <h5>Detalle de stock por sucursal</h5>
-    <div class="table-responsive">
-        <table class="table table-bordered table-sm">
-            <thead class="thead-light">
-                <tr>
-                    <th>Producto</th>
-                    <th>Sucursal</th>
-                    <th>Stock</th>
-                    <th>Acciones</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php foreach ($stocks as $stock): ?>
-                    <tr>
-                        <td><?php echo htmlspecialchars($stock['producto']); ?></td>
-                        <td><?php echo htmlspecialchars($stock['sucursal']); ?></td>
-                        <td><?php echo htmlspecialchars($stock['stock']); ?></td>
-                        <td>
-                            <a class="btn btn-danger btn-sm" href="/admin/index.php?page=productos&eliminar_stock_producto=<?php echo (int)$stock['codProducto']; ?>&eliminar_stock_sucursal=<?php echo (int)$stock['codSucursal']; ?>">Eliminar</a>
-                        </td>
-                    </tr>
-                <?php endforeach; ?>
-            </tbody>
-        </table>
+<!-- Filtros -->
+<div class="card mb-4">
+    <div class="card-body py-3">
+        <form method="GET" action="/admin/index.php" class="row g-2 align-items-end">
+            <input type="hidden" name="page" value="productos">
+            <div class="col-md-4">
+                <input type="text" name="q" class="form-control form-control-sm"
+                       placeholder="Buscar nombre..."
+                       value="<?php echo htmlspecialchars($_GET['q'] ?? ''); ?>">
+            </div>
+            <div class="col-md-3">
+                <select name="cat" class="form-select form-select-sm">
+                    <option value="">Todas las categorías</option>
+                    <?php foreach ($categorias as $c): ?>
+                        <option value="<?php echo (int)$c['cod']; ?>"
+                            <?php echo (isset($_GET['cat']) && (int)$_GET['cat'] === (int)$c['cod']) ? 'selected' : ''; ?>>
+                            <?php echo htmlspecialchars($c['nombre']); ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <select name="estado" class="form-select form-select-sm">
+                    <option value="">Todos los estados</option>
+                    <option value="activo"   <?php echo (($_GET['estado'] ?? '') === 'activo')   ? 'selected' : ''; ?>>Activos</option>
+                    <option value="inactivo" <?php echo (($_GET['estado'] ?? '') === 'inactivo') ? 'selected' : ''; ?>>Inactivos</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <select name="stock_bajo" class="form-select form-select-sm">
+                    <option value="">Sin filtro</option>
+                    <option value="1" <?php echo (($_GET['stock_bajo'] ?? '') === '1') ? 'selected' : ''; ?>>Stock bajo (≤5)</option>
+                </select>
+            </div>
+            <div class="col-md-1">
+                <button type="submit" class="btn btn-primary btn-sm w-100">
+                    <i class="bi bi-search"></i>
+                </button>
+            </div>
+        </form>
     </div>
 </div>
 
-<script>
-document.addEventListener('DOMContentLoaded', function () {
-    Validacion.iniciar(document.getElementById('formProducto'), {
-        nombre:       [Validacion.reglas.requerido, Validacion.reglas.minLen(3), Validacion.reglas.maxLen(50)],
-        descripcion:  [Validacion.reglas.requerido, Validacion.reglas.minLen(10)],
-        precio:       [Validacion.reglas.requerido, Validacion.reglas.numeroPositivo],
-        imagen:       [Validacion.reglas.requerido],
-        codMarca:     [Validacion.reglas.seleccionValida],
-        codIndustria: [Validacion.reglas.seleccionValida],
-        codCategoria: [Validacion.reglas.seleccionValida],
-    });
-});
-</script>
+<?php
+// Aplicar filtros
+$lista = $productos;
+
+if (!empty($_GET['q'])) {
+    $q = strtolower(trim($_GET['q']));
+    $lista = array_filter($lista, fn($p) => str_contains(strtolower($p['nombre']), $q));
+}
+if (!empty($_GET['cat'])) {
+    $lista = array_filter($lista, fn($p) => (int)($p['codCategoria'] ?? 0) === (int)$_GET['cat']);
+}
+if (!empty($_GET['estado'])) {
+    $lista = array_filter($lista, fn($p) => strtolower($p['estado']) === $_GET['estado']);
+}
+if (!empty($_GET['stock_bajo'])) {
+    $lista = array_filter($lista, fn($p) => (int)($p['stock'] ?? 0) <= 5 && strtolower($p['estado']) === 'activo');
+}
+?>
+
+<!-- Tabla -->
+<div class="card">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th style="width:60px;">Img</th>
+                        <th>Producto</th>
+                        <th>Categoría</th>
+                        <th>Marca</th>
+                        <th>Precio</th>
+                        <th>Stock</th>
+                        <th>Estado</th>
+                        <th class="text-end">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php if (empty($lista)): ?>
+                        <tr>
+                            <td colspan="8" class="text-center text-muted py-5">
+                                <i class="bi bi-box-seam d-block mb-2" style="font-size:2rem;"></i>
+                                No hay productos.
+                                <a href="/admin/index.php?page=productos_crear">Crear el primero</a>
+                            </td>
+                        </tr>
+                    <?php else: ?>
+                        <?php foreach ($lista as $p): ?>
+                        <tr>
+                            <td>
+                                <?php if (!empty($p['imagen'])): ?>
+                                    <img src="/recursos/imagenes/<?php echo htmlspecialchars($p['imagen']); ?>"
+                                         class="rounded" style="width:48px;height:48px;object-fit:contain;background:#f8f9fa;">
+                                <?php else: ?>
+                                    <div class="rounded bg-light d-flex align-items-center justify-content-center"
+                                         style="width:48px;height:48px;">
+                                        <i class="bi bi-image text-muted"></i>
+                                    </div>
+                                <?php endif; ?>
+                            </td>
+                            <td>
+                                <div class="fw-semibold small"><?php echo htmlspecialchars($p['nombre']); ?></div>
+                                <small class="text-muted"><?php echo htmlspecialchars(mb_strimwidth($p['descripcion'] ?? '', 0, 50, '…')); ?></small>
+                            </td>
+                            <td><small><?php echo htmlspecialchars($p['categoria'] ?? '—'); ?></small></td>
+                            <td><small><?php echo htmlspecialchars($p['marca'] ?? '—'); ?></small></td>
+                            <td>
+                                <span class="fw-semibold small">Bs. <?php echo number_format((float)$p['precio'], 2); ?></span>
+                            </td>
+                            <td>
+                                <?php $s = (int)($p['stock'] ?? 0); ?>
+                                <?php if ($s <= 0): ?>
+                                    <span class="badge bg-danger rounded-pill">Agotado</span>
+                                <?php elseif ($s <= 5): ?>
+                                    <span class="badge bg-warning text-dark rounded-pill"><?php echo $s; ?> bajo</span>
+                                <?php else: ?>
+                                    <span class="badge bg-success rounded-pill"><?php echo $s; ?></span>
+                                <?php endif; ?>
+                            </td>
+                            <td>
+                                <span class="badge rounded-pill <?php echo $p['estado'] === 'activo' ? 'badge-status-active' : 'badge-status-inactive'; ?>">
+                                    <?php echo ucfirst($p['estado']); ?>
+                                </span>
+                            </td>
+                            <td class="text-end">
+                                <a href="/admin/index.php?page=productos_editar&id=<?php echo (int)$p['id_producto']; ?>"
+                                   class="btn btn-sm btn-outline-primary py-0 px-2 me-1"
+                                   title="Editar">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                <button class="btn btn-sm btn-outline-danger py-0 px-2"
+                                    title="Eliminar"
+                                    onclick="confirmDelete('el producto <?php echo htmlspecialchars($p['nombre'], ENT_QUOTES); ?>', function(){
+                                        window.location='/admin/index.php?page=productos&eliminar_producto=<?php echo (int)$p['id_producto']; ?>';
+                                    })">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
 <?php require_once __DIR__ . '/layout_admin/footer.php'; ?>

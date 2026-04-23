@@ -125,7 +125,7 @@
 <div class="alm-container">
 
     <!-- Título -->
-    <div class="alm-titulo"><i class="bi bi-archive-fill mr-2"></i>Módulo de Almacén</div>
+    <div class="alm-titulo"><i class="bi bi-archive-fill me-2"></i>Módulo de Almacén</div>
     <div class="alm-subtitulo">Kardex, traspasos, ajustes y stock crítico — Electrohogar</div>
 
     <!-- Tarjetas métricas -->
@@ -162,14 +162,14 @@
 
     <!-- Tabs -->
     <div class="alm-tabs">
-        <button class="alm-tab activo" onclick="cambiarTab('stock')"><i class="bi bi-table mr-1"></i>Stock Actual</button>
-        <button class="alm-tab" onclick="cambiarTab('kardex')"><i class="bi bi-journal-text mr-1"></i>Kardex</button>
-        <button class="alm-tab" onclick="cambiarTab('traspasos')"><i class="bi bi-arrow-left-right mr-1"></i>Traspasos</button>
-        <button class="alm-tab" onclick="cambiarTab('ajustes')"><i class="bi bi-pencil-square mr-1"></i>Ajustes</button>
+        <button class="alm-tab activo" onclick="cambiarTab('stock')"><i class="bi bi-table me-1"></i>Stock Actual</button>
+        <button class="alm-tab" onclick="cambiarTab('kardex')"><i class="bi bi-journal-text me-1"></i>Kardex</button>
+        <button class="alm-tab" onclick="cambiarTab('traspasos')"><i class="bi bi-arrow-left-right me-1"></i>Traspasos</button>
+        <button class="alm-tab" onclick="cambiarTab('ajustes')"><i class="bi bi-pencil-square me-1"></i>Ajustes</button>
         <button class="alm-tab" onclick="cambiarTab('critico')">
-            <i class="bi bi-exclamation-diamond mr-1"></i>Stock Crítico
+            <i class="bi bi-exclamation-diamond me-1"></i>Stock Crítico
             <?php if ($totalCriticos > 0): ?>
-                <span class="badge badge-danger ml-1" style="font-size:10px;"><?php echo $totalCriticos; ?></span>
+                <span class="badge bg-danger ms-1" style="font-size:10px;"><?php echo $totalCriticos; ?></span>
             <?php endif; ?>
         </button>
     </div>
@@ -302,7 +302,7 @@
             <!-- Formulario nuevo traspaso -->
             <div class="col-lg-4">
                 <div class="alm-form-card">
-                    <h6><i class="bi bi-plus-circle mr-1"></i>Nuevo Traspaso</h6>
+                    <h6><i class="bi bi-plus-circle me-1"></i>Nuevo Traspaso</h6>
                     <div class="form-group">
                         <label style="font-size:12px;font-weight:600;">Sucursal Origen</label>
                         <select class="form-control form-control-sm" id="trpOrigen">
@@ -342,7 +342,7 @@
                     <button class="btn btn-sm btn-outline-primary mt-1 mb-3" onclick="agregarFilaProd()"><i class="bi bi-plus"></i> Añadir producto</button>
 
                     <button class="btn btn-primary btn-block" onclick="crearTraspaso()">
-                        <i class="bi bi-arrow-left-right mr-1"></i>Crear Traspaso
+                        <i class="bi bi-arrow-left-right me-1"></i>Crear Traspaso
                     </button>
                     <div id="msgTraspaso" class="mt-2" style="font-size:12px;"></div>
                 </div>
@@ -379,7 +379,7 @@
         <div class="row">
             <div class="col-lg-4">
                 <div class="alm-form-card">
-                    <h6><i class="bi bi-pencil-square mr-1"></i>Registrar Ajuste de Inventario</h6>
+                    <h6><i class="bi bi-pencil-square me-1"></i>Registrar Ajuste de Inventario</h6>
                     <div class="form-group">
                         <label style="font-size:12px;font-weight:600;">Producto</label>
                         <select class="form-control form-control-sm" id="ajProd">
@@ -416,7 +416,7 @@
                         <input type="text" class="form-control form-control-sm" id="ajObs" placeholder="Descripción del ajuste...">
                     </div>
                     <button class="btn btn-primary btn-block" onclick="registrarAjuste()">
-                        <i class="bi bi-check2-circle mr-1"></i>Registrar Ajuste
+                        <i class="bi bi-check2-circle me-1"></i>Registrar Ajuste
                     </button>
                     <div id="msgAjuste" class="mt-2" style="font-size:12px;"></div>
                 </div>
@@ -506,7 +506,7 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header" style="background:var(--azul);color:#fff;">
-                <h5 class="modal-title"><i class="bi bi-arrow-left-right mr-1"></i>Detalle del Traspaso <span id="modalTrpNro"></span></h5>
+                <h5 class="modal-title"><i class="bi bi-arrow-left-right me-1"></i>Detalle del Traspaso <span id="modalTrpNro"></span></h5>
                 <button type="button" class="close text-white" data-dismiss="modal">&times;</button>
             </div>
             <div class="modal-body" id="modalTrpBody">Cargando...</div>
@@ -662,12 +662,12 @@ function cargarTraspasos() {
                 tbody.innerHTML = data.map(t => {
                     const estadoClass = { pendiente:'est-pendiente', completado:'est-completado', cancelado:'est-cancelado' }[t.estado] || '';
                     const acciones = t.estado === 'pendiente'
-                        ? `<button class="btn btn-sm btn-success mr-1" onclick="completarTrp(${t.nro})" title="Completar"><i class="bi bi-check-lg"></i></button>
+                        ? `<button class="btn btn-sm btn-success me-1" onclick="completarTrp(${t.nro})" title="Completar"><i class="bi bi-check-lg"></i></button>
                            <button class="btn btn-sm btn-danger" onclick="cancelarTrp(${t.nro})" title="Cancelar"><i class="bi bi-x-lg"></i></button>`
                         : '';
                     return `<tr>
                         <td><strong>TRP-${String(t.nro).padStart(6,'0')}</strong>
-                            <button class="btn btn-sm btn-link p-0 ml-1" onclick="verDetalleTrp(${t.nro})" title="Ver detalle"><i class="bi bi-eye"></i></button>
+                            <button class="btn btn-sm btn-link p-0 ms-1" onclick="verDetalleTrp(${t.nro})" title="Ver detalle"><i class="bi bi-eye"></i></button>
                         </td>
                         <td><small>${t.fechaHora}</small></td>
                         <td>${esc(t.sucursalOrigen)}</td>

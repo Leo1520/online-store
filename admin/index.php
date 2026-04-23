@@ -12,7 +12,8 @@ $page = trim($_GET['page'] ?? 'dashboard');
 
 $paginas = [
     'dashboard', 'catalogos', 'sucursales', 'clientes',
-    'productos', 'ventas', 'vendedores', 'almacen'
+    'productos', 'productos_crear', 'productos_editar',
+    'ventas', 'vendedores', 'almacen'
 ];
 
 if (!in_array($page, $paginas)) {
@@ -25,12 +26,14 @@ require_once __DIR__ . '/../controladores/AdminControlador.php';
 $ctrl = new AdminControlador();
 
 switch ($page) {
-    case 'dashboard':  $ctrl->dashboard();  break;
-    case 'catalogos':  $ctrl->catalogos();  break;
-    case 'sucursales': $ctrl->sucursales(); break;
-    case 'clientes':   $ctrl->clientes();   break;
-    case 'productos':  $ctrl->productos();  break;
-    case 'ventas':     $ctrl->ventas();     break;
-    case 'vendedores': $ctrl->vendedores(); break;
-    case 'almacen':    $ctrl->almacen();    break;
+    case 'dashboard':        $ctrl->dashboard();        break;
+    case 'catalogos':        $ctrl->catalogos();        break;
+    case 'sucursales':       $ctrl->sucursales();       break;
+    case 'clientes':         $ctrl->clientes();         break;
+    case 'productos':        $ctrl->productos();        break;
+    case 'productos_crear':  $ctrl->productosCrear();   break;
+    case 'productos_editar': $ctrl->productosEditar();  break;
+    case 'ventas':           $ctrl->ventas();           break;
+    case 'vendedores':       $ctrl->vendedores();       break;
+    case 'almacen':          $ctrl->almacen();          break;
 }

@@ -2,235 +2,197 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title><?php echo htmlspecialchars($titulo ?? 'Admin — Electrohogar'); ?></title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><?php echo htmlspecialchars($titulo ?? 'Panel Admin'); ?> — ElectroHogar</title>
 
-    <!-- Font Awesome 5 -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-    <!-- Bootstrap 4 -->
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-    <!-- AdminLTE 3 -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/admin-lte@3.2.0/dist/css/adminlte.min.css">
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Bootstrap Icons -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <!-- SweetAlert2 -->
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
 
     <style>
         :root {
-            --azul:       #1B3A6B;
-            --azul-claro: #2751a3;
-            --amarillo:   #F5A623;
+            --sidebar-w: 260px;
+            --primary:   #1B3A6B;
+            --accent:    #F5A623;
         }
-        .brand-link { background: #1B3A6B !important; border-bottom: 1px solid rgba(255,255,255,.1) !important; }
-        .brand-text  { color: #F5A623 !important; font-size: 17px !important; font-weight: 800 !important; letter-spacing: 1px; }
-        .main-sidebar { background: #1B3A6B !important; }
-        .sidebar .nav-link { color: #c8d3ea !important; font-size: 13px; font-weight: 500; }
-        .sidebar .nav-link:hover, .sidebar .nav-link.active { color: #F5A623 !important; background: rgba(255,255,255,.07) !important; }
-        .sidebar .nav-link i { color: #8898c4; }
-        .sidebar .nav-link:hover i, .sidebar .nav-link.active i { color: #F5A623; }
-        .sidebar .nav-treeview .nav-link { padding-left: 2rem; font-size: 12px; }
-        .nav-sidebar .nav-header { color: #8898c4; font-size: 10px; letter-spacing: 1.5px; padding: 8px 16px 4px; font-weight: 700; }
-        .user-panel { border-bottom: 1px solid rgba(255,255,255,.07) !important; }
-        .user-panel .info a { color: #c8d3ea !important; font-size: 13px; }
-        .user-panel .info small { color: #8898c4; font-size: 11px; }
-        .main-header.navbar { background: #fff; border-bottom: 1px solid #e8ecf8; }
-        .navbar-badge { font-size: 9px; }
-        .content-wrapper { background: #f4f6fa; }
-        .content-header h1 { font-size: 20px; font-weight: 700; color: #1B3A6B; }
-        .breadcrumb-item.active { color: #888; font-size: 12px; }
-        .card { border: none; border-radius: 12px; box-shadow: 0 2px 12px rgba(27,58,107,.08); }
-        .card-header { border-radius: 12px 12px 0 0 !important; }
-        .sidebar-mini.sidebar-collapse .main-sidebar { width: 4.6rem !important; }
-        .badge-amarillo { background: #F5A623; color: #333; }
+        body { background: #f0f2f5; font-family: 'Segoe UI', sans-serif; }
+
+        /* ── Sidebar ── */
+        .sidebar {
+            width: var(--sidebar-w); min-height: 100vh;
+            background: var(--primary);
+            position: fixed; top: 0; left: 0; z-index: 1000;
+            overflow-y: auto; transition: transform .3s;
+        }
+        .sidebar-brand { padding: 1.2rem 1.5rem; border-bottom: 1px solid rgba(255,255,255,.1); }
+        .sidebar-brand span { color: var(--accent); }
+        .sidebar .nav-link {
+            color: rgba(255,255,255,.75); padding: .6rem 1.5rem;
+            border-radius: 0; display: flex; align-items: center;
+            gap: .6rem; font-size: .9rem; text-decoration: none;
+        }
+        .sidebar .nav-link:hover,
+        .sidebar .nav-link.active { color: #fff; background: rgba(255,255,255,.12); }
+        .sidebar .nav-section {
+            color: rgba(255,255,255,.4); font-size: .7rem;
+            text-transform: uppercase; padding: 1rem 1.5rem .3rem;
+            letter-spacing: .08em;
+        }
+        .sidebar .badge-alert {
+            margin-left: auto; font-size: .65rem; border-radius: 20px;
+        }
+
+        /* ── Main ── */
+        .main-content { margin-left: var(--sidebar-w); min-height: 100vh; }
+        .topbar {
+            background: #fff; border-bottom: 1px solid #e5e7eb;
+            padding: .75rem 1.5rem; position: sticky; top: 0; z-index: 999;
+        }
+        .page-header {
+            background: #fff; border-bottom: 1px solid #e5e7eb;
+            padding: 1.25rem 1.5rem; margin-bottom: 1.5rem;
+        }
+
+        /* ── Cards ── */
+        .card { border: none; box-shadow: 0 1px 4px rgba(0,0,0,.08); border-radius: .6rem; }
+        .stat-card { border-left: 4px solid var(--accent); }
+
+        /* ── Tables ── */
+        .table th {
+            font-size: .78rem; text-transform: uppercase;
+            letter-spacing: .04em; color: #6b7280; font-weight: 600;
+        }
+
+        /* ── Status badges ── */
+        .badge-status-active    { background: #d1fae5; color: #065f46; }
+        .badge-status-inactive  { background: #f3f4f6; color: #374151; }
+        .badge-status-blocked   { background: #fee2e2; color: #991b1b; }
+        .badge-status-pending   { background: #fef3c7; color: #92400e; }
+        .badge-status-approved  { background: #dbeafe; color: #1e40af; }
+        .badge-status-overdue   { background: #fee2e2; color: #991b1b; }
+        .badge-status-completed { background: #d1fae5; color: #065f46; }
+        .badge-status-procesando{ background: #fff7ed; color: #9a3412; }
+        .badge-status-enviado   { background: #eff6ff; color: #1d4ed8; }
+        .badge-status-entregado { background: #d1fae5; color: #065f46; }
+        .badge-status-cancelado { background: #fee2e2; color: #991b1b; }
+        .badge-status-facturado { background: #ede9fe; color: #5b21b6; }
+
+        /* ── Responsive ── */
+        @media(max-width:768px) {
+            .sidebar { transform: translateX(-100%); }
+            .sidebar.show { transform: translateX(0); }
+            .main-content { margin-left: 0; }
+        }
     </style>
 </head>
-<body class="hold-transition sidebar-mini layout-fixed">
-<div class="wrapper">
+<body>
 
 <?php
 $ap = $_GET['page'] ?? 'dashboard';
-function adminLink($page, $extra = '') {
+
+function isAct($page) {
+    global $ap;
+    // Subpáginas comparten el estado activo con su padre
+    $grupos = [
+        'productos' => ['productos', 'productos_crear', 'productos_editar'],
+    ];
+    $grupo = $grupos[$page] ?? [$page];
+    return in_array($ap, $grupo) ? 'active' : '';
+}
+function aUrl($page, $extra = '') {
     return '/admin/index.php?page=' . $page . ($extra ? '&' . $extra : '');
-}
-function isActive($page, $current) {
-    return $page === $current ? 'active' : '';
-}
-function isOpen($pages, $current) {
-    return in_array($current, $pages) ? 'menu-open' : '';
 }
 ?>
 
-<!-- ══ TOP NAVBAR ══ -->
-<nav class="main-header navbar navbar-expand navbar-white navbar-light">
-    <ul class="navbar-nav">
-        <li class="nav-item">
-            <a class="nav-link" data-widget="pushmenu" href="#" role="button" title="Colapsar menú">
-                <i class="fas fa-bars"></i>
-            </a>
-        </li>
-        <li class="nav-item d-none d-sm-inline-block">
-            <a href="/admin/index.php" class="nav-link font-weight-bold" style="color:#1B3A6B;">
-                <i class="fas fa-th-large mr-1"></i>Admin Panel
-            </a>
-        </li>
-    </ul>
-    <ul class="navbar-nav ml-auto">
-        <li class="nav-item">
-            <a class="nav-link" href="/" target="_blank" title="Ver tienda pública">
-                <i class="fas fa-store"></i>
-                <span class="d-none d-md-inline ml-1" style="font-size:12px;">Ver Tienda</span>
-            </a>
-        </li>
-        <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="#" id="userMenu" role="button" data-toggle="dropdown">
-                <i class="fas fa-user-shield mr-1" style="color:#1B3A6B;"></i>
-                <span style="font-size:13px;font-weight:600;"><?php echo htmlspecialchars($_SESSION['usuario'] ?? 'Admin'); ?></span>
-            </a>
-            <div class="dropdown-menu dropdown-menu-right" style="min-width:200px;">
-                <div class="px-3 py-2 border-bottom">
-                    <small class="text-muted d-block">Conectado como</small>
-                    <strong><?php echo htmlspecialchars($_SESSION['usuario'] ?? ''); ?></strong>
-                    <span class="badge badge-warning badge-sm ml-1">Admin</span>
-                </div>
-                <a class="dropdown-item" href="/index.php?pagina=inicio" target="_blank">
-                    <i class="fas fa-store fa-sm mr-2 text-muted"></i>Ir a la tienda
-                </a>
-                <div class="dropdown-divider"></div>
-                <a class="dropdown-item text-danger" href="/admin/logout.php">
-                    <i class="fas fa-sign-out-alt fa-sm mr-2"></i>Cerrar sesión
-                </a>
-            </div>
-        </li>
-    </ul>
-</nav>
-<!-- ══ END TOP NAVBAR ══ -->
-
 <!-- ══ SIDEBAR ══ -->
-<aside class="main-sidebar sidebar-dark-primary elevation-4">
-    <a href="/admin/index.php" class="brand-link px-3 py-3">
-        <span class="brand-text">⚡ ELECTROHOGAR</span>
-    </a>
-
-    <div class="sidebar">
-        <!-- Usuario -->
-        <div class="user-panel mt-3 pb-3 mb-2 d-flex align-items-center px-3">
-            <div class="image">
-                <div style="width:34px;height:34px;border-radius:50%;background:#F5A623;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14px;color:#1B3A6B;">
-                    <?php echo strtoupper(substr($_SESSION['usuario'] ?? 'A', 0, 1)); ?>
-                </div>
-            </div>
-            <div class="info ml-2">
-                <a href="#" class="d-block"><?php echo htmlspecialchars($_SESSION['usuario'] ?? 'Admin'); ?></a>
-                <small>Administrador</small>
-            </div>
-        </div>
-
-        <!-- Nav -->
-        <nav class="mt-1">
-            <ul class="nav nav-pills nav-sidebar flex-column nav-compact nav-child-indent"
-                data-widget="treeview" role="menu" data-accordion="false">
-
-                <!-- Dashboard -->
-                <li class="nav-item">
-                    <a href="<?php echo adminLink('dashboard'); ?>" class="nav-link <?php echo isActive('dashboard', $ap); ?>">
-                        <i class="nav-icon fas fa-tachometer-alt"></i>
-                        <p>Dashboard</p>
-                    </a>
-                </li>
-
-                <li class="nav-header">GESTIÓN</li>
-
-                <!-- Productos -->
-                <li class="nav-item <?php echo isOpen(['productos'], $ap); ?>">
-                    <a href="<?php echo adminLink('productos'); ?>" class="nav-link <?php echo isActive('productos', $ap); ?>">
-                        <i class="nav-icon fas fa-box"></i>
-                        <p>Productos</p>
-                    </a>
-                </li>
-
-                <!-- Catálogos -->
-                <li class="nav-item <?php echo isOpen(['catalogos'], $ap); ?>">
-                    <a href="<?php echo adminLink('catalogos'); ?>" class="nav-link <?php echo isActive('catalogos', $ap); ?>">
-                        <i class="nav-icon fas fa-tags"></i>
-                        <p>Catálogos</p>
-                    </a>
-                </li>
-
-                <!-- Sucursales -->
-                <li class="nav-item">
-                    <a href="<?php echo adminLink('sucursales'); ?>" class="nav-link <?php echo isActive('sucursales', $ap); ?>">
-                        <i class="nav-icon fas fa-building"></i>
-                        <p>Sucursales</p>
-                    </a>
-                </li>
-
-                <li class="nav-header">PERSONAS</li>
-
-                <!-- Clientes -->
-                <li class="nav-item">
-                    <a href="<?php echo adminLink('clientes'); ?>" class="nav-link <?php echo isActive('clientes', $ap); ?>">
-                        <i class="nav-icon fas fa-users"></i>
-                        <p>Clientes</p>
-                    </a>
-                </li>
-
-                <!-- Vendedores -->
-                <li class="nav-item">
-                    <a href="<?php echo adminLink('vendedores'); ?>" class="nav-link <?php echo isActive('vendedores', $ap); ?>">
-                        <i class="nav-icon fas fa-user-tie"></i>
-                        <p>Vendedores</p>
-                    </a>
-                </li>
-
-                <li class="nav-header">OPERACIONES</li>
-
-                <!-- Ventas -->
-                <li class="nav-item">
-                    <a href="<?php echo adminLink('ventas'); ?>" class="nav-link <?php echo isActive('ventas', $ap); ?>">
-                        <i class="nav-icon fas fa-receipt"></i>
-                        <p>Ventas</p>
-                    </a>
-                </li>
-
-                <!-- Almacén -->
-                <li class="nav-item has-treeview <?php echo isOpen(['almacen'], $ap); ?>">
-                    <a href="<?php echo adminLink('almacen'); ?>" class="nav-link <?php echo isActive('almacen', $ap); ?>">
-                        <i class="nav-icon fas fa-warehouse"></i>
-                        <p>
-                            Almacén / Kardex
-                        </p>
-                    </a>
-                </li>
-
-                <li class="nav-header">SISTEMA</li>
-                <li class="nav-item">
-                    <a href="/admin/logout.php" class="nav-link">
-                        <i class="nav-icon fas fa-sign-out-alt" style="color:#e07070;"></i>
-                        <p style="color:#e07070;">Cerrar sesión</p>
-                    </a>
-                </li>
-
-            </ul>
-        </nav>
+<aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+        <a href="/admin/index.php" class="text-white text-decoration-none fw-bold fs-5">
+            <i class="bi bi-lightning-charge-fill text-warning me-2"></i>Electro<span>Hogar</span>
+        </a>
+        <div class="text-white-50 small mt-1">Panel Administración</div>
     </div>
-</aside>
-<!-- ══ END SIDEBAR ══ -->
 
-<!-- ══ CONTENT WRAPPER ══ -->
-<div class="content-wrapper">
-    <section class="content-header">
-        <div class="container-fluid">
-            <div class="row mb-2">
-                <div class="col-sm-6">
-                    <h1><?php echo htmlspecialchars($titulo ?? 'Panel Admin'); ?></h1>
-                </div>
-                <div class="col-sm-6">
-                    <ol class="breadcrumb float-sm-right">
-                        <li class="breadcrumb-item"><a href="/admin/index.php">Inicio</a></li>
-                        <li class="breadcrumb-item active"><?php echo htmlspecialchars($titulo ?? ''); ?></li>
-                    </ol>
-                </div>
-            </div>
+    <nav class="mt-2">
+        <div class="nav-section">Principal</div>
+        <a href="<?php echo aUrl('dashboard'); ?>" class="nav-link <?php echo isAct('dashboard'); ?>">
+            <i class="bi bi-speedometer2"></i> Dashboard
+        </a>
+
+        <div class="nav-section">Catálogo</div>
+        <a href="<?php echo aUrl('productos'); ?>" class="nav-link <?php echo isAct('productos'); ?>">
+            <i class="bi bi-box-seam"></i> Productos
+        </a>
+        <a href="<?php echo aUrl('catalogos'); ?>" class="nav-link <?php echo isAct('catalogos'); ?>">
+            <i class="bi bi-tags"></i> Categorías / Marcas
+        </a>
+        <a href="<?php echo aUrl('sucursales'); ?>" class="nav-link <?php echo isAct('sucursales'); ?>">
+            <i class="bi bi-building"></i> Sucursales
+        </a>
+
+        <div class="nav-section">Ventas</div>
+        <a href="<?php echo aUrl('ventas'); ?>" class="nav-link <?php echo isAct('ventas'); ?>">
+            <i class="bi bi-bag-check"></i> Pedidos / Ventas
+        </a>
+        <a href="<?php echo aUrl('clientes'); ?>" class="nav-link <?php echo isAct('clientes'); ?>">
+            <i class="bi bi-people"></i> Clientes
+        </a>
+        <a href="<?php echo aUrl('vendedores'); ?>" class="nav-link <?php echo isAct('vendedores'); ?>">
+            <i class="bi bi-person-badge"></i> Vendedores
+        </a>
+
+        <div class="nav-section">Almacén</div>
+        <a href="<?php echo aUrl('almacen'); ?>" class="nav-link <?php echo isAct('almacen'); ?>">
+            <i class="bi bi-archive"></i> Stock / Kardex
+        </a>
+
+        <div class="pb-3 px-3 mt-3">
+            <a href="/admin/logout.php" class="btn btn-sm btn-outline-light w-100">
+                <i class="bi bi-box-arrow-right me-1"></i>Cerrar Sesión
+            </a>
         </div>
-    </section>
-    <section class="content">
-        <div class="container-fluid">
+    </nav>
+</aside>
+
+<!-- ══ MAIN CONTENT ══ -->
+<div class="main-content">
+
+    <!-- TOPBAR -->
+    <div class="topbar d-flex align-items-center justify-content-between">
+        <button class="btn btn-sm btn-outline-secondary d-md-none"
+                onclick="document.getElementById('sidebar').classList.toggle('show')">
+            <i class="bi bi-list"></i>
+        </button>
+        <nav aria-label="breadcrumb" class="d-none d-md-block">
+            <ol class="breadcrumb mb-0 small">
+                <li class="breadcrumb-item"><a href="/admin/index.php">Admin</a></li>
+                <li class="breadcrumb-item active"><?php echo htmlspecialchars($titulo ?? ''); ?></li>
+            </ol>
+        </nav>
+        <div class="d-flex align-items-center gap-3">
+            <span class="small text-muted">
+                <i class="bi bi-person-circle me-1"></i>
+                <?php echo htmlspecialchars($_SESSION['usuario'] ?? 'Administrador'); ?>
+            </span>
+            <a href="/index.php?pagina=inicio" class="btn btn-sm btn-outline-primary" target="_blank">
+                <i class="bi bi-shop me-1"></i>Ver tienda
+            </a>
+        </div>
+    </div>
+
+    <!-- FLASH MESSAGES -->
+    <?php if (!empty($mensaje)): ?>
+    <div class="px-4 pt-3">
+        <div class="alert alert-success alert-dismissible fade show py-2" role="alert">
+            <i class="bi bi-check-circle me-2"></i><?php echo htmlspecialchars($mensaje); ?>
+            <button type="button" class="btn-close btn-sm" data-bs-dismiss="alert"></button>
+        </div>
+    </div>
+    <?php endif; ?>
+
+    <!-- PAGE CONTENT -->
+    <script src="/recursos/js/validacion.js"></script>
+    <div class="p-4">

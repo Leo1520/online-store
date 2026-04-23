@@ -1,5 +1,12 @@
 <?php require_once __DIR__ . '/layout_admin/head.php'; ?>
 
+<div class="page-header">
+    <h4 class="mb-0 fw-bold" style="color:var(--primary)">
+        <i class="bi bi-speedometer2 me-2"></i>Dashboard
+    </h4>
+    <small class="text-muted">Resumen general — <?php echo date('d/m/Y'); ?></small>
+</div>
+
 <style>
 .dash-card { border-radius: 14px; padding: 20px 22px; color: #fff; display: flex; align-items: center; gap: 16px; box-shadow: 0 4px 20px rgba(0,0,0,.12); }
 .dash-card-ico { font-size: 36px; opacity: .85; }
@@ -16,7 +23,7 @@
 <div class="row mb-4">
     <div class="col-sm-6 col-xl-3 mb-3">
         <div class="dash-card azul">
-            <div class="dash-card-ico"><i class="fas fa-shopping-cart"></i></div>
+            <div class="dash-card-ico"><i class="bi bi-cart-check"></i></div>
             <div>
                 <div class="dash-card-num"><?php echo (int)($dash['ventasHoy'] ?? 0); ?></div>
                 <div class="dash-card-lbl">Ventas hoy</div>
@@ -25,7 +32,7 @@
     </div>
     <div class="col-sm-6 col-xl-3 mb-3">
         <div class="dash-card verde">
-            <div class="dash-card-ico"><i class="fas fa-calendar-week"></i></div>
+            <div class="dash-card-ico"><i class="bi bi-calendar-week"></i></div>
             <div>
                 <div class="dash-card-num"><?php echo (int)($dash['ventasSemana'] ?? 0); ?></div>
                 <div class="dash-card-lbl">Ventas esta semana</div>
@@ -34,7 +41,7 @@
     </div>
     <div class="col-sm-6 col-xl-3 mb-3">
         <div class="dash-card amari">
-            <div class="dash-card-ico"><i class="fas fa-calendar-alt"></i></div>
+            <div class="dash-card-ico"><i class="bi bi-calendar3"></i></div>
             <div>
                 <div class="dash-card-num"><?php echo (int)($dash['ventasMes'] ?? 0); ?></div>
                 <div class="dash-card-lbl">Ventas este mes</div>
@@ -43,7 +50,7 @@
     </div>
     <div class="col-sm-6 col-xl-3 mb-3">
         <div class="dash-card azul" style="background:linear-gradient(135deg,#6610f2,#6f42c1);">
-            <div class="dash-card-ico"><i class="fas fa-dollar-sign"></i></div>
+            <div class="dash-card-ico"><i class="bi bi-currency-dollar"></i></div>
             <div>
                 <div class="dash-card-num">Bs. <?php echo number_format((float)($dash['ingresosMes'] ?? 0), 0, '.', ','); ?></div>
                 <div class="dash-card-lbl">Ingresos del mes</div>
@@ -57,12 +64,12 @@
     <div class="col-lg-7 mb-4">
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center" style="background:#1B3A6B;">
-                <h6 class="mb-0 text-white"><i class="fas fa-receipt mr-2"></i>Últimas Ventas</h6>
+                <h6 class="mb-0 text-white"><i class="bi bi-receipt me-2"></i>Últimas Ventas</h6>
                 <a href="/admin/index.php?page=ventas" class="btn btn-sm btn-outline-light" style="font-size:11px;">Ver todas</a>
             </div>
             <div class="card-body p-0">
                 <table class="table table-sm mb-0" style="font-size:13px;">
-                    <thead class="thead-light">
+                    <thead>
                         <tr><th>#</th><th>Fecha</th><th>Cliente</th><th>Total</th><th>Estado</th></tr>
                     </thead>
                     <tbody>
@@ -70,15 +77,15 @@
                             <tr><td colspan="5" class="text-center text-muted py-3">Sin ventas</td></tr>
                         <?php else: ?>
                             <?php foreach ($ultimasVentas as $v):
-                                $badges = ['pendiente'=>'secondary','procesando'=>'warning','enviado'=>'info','entregado'=>'success','cancelado'=>'danger','facturado'=>'primary'];
-                                $b = $badges[$v['estado'] ?? 'pendiente'] ?? 'secondary';
+                                $badgeMap = ['pendiente'=>'badge-status-pending','procesando'=>'badge-status-procesando','enviado'=>'badge-status-enviado','entregado'=>'badge-status-entregado','cancelado'=>'badge-status-cancelado','facturado'=>'badge-status-facturado'];
+                                $b = $badgeMap[$v['estado'] ?? 'pendiente'] ?? 'badge-status-pending';
                             ?>
                             <tr>
                                 <td><strong>#<?php echo (int)$v['nro']; ?></strong></td>
                                 <td><small><?php echo htmlspecialchars(substr($v['fechaHora'],0,16)); ?></small></td>
                                 <td><?php echo htmlspecialchars($v['cliente'] ?? $v['ciCliente']); ?></td>
                                 <td><strong>Bs. <?php echo number_format((float)($v['totalMonto'] ?? 0),2); ?></strong></td>
-                                <td><span class="badge badge-<?php echo $b; ?>"><?php echo ucfirst($v['estado']??''); ?></span></td>
+                                <td><span class="badge rounded-pill <?php echo $b; ?>"><?php echo ucfirst($v['estado']??''); ?></span></td>
                             </tr>
                             <?php endforeach; ?>
                         <?php endif; ?>
@@ -93,7 +100,7 @@
         <!-- Top productos -->
         <div class="card mb-3">
             <div class="card-header" style="background:#F5A623;">
-                <h6 class="mb-0" style="color:#333;"><i class="fas fa-trophy mr-2"></i>Productos Más Vendidos</h6>
+                <h6 class="mb-0" style="color:#333;"><i class="bi bi-trophy me-2"></i>Productos Más Vendidos</h6>
             </div>
             <div class="card-body p-0">
                 <?php if (empty($topProductos)): ?>
@@ -103,7 +110,7 @@
                     <div class="d-flex justify-content-between align-items-center px-3 py-2 border-bottom">
                         <div style="font-size:13px;"><strong><?php echo htmlspecialchars($p['nombre']); ?></strong></div>
                         <div class="text-right">
-                            <span class="badge badge-primary"><?php echo (int)$p['totalVendido']; ?> uds</span>
+                            <span class="badge rounded-pill" style="background:var(--primary)"><?php echo (int)$p['totalVendido']; ?> uds</span>
                         </div>
                     </div>
                     <?php endforeach; ?>
@@ -114,17 +121,17 @@
         <!-- Stock crítico -->
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center" style="background:#dc3545;">
-                <h6 class="mb-0 text-white"><i class="fas fa-exclamation-triangle mr-2"></i>Stock Crítico</h6>
+                <h6 class="mb-0 text-white"><i class="bi bi-exclamation-triangle me-2"></i>Stock Crítico</h6>
                 <a href="/admin/index.php?page=almacen" class="btn btn-sm btn-outline-light" style="font-size:11px;">Ver almacén</a>
             </div>
             <div class="card-body p-0">
                 <?php if (empty($stockCritico)): ?>
-                    <p class="text-center text-muted py-3 mb-0" style="font-size:13px;"><i class="fas fa-check-circle text-success mr-1"></i>Sin alertas</p>
+                    <p class="text-center text-muted py-3 mb-0" style="font-size:13px;"><i class="bi bi-check-circle text-success me-1"></i>Sin alertas</p>
                 <?php else: ?>
                     <?php foreach (array_slice($stockCritico, 0, 6) as $c): ?>
                     <div class="d-flex justify-content-between align-items-center px-3 py-2 border-bottom">
                         <div style="font-size:12px;"><?php echo htmlspecialchars($c['producto']); ?></div>
-                        <span class="badge badge-<?php echo $c['alerta'] === 'agotado' ? 'danger' : 'warning'; ?>">
+                        <span class="badge rounded-pill <?php echo $c['alerta'] === 'agotado' ? 'bg-danger' : 'bg-warning text-dark'; ?>">
                             <?php echo (int)$c['stockTotal']; ?> uds
                         </span>
                     </div>

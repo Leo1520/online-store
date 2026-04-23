@@ -1,172 +1,156 @@
 <?php require_once __DIR__ . '/layout_admin/head.php'; ?>
-<div class="container mt-4">
-    <h1 class="mb-4">Administracion de Cuentas y Clientes</h1>
 
-    <?php if (!empty($mensaje)): ?>
-        <div class="alert alert-info"><?php echo htmlspecialchars($mensaje); ?></div>
-    <?php endif; ?>
+<div class="page-header d-flex align-items-center justify-content-between">
+    <div>
+        <h4 class="mb-0 fw-bold" style="color:var(--primary)">
+            <i class="bi bi-people me-2"></i>Cuentas y Clientes
+        </h4>
+        <small class="text-muted">Gestión de usuarios y datos de clientes</small>
+    </div>
+</div>
 
-    <form id="formCliente" method="POST" action="/admin/index.php?page=clientes" class="card card-body mb-4">
-        <input type="hidden" name="accion" value="<?php echo !empty($clienteEditar) ? 'editar' : 'crear'; ?>">
-        <h5 class="mb-3"><?php echo !empty($clienteEditar) ? 'Editar cliente' : 'Nueva cuenta + cliente'; ?></h5>
-        <div class="form-row">
-            <div class="form-group col-md-3">
-                <label>Usuario</label>
+<!-- Form -->
+<div class="card mb-4">
+    <div class="card-header" style="background:var(--primary);">
+        <h6 class="mb-0 text-white">
+            <i class="bi bi-<?php echo !empty($clienteEditar) ? 'pencil' : 'plus-circle'; ?> me-2"></i>
+            <?php echo !empty($clienteEditar) ? 'Editar cliente' : 'Nueva cuenta + cliente'; ?>
+        </h6>
+    </div>
+    <div class="card-body">
+        <form id="formCliente" method="POST" action="/admin/index.php?page=clientes">
+            <input type="hidden" name="accion" value="<?php echo !empty($clienteEditar) ? 'editar' : 'crear'; ?>">
+            <div class="row g-3 mb-3">
+                <div class="col-md-3">
+                    <label class="form-label">Usuario</label>
+                    <?php if (!empty($clienteEditar)): ?>
+                        <input type="text" class="form-control" value="<?php echo htmlspecialchars($clienteEditar['usuarioCuenta']); ?>" readonly>
+                        <input type="hidden" name="usuarioCuenta" value="<?php echo htmlspecialchars($clienteEditar['usuarioCuenta']); ?>">
+                    <?php else: ?>
+                        <input type="text" name="usuario" class="form-control" required>
+                    <?php endif; ?>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Password</label>
+                    <input type="text" name="password" class="form-control"
+                        <?php echo empty($clienteEditar) ? 'required' : ''; ?>
+                        placeholder="<?php echo !empty($clienteEditar) ? 'Dejar vacío para no cambiar' : ''; ?>">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">CI</label>
+                    <?php if (!empty($clienteEditar)): ?>
+                        <input type="text" class="form-control" value="<?php echo htmlspecialchars($clienteEditar['ci']); ?>" readonly>
+                        <input type="hidden" name="ci" value="<?php echo htmlspecialchars($clienteEditar['ci']); ?>">
+                    <?php else: ?>
+                        <input type="text" name="ci" class="form-control" required>
+                    <?php endif; ?>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Nombres</label>
+                    <input type="text" name="nombres" class="form-control" value="<?php echo !empty($clienteEditar) ? htmlspecialchars($clienteEditar['nombres']) : ''; ?>" required>
+                </div>
+            </div>
+            <div class="row g-3 mb-3">
+                <div class="col-md-2">
+                    <label class="form-label">Ap. Paterno</label>
+                    <input type="text" name="apPaterno" class="form-control" value="<?php echo !empty($clienteEditar) ? htmlspecialchars($clienteEditar['apPaterno']) : ''; ?>" required>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Ap. Materno</label>
+                    <input type="text" name="apMaterno" class="form-control" value="<?php echo !empty($clienteEditar) ? htmlspecialchars($clienteEditar['apMaterno']) : ''; ?>" required>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Correo</label>
+                    <input type="email" name="correo" class="form-control" value="<?php echo !empty($clienteEditar) ? htmlspecialchars($clienteEditar['correo']) : ''; ?>" required>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Dirección</label>
+                    <input type="text" name="direccion" class="form-control" value="<?php echo !empty($clienteEditar) ? htmlspecialchars($clienteEditar['direccion']) : ''; ?>" required>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Celular</label>
+                    <input type="text" name="nroCelular" class="form-control" value="<?php echo !empty($clienteEditar) ? htmlspecialchars($clienteEditar['nroCelular']) : ''; ?>" required>
+                </div>
+            </div>
+            <div class="d-flex gap-2">
+                <button class="btn btn-primary" type="submit">
+                    <i class="bi bi-save me-1"></i><?php echo !empty($clienteEditar) ? 'Actualizar' : 'Guardar cliente'; ?>
+                </button>
                 <?php if (!empty($clienteEditar)): ?>
-                    <input type="text" class="form-control" value="<?php echo htmlspecialchars($clienteEditar['usuarioCuenta']); ?>" readonly>
-                    <input type="hidden" name="usuarioCuenta" value="<?php echo htmlspecialchars($clienteEditar['usuarioCuenta']); ?>">
-                <?php else: ?>
-                    <input type="text" name="usuario" class="form-control" required>
+                    <a href="/admin/index.php?page=clientes" class="btn btn-secondary">Cancelar</a>
                 <?php endif; ?>
             </div>
-            <div class="form-group col-md-3">
-                <label>Password</label>
-                <input type="text" name="password" class="form-control" <?php echo empty($clienteEditar) ? 'required' : ''; ?> placeholder="<?php echo !empty($clienteEditar) ? 'Opcional para cambiar' : ''; ?>">
-            </div>
-            <div class="form-group col-md-3">
-                <label>CI</label>
-                <?php if (!empty($clienteEditar)): ?>
-                    <input type="text" class="form-control" value="<?php echo htmlspecialchars($clienteEditar['ci']); ?>" readonly>
-                    <input type="hidden" name="ci" value="<?php echo htmlspecialchars($clienteEditar['ci']); ?>">
-                <?php else: ?>
-                    <input type="text" name="ci" class="form-control" required>
-                <?php endif; ?>
-            </div>
-            <div class="form-group col-md-3">
-                <label>Nombres</label>
-                <input type="text" name="nombres" class="form-control" value="<?php echo !empty($clienteEditar) ? htmlspecialchars($clienteEditar['nombres']) : ''; ?>" required>
-            </div>
-        </div>
-        <div class="form-row">
-            <div class="form-group col-md-2">
-                <label>Ap. Paterno</label>
-                <input type="text" name="apPaterno" class="form-control" value="<?php echo !empty($clienteEditar) ? htmlspecialchars($clienteEditar['apPaterno']) : ''; ?>" required>
-            </div>
-            <div class="form-group col-md-2">
-                <label>Ap. Materno</label>
-                <input type="text" name="apMaterno" class="form-control" value="<?php echo !empty($clienteEditar) ? htmlspecialchars($clienteEditar['apMaterno']) : ''; ?>" required>
-            </div>
-            <div class="form-group col-md-3">
-                <label>Correo</label>
-                <input type="email" name="correo" class="form-control" value="<?php echo !empty($clienteEditar) ? htmlspecialchars($clienteEditar['correo']) : ''; ?>" required>
-            </div>
-            <div class="form-group col-md-3">
-                <label>Direccion</label>
-                <input type="text" name="direccion" class="form-control" value="<?php echo !empty($clienteEditar) ? htmlspecialchars($clienteEditar['direccion']) : ''; ?>" required>
-            </div>
-            <div class="form-group col-md-2">
-                <label>Celular</label>
-                <input type="text" name="nroCelular" class="form-control" value="<?php echo !empty($clienteEditar) ? htmlspecialchars($clienteEditar['nroCelular']) : ''; ?>" required>
-            </div>
-        </div>
-        <button class="btn btn-primary" type="submit"><?php echo !empty($clienteEditar) ? 'Actualizar cliente' : 'Guardar cliente'; ?></button>
-        <?php if (!empty($clienteEditar)): ?>
-            <a href="/admin/index.php?page=clientes" class="btn btn-secondary mt-2">Cancelar edicion</a>
-        <?php endif; ?>
-    </form>
+        </form>
+    </div>
+</div>
 
-    <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        var form    = document.getElementById('formCliente');
-        var esEditar = form.querySelector('[name="accion"]').value === 'editar';
-        var reglas  = {
-            nombres:    [Validacion.reglas.requerido, Validacion.reglas.soloLetrasEspacios, Validacion.reglas.minLen(2)],
-            apPaterno:  [Validacion.reglas.requerido, Validacion.reglas.soloLetrasEspacios, Validacion.reglas.minLen(2)],
-            apMaterno:  [Validacion.reglas.requerido, Validacion.reglas.soloLetrasEspacios, Validacion.reglas.minLen(2)],
-            correo:     [Validacion.reglas.requerido, Validacion.reglas.email],
-            direccion:  [Validacion.reglas.requerido, Validacion.reglas.minLen(5)],
-            nroCelular: [Validacion.reglas.requerido, Validacion.reglas.soloDigitos, Validacion.reglas.minLen(7)],
-            ci:         [Validacion.reglas.requerido, Validacion.reglas.minLen(5)],
-        };
-        if (!esEditar) {
-            reglas.usuario  = [Validacion.reglas.requerido, Validacion.reglas.alphanumerico, Validacion.reglas.minLen(3)];
-            reglas.password = [Validacion.reglas.requerido, Validacion.reglas.minLen(6)];
-        }
-        Validacion.iniciar(form, reglas);
-    });
-    </script>
-
-    <div class="row">
-        <div class="col-md-5">
-            <h5>Cuentas</h5>
-            <ul class="list-group mb-3">
+<div class="row g-4">
+    <!-- Cuentas -->
+    <div class="col-md-4">
+        <div class="card h-100">
+            <div class="card-header" style="background:var(--accent);color:#333;">
+                <h6 class="mb-0"><i class="bi bi-person-lock me-2"></i>Cuentas</h6>
+            </div>
+            <ul class="list-group list-group-flush">
                 <?php foreach ($cuentas as $cuenta): ?>
-                    <li class="list-group-item d-flex justify-content-between">
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
                         <span><?php echo htmlspecialchars($cuenta['usuario']); ?></span>
-                        <span>
-                            <small class="mr-2"><?php echo htmlspecialchars($cuenta['password']); ?></small>
-                            <?php if (in_array($cuenta['usuario'], ['cliente_demo', 'admin'], true)): ?>
-                                <span class="badge badge-secondary">Protegido</span>
-                            <?php else: ?>
-                                <a class="btn btn-danger btn-sm btn-delete"
-                                   href="#"
-                                   data-toggle="modal"
-                                   data-target="#confirmDeleteModal"
-                                   data-url="index.php?pagina=admin_clientes&eliminar_cuenta=<?php echo urlencode($cuenta['usuario']); ?>"
-                                   data-label="la cuenta <?php echo htmlspecialchars($cuenta['usuario'], ENT_QUOTES); ?>">Eliminar</a>
-                            <?php endif; ?>
-                        </span>
+                        <?php if (in_array($cuenta['usuario'], ['cliente_demo', 'admin'], true)): ?>
+                            <span class="badge bg-secondary rounded-pill">Protegido</span>
+                        <?php else: ?>
+                            <button class="btn btn-outline-danger btn-sm"
+                                onclick="confirmDelete('la cuenta <?php echo htmlspecialchars($cuenta['usuario'], ENT_QUOTES); ?>', function(){
+                                    window.location='/admin/index.php?page=clientes&eliminar_cuenta=<?php echo urlencode($cuenta['usuario']); ?>';
+                                })">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        <?php endif; ?>
                     </li>
                 <?php endforeach; ?>
             </ul>
         </div>
-        <div class="col-md-7">
-            <h5>Clientes</h5>
-            <div class="table-responsive">
-                <table class="table table-sm table-bordered">
-                    <thead class="thead-light">
-                        <tr>
-                            <th>CI</th>
-                            <th>Nombre</th>
-                            <th>Correo</th>
-                            <th>Usuario</th>
-                            <th>Accion</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php foreach ($clientes as $cliente): ?>
-                            <tr>
-                                <td><?php echo htmlspecialchars($cliente['ci']); ?></td>
-                                <td><?php echo htmlspecialchars($cliente['nombres'] . ' ' . $cliente['apPaterno'] . ' ' . $cliente['apMaterno']); ?></td>
-                                <td><?php echo htmlspecialchars($cliente['correo']); ?></td>
-                                <td><?php echo htmlspecialchars($cliente['usuarioCuenta']); ?></td>
-                                <td>
-                                    <a class="btn btn-warning btn-sm" href="/admin/index.php?page=clientes&editar_ci=<?php echo urlencode($cliente['ci']); ?>&editar_usuario=<?php echo urlencode($cliente['usuarioCuenta']); ?>">Editar</a>
-                                    <?php if (in_array($cliente['usuarioCuenta'], ['cliente_demo', 'admin'], true)): ?>
-                                        <span class="badge badge-secondary">Protegido</span>
-                                    <?php else: ?>
-                                        <a class="btn btn-danger btn-sm btn-delete"
-                                           href="#"
-                                           data-toggle="modal"
-                                           data-target="#confirmDeleteModal"
-                                           data-url="index.php?pagina=admin_clientes&eliminar_cliente_ci=<?php echo urlencode($cliente['ci']); ?>&eliminar_cliente_usuario=<?php echo urlencode($cliente['usuarioCuenta']); ?>"
-                                           data-label="el cliente <?php echo htmlspecialchars($cliente['nombres'] . ' ' . $cliente['apPaterno'], ENT_QUOTES); ?> y su cuenta asociada">Eliminar</a>
-                                    <?php endif; ?>
-                                </td>
-                            </tr>
-                        <?php endforeach; ?>
-                    </tbody>
-                </table>
-            </div>
-        </div>
     </div>
-</div>
 
-<div class="modal fade" id="confirmDeleteModal" tabindex="-1" role="dialog" aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="confirmDeleteModalLabel">Confirmar eliminacion</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Cerrar">
-                    <span aria-hidden="true">&times;</span>
-                </button>
+    <!-- Clientes -->
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header" style="background:#f8f9fa;">
+                <h6 class="mb-0 fw-bold" style="color:var(--primary)"><i class="bi bi-people me-2"></i>Clientes registrados</h6>
             </div>
-            <div class="modal-body" id="confirmDeleteModalBody">
-                ¿Estas seguro de eliminar este registro?
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
-                <a href="#" class="btn btn-danger" id="confirmDeleteButton">Eliminar</a>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover table-sm mb-0">
+                        <thead>
+                            <tr><th>CI</th><th>Nombre completo</th><th>Correo</th><th>Usuario</th><th>Acciones</th></tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($clientes as $cliente): ?>
+                                <tr>
+                                    <td><?php echo htmlspecialchars($cliente['ci']); ?></td>
+                                    <td><?php echo htmlspecialchars($cliente['nombres'] . ' ' . $cliente['apPaterno'] . ' ' . $cliente['apMaterno']); ?></td>
+                                    <td><small><?php echo htmlspecialchars($cliente['correo']); ?></small></td>
+                                    <td><?php echo htmlspecialchars($cliente['usuarioCuenta']); ?></td>
+                                    <td>
+                                        <a class="btn btn-sm btn-outline-warning"
+                                           href="/admin/index.php?page=clientes&editar_ci=<?php echo urlencode($cliente['ci']); ?>&editar_usuario=<?php echo urlencode($cliente['usuarioCuenta']); ?>">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+                                        <?php if (in_array($cliente['usuarioCuenta'], ['cliente_demo', 'admin'], true)): ?>
+                                            <span class="badge bg-secondary rounded-pill">Protegido</span>
+                                        <?php else: ?>
+                                            <button class="btn btn-sm btn-outline-danger"
+                                                onclick="confirmDelete('el cliente <?php echo htmlspecialchars($cliente['nombres'] . ' ' . $cliente['apPaterno'], ENT_QUOTES); ?> y su cuenta', function(){
+                                                    window.location='/admin/index.php?page=clientes&eliminar_cliente_ci=<?php echo urlencode($cliente['ci']); ?>&eliminar_cliente_usuario=<?php echo urlencode($cliente['usuarioCuenta']); ?>';
+                                                })">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        <?php endif; ?>
+                                    </td>
+                                </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
@@ -174,27 +158,22 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-    var modal = document.getElementById('confirmDeleteModal');
-    var btnConfirmar = document.getElementById('confirmDeleteButton');
-    var cuerpoModal = document.getElementById('confirmDeleteModalBody');
-
-    $('#confirmDeleteModal').on('show.bs.modal', function (event) {
-        var trigger = event.relatedTarget;
-        if (!trigger) {
-            btnConfirmar.setAttribute('href', '#');
-            cuerpoModal.textContent = '¿Estas seguro de eliminar este registro?';
-            return;
-        }
-
-        var url = trigger.getAttribute('data-url') || '#';
-        var etiqueta = trigger.getAttribute('data-label') || 'este registro';
-        btnConfirmar.setAttribute('href', url);
-        cuerpoModal.textContent = '¿Estas seguro de eliminar ' + etiqueta + '?';
-    });
-
-    modal.addEventListener('hidden.bs.modal', function () {
-        btnConfirmar.setAttribute('href', '#');
-    });
+    var form    = document.getElementById('formCliente');
+    var esEditar = form.querySelector('[name="accion"]').value === 'editar';
+    var reglas  = {
+        nombres:    [Validacion.reglas.requerido, Validacion.reglas.soloLetrasEspacios, Validacion.reglas.minLen(2)],
+        apPaterno:  [Validacion.reglas.requerido, Validacion.reglas.soloLetrasEspacios, Validacion.reglas.minLen(2)],
+        apMaterno:  [Validacion.reglas.requerido, Validacion.reglas.soloLetrasEspacios, Validacion.reglas.minLen(2)],
+        correo:     [Validacion.reglas.requerido, Validacion.reglas.email],
+        direccion:  [Validacion.reglas.requerido, Validacion.reglas.minLen(5)],
+        nroCelular: [Validacion.reglas.requerido, Validacion.reglas.soloDigitos, Validacion.reglas.minLen(7)],
+        ci:         [Validacion.reglas.requerido, Validacion.reglas.minLen(5)],
+    };
+    if (!esEditar) {
+        reglas.usuario  = [Validacion.reglas.requerido, Validacion.reglas.alphanumerico, Validacion.reglas.minLen(3)];
+        reglas.password = [Validacion.reglas.requerido, Validacion.reglas.minLen(6)];
+    }
+    Validacion.iniciar(form, reglas);
 });
 </script>
 <?php require_once __DIR__ . '/layout_admin/footer.php'; ?>
