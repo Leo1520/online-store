@@ -1,4 +1,4 @@
-<?php require_once __DIR__ . '/layout/encabezado.php'; ?>
+<?php require_once __DIR__ . '/layout_admin/head.php'; ?>
 <div class="container mt-4">
     <h1 class="mb-4">Administracion de Vendedores</h1>
 
@@ -6,7 +6,7 @@
         <div class="alert alert-info"><?php echo htmlspecialchars($mensaje); ?></div>
     <?php endif; ?>
 
-    <form method="POST" action="index.php?pagina=admin_vendedores" class="card card-body mb-4">
+    <form method="POST" action="/admin/index.php?page=vendedores" class="card card-body mb-4">
         <input type="hidden" name="accion" value="<?php echo !empty($vendedorEditar) ? 'editar' : 'crear'; ?>">
         <h5 class="mb-3"><?php echo !empty($vendedorEditar) ? 'Editar vendedor' : 'Nuevo vendedor'; ?></h5>
 
@@ -75,7 +75,7 @@
                 <?php echo !empty($vendedorEditar) ? 'Actualizar vendedor' : 'Guardar vendedor'; ?>
             </button>
             <?php if (!empty($vendedorEditar)): ?>
-                <a href="index.php?pagina=admin_vendedores" class="btn btn-secondary ml-2">Cancelar edicion</a>
+                <a href="/admin/index.php?page=vendedores" class="btn btn-secondary ml-2">Cancelar edicion</a>
             <?php endif; ?>
         </div>
     </form>
@@ -123,7 +123,7 @@
                             <td><?php echo htmlspecialchars($v['nroCelular']); ?></td>
                             <td><?php echo htmlspecialchars($v['usuarioCuenta']); ?></td>
                             <td>
-                                <a href="index.php?pagina=admin_vendedores&editar_ci=<?php echo urlencode($v['ci']); ?>&editar_usuario=<?php echo urlencode($v['usuarioCuenta']); ?>"
+                                <a href="/admin/index.php?page=vendedores&editar_ci=<?php echo urlencode($v['ci']); ?>&editar_usuario=<?php echo urlencode($v['usuarioCuenta']); ?>"
                                    class="btn btn-warning btn-sm">Editar</a>
                                 <a href="#"
                                    class="btn btn-danger btn-sm btn-delete"
@@ -176,4 +176,4 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 });
 </script>
-<?php require_once __DIR__ . '/layout/pie.php'; ?>
+<?php require_once __DIR__ . '/layout_admin/footer.php'; ?>

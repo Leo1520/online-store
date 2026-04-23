@@ -494,15 +494,9 @@
                         <i class="bi bi-gear-fill mr-1"></i>Administración
                     </a>
                     <div class="dropdown-menu" aria-labelledby="adminMenu">
-                        <a class="dropdown-item" href="index.php?pagina=admin_catalogos"><i class="bi bi-tags mr-2 text-primary"></i>Catálogos</a>
-                        <a class="dropdown-item" href="index.php?pagina=admin_productos"><i class="bi bi-box mr-2 text-primary"></i>Productos</a>
-                        <a class="dropdown-item" href="index.php?pagina=admin_sucursales"><i class="bi bi-building mr-2 text-primary"></i>Sucursales</a>
-                        <a class="dropdown-item" href="index.php?pagina=admin_clientes"><i class="bi bi-people mr-2 text-primary"></i>Clientes</a>
-                        <div class="dropdown-divider"></div>
-                        <a class="dropdown-item" href="index.php?pagina=admin_ventas"><i class="bi bi-receipt mr-2 text-success"></i>Ventas</a>
-                        <a class="dropdown-item" href="index.php?pagina=admin_vendedores"><i class="bi bi-person-badge mr-2 text-success"></i>Vendedores</a>
-                        <div class="dropdown-divider"></div>
-                        <a class="dropdown-item" href="index.php?pagina=admin_almacen"><i class="bi bi-archive mr-2 text-warning"></i>Almacén / Kardex</a>
+                        <a class="dropdown-item font-weight-bold" href="/admin/index.php" style="color:#1B3A6B;">
+                            <i class="bi bi-speedometer2 mr-2 text-warning"></i>Ir al Panel Admin
+                        </a>
                     </div>
                 </li>
                 <?php endif; ?>

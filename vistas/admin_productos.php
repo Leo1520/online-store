@@ -1,4 +1,4 @@
-<?php require_once __DIR__ . '/layout/encabezado.php'; ?>
+<?php require_once __DIR__ . '/layout_admin/head.php'; ?>
 <div class="container mt-4">
     <h1 class="mb-4">Administracion de Productos y Stock</h1>
 
@@ -6,7 +6,7 @@
         <div class="alert alert-success"><?php echo htmlspecialchars($mensaje); ?></div>
     <?php endif; ?>
 
-    <form id="formProducto" method="POST" action="index.php?pagina=admin_productos"
+    <form id="formProducto" method="POST" action="/admin/index.php?page=productos"
           class="card card-body mb-4" enctype="multipart/form-data">
         <h5><?php echo !empty($productoEditar) ? 'Editar producto' : 'Nuevo producto'; ?></h5>
         <input type="hidden" name="accion" value="<?php echo !empty($productoEditar) ? 'editar_producto' : 'crear_producto'; ?>">
@@ -74,11 +74,11 @@
         </div>
         <button class="btn btn-primary" type="submit"><?php echo !empty($productoEditar) ? 'Actualizar producto' : 'Guardar producto'; ?></button>
         <?php if (!empty($productoEditar)): ?>
-            <a href="index.php?pagina=admin_productos" class="btn btn-secondary mt-2">Cancelar edicion</a>
+            <a href="/admin/index.php?page=productos" class="btn btn-secondary mt-2">Cancelar edicion</a>
         <?php endif; ?>
     </form>
 
-    <form method="POST" action="index.php?pagina=admin_productos" class="card card-body mb-4">
+    <form method="POST" action="/admin/index.php?page=productos" class="card card-body mb-4">
         <h5>Asignar stock por sucursal</h5>
         <input type="hidden" name="accion" value="guardar_stock">
         <div class="form-row">
@@ -156,8 +156,8 @@
                             <?php endif; ?>
                         </td>
                         <td>
-                            <a class="btn btn-warning btn-sm" href="index.php?pagina=admin_productos&editar_producto=<?php echo (int)$producto['id_producto']; ?>">Editar</a>
-                            <a class="btn btn-danger btn-sm" href="index.php?pagina=admin_productos&eliminar_producto=<?php echo (int)$producto['id_producto']; ?>">Eliminar</a>
+                            <a class="btn btn-warning btn-sm" href="/admin/index.php?page=productos&editar_producto=<?php echo (int)$producto['id_producto']; ?>">Editar</a>
+                            <a class="btn btn-danger btn-sm" href="/admin/index.php?page=productos&eliminar_producto=<?php echo (int)$producto['id_producto']; ?>">Eliminar</a>
                         </td>
                     </tr>
                 <?php endforeach; ?>
@@ -183,7 +183,7 @@
                         <td><?php echo htmlspecialchars($stock['sucursal']); ?></td>
                         <td><?php echo htmlspecialchars($stock['stock']); ?></td>
                         <td>
-                            <a class="btn btn-danger btn-sm" href="index.php?pagina=admin_productos&eliminar_stock_producto=<?php echo (int)$stock['codProducto']; ?>&eliminar_stock_sucursal=<?php echo (int)$stock['codSucursal']; ?>">Eliminar</a>
+                            <a class="btn btn-danger btn-sm" href="/admin/index.php?page=productos&eliminar_stock_producto=<?php echo (int)$stock['codProducto']; ?>&eliminar_stock_sucursal=<?php echo (int)$stock['codSucursal']; ?>">Eliminar</a>
                         </td>
                     </tr>
                 <?php endforeach; ?>
@@ -205,4 +205,4 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 });
 </script>
-<?php require_once __DIR__ . '/layout/pie.php'; ?>
+<?php require_once __DIR__ . '/layout_admin/footer.php'; ?>

@@ -1,4 +1,4 @@
-<?php require_once __DIR__ . '/layout/encabezado.php'; ?>
+<?php require_once __DIR__ . '/layout_admin/head.php'; ?>
 <div class="container mt-4">
     <h1 class="mb-4">Reporte de Ventas</h1>
 
@@ -48,7 +48,7 @@
                         <td style="min-width:140px;">
                             <span class="badge <?php echo $badgeClase; ?>"><?php echo ucfirst($estado); ?></span>
                             <?php if ($estado !== 'facturado'): ?>
-                            <form method="POST" action="index.php?pagina=admin_ventas" class="d-flex align-items-center mt-1">
+                            <form method="POST" action="/admin/index.php?page=ventas" class="d-flex align-items-center mt-1">
                                 <input type="hidden" name="accion" value="cambiar_estado">
                                 <input type="hidden" name="nro" value="<?php echo (int)$venta['nro']; ?>">
                                 <select name="estado" class="form-control form-control-sm mr-1" style="width:120px;">
@@ -164,4 +164,4 @@ function imprimirComprobante() {
 }
 </script>
 
-<?php require_once __DIR__ . '/layout/pie.php'; ?>
+<?php require_once __DIR__ . '/layout_admin/footer.php'; ?>

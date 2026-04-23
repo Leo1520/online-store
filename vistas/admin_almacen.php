@@ -1,4 +1,4 @@
-<?php require_once __DIR__ . '/layout/encabezado.php'; ?>
+<?php require_once __DIR__ . '/layout_admin/head.php'; ?>
 
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
@@ -521,7 +521,7 @@
 // ══════════════════════════════════════════════════════════════
 //  Utilidades
 // ══════════════════════════════════════════════════════════════
-const API = 'api/almacen.php';
+const API = '/api/almacen.php';
 
 function cambiarTab(id) {
     document.querySelectorAll('.alm-tab').forEach(t => t.classList.remove('activo'));
@@ -1023,4 +1023,4 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 </script>
 
-<?php require_once __DIR__ . '/layout/pie.php'; ?>
+<?php require_once __DIR__ . '/layout_admin/footer.php'; ?>

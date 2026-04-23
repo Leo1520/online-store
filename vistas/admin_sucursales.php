@@ -1,4 +1,4 @@
-<?php require_once __DIR__ . '/layout/encabezado.php'; ?>
+<?php require_once __DIR__ . '/layout_admin/head.php'; ?>
 <div class="container mt-4">
     <h1 class="mb-4">Administracion de Sucursales</h1>
 
@@ -6,7 +6,7 @@
         <div class="alert alert-success"><?php echo htmlspecialchars($mensaje); ?></div>
     <?php endif; ?>
 
-    <form id="formSucursal" method="POST" action="index.php?pagina=admin_sucursales" class="card card-body mb-4">
+    <form id="formSucursal" method="POST" action="/admin/index.php?page=sucursales" class="card card-body mb-4">
         <input type="hidden" name="accion" value="<?php echo !empty($sucursalEditar) ? 'editar' : 'crear'; ?>">
         <input type="hidden" name="cod" value="<?php echo !empty($sucursalEditar) ? (int)$sucursalEditar['cod'] : 0; ?>">
         <div class="form-row">
@@ -25,7 +25,7 @@
         </div>
         <button class="btn btn-primary" type="submit"><?php echo !empty($sucursalEditar) ? 'Actualizar sucursal' : 'Guardar sucursal'; ?></button>
         <?php if (!empty($sucursalEditar)): ?>
-            <a href="index.php?pagina=admin_sucursales" class="btn btn-secondary mt-2">Cancelar edicion</a>
+            <a href="/admin/index.php?page=sucursales" class="btn btn-secondary mt-2">Cancelar edicion</a>
         <?php endif; ?>
     </form>
 
@@ -58,8 +58,8 @@
                         <td><?php echo htmlspecialchars($sucursal['direccion']); ?></td>
                         <td><?php echo htmlspecialchars($sucursal['nroTelefono']); ?></td>
                         <td>
-                            <a class="btn btn-warning btn-sm" href="index.php?pagina=admin_sucursales&editar=<?php echo (int)$sucursal['cod']; ?>">Editar</a>
-                            <a class="btn btn-danger btn-sm" href="index.php?pagina=admin_sucursales&eliminar=<?php echo (int)$sucursal['cod']; ?>">Eliminar</a>
+                            <a class="btn btn-warning btn-sm" href="/admin/index.php?page=sucursales&editar=<?php echo (int)$sucursal['cod']; ?>">Editar</a>
+                            <a class="btn btn-danger btn-sm" href="/admin/index.php?page=sucursales&eliminar=<?php echo (int)$sucursal['cod']; ?>">Eliminar</a>
                         </td>
                     </tr>
                 <?php endforeach; ?>
@@ -67,4 +67,4 @@
         </table>
     </div>
 </div>
-<?php require_once __DIR__ . '/layout/pie.php'; ?>
+<?php require_once __DIR__ . '/layout_admin/footer.php'; ?>

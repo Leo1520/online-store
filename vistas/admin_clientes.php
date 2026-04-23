@@ -1,4 +1,4 @@
-<?php require_once __DIR__ . '/layout/encabezado.php'; ?>
+<?php require_once __DIR__ . '/layout_admin/head.php'; ?>
 <div class="container mt-4">
     <h1 class="mb-4">Administracion de Cuentas y Clientes</h1>
 
@@ -6,7 +6,7 @@
         <div class="alert alert-info"><?php echo htmlspecialchars($mensaje); ?></div>
     <?php endif; ?>
 
-    <form id="formCliente" method="POST" action="index.php?pagina=admin_clientes" class="card card-body mb-4">
+    <form id="formCliente" method="POST" action="/admin/index.php?page=clientes" class="card card-body mb-4">
         <input type="hidden" name="accion" value="<?php echo !empty($clienteEditar) ? 'editar' : 'crear'; ?>">
         <h5 class="mb-3"><?php echo !empty($clienteEditar) ? 'Editar cliente' : 'Nueva cuenta + cliente'; ?></h5>
         <div class="form-row">
@@ -61,7 +61,7 @@
         </div>
         <button class="btn btn-primary" type="submit"><?php echo !empty($clienteEditar) ? 'Actualizar cliente' : 'Guardar cliente'; ?></button>
         <?php if (!empty($clienteEditar)): ?>
-            <a href="index.php?pagina=admin_clientes" class="btn btn-secondary mt-2">Cancelar edicion</a>
+            <a href="/admin/index.php?page=clientes" class="btn btn-secondary mt-2">Cancelar edicion</a>
         <?php endif; ?>
     </form>
 
@@ -131,7 +131,7 @@
                                 <td><?php echo htmlspecialchars($cliente['correo']); ?></td>
                                 <td><?php echo htmlspecialchars($cliente['usuarioCuenta']); ?></td>
                                 <td>
-                                    <a class="btn btn-warning btn-sm" href="index.php?pagina=admin_clientes&editar_ci=<?php echo urlencode($cliente['ci']); ?>&editar_usuario=<?php echo urlencode($cliente['usuarioCuenta']); ?>">Editar</a>
+                                    <a class="btn btn-warning btn-sm" href="/admin/index.php?page=clientes&editar_ci=<?php echo urlencode($cliente['ci']); ?>&editar_usuario=<?php echo urlencode($cliente['usuarioCuenta']); ?>">Editar</a>
                                     <?php if (in_array($cliente['usuarioCuenta'], ['cliente_demo', 'admin'], true)): ?>
                                         <span class="badge badge-secondary">Protegido</span>
                                     <?php else: ?>
@@ -197,4 +197,4 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 });
 </script>
-<?php require_once __DIR__ . '/layout/pie.php'; ?>
+<?php require_once __DIR__ . '/layout_admin/footer.php'; ?>
