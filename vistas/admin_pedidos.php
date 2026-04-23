@@ -3,9 +3,9 @@
 <div class="page-header d-flex align-items-center justify-content-between">
     <div>
         <h4 class="mb-0 fw-bold" style="color:var(--primary)">
-            <i class="bi bi-bag-check me-2"></i>Historial de Ventas
+            <i class="bi bi-clock-history me-2"></i>Pedidos Activos
         </h4>
-        <small class="text-muted"><?php echo count($ventas); ?> ventas registradas</small>
+        <small class="text-muted"><?php echo count($ventas); ?> pedidos en proceso</small>
     </div>
 </div>
 
@@ -28,17 +28,17 @@
                     <?php if (empty($ventas)): ?>
                         <tr>
                             <td colspan="7" class="text-center text-muted py-5">
-                                <i class="bi bi-bag d-block mb-2" style="font-size:2rem;"></i>
-                                No hay ventas registradas.
+                                <i class="bi bi-inbox d-block mb-2" style="font-size:2rem;"></i>
+                                No hay pedidos activos en este momento.
                             </td>
                         </tr>
                     <?php else: ?>
                         <?php foreach ($ventas as $v):
                             $estado = $v['estado'] ?? 'pendiente';
                             $badgeMap = [
-                                'entregado'  => 'badge-status-entregado',
-                                'cancelado'  => 'badge-status-cancelado',
-                                'facturado'  => 'badge-status-facturado',
+                                'pendiente'  => 'badge-status-pending',
+                                'procesando' => 'badge-status-procesando',
+                                'enviado'    => 'badge-status-enviado',
                             ];
                             $badge = $badgeMap[$estado] ?? 'badge-status-pending';
                         ?>
@@ -57,7 +57,7 @@
                                 <span class="badge rounded-pill <?php echo $badge; ?>"><?php echo ucfirst($estado); ?></span>
                             </td>
                             <td class="text-end">
-                                <a href="/admin/index.php?page=ventas_detalle&id=<?php echo (int)$v['nro']; ?>&from=ventas"
+                                <a href="/admin/index.php?page=ventas_detalle&id=<?php echo (int)$v['nro']; ?>&from=pedidos"
                                    class="btn btn-sm btn-outline-primary py-0 px-2" title="Ver detalle">
                                     <i class="bi bi-eye"></i>
                                 </a>

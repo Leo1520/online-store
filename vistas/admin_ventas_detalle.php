@@ -1,4 +1,9 @@
-<?php require_once __DIR__ . '/layout_admin/head.php'; ?>
+<?php
+$from     = $_GET['from'] ?? 'ventas';
+$backPage = $from === 'pedidos' ? 'pedidos' : 'ventas';
+$backLabel = $from === 'pedidos' ? 'Pedidos' : 'Ventas';
+require_once __DIR__ . '/layout_admin/head.php';
+?>
 
 <div class="page-header d-flex align-items-center justify-content-between">
     <div>
@@ -7,8 +12,8 @@
         </h4>
         <small class="text-muted"><?php echo htmlspecialchars(substr($venta['fechaHora'], 0, 16)); ?></small>
     </div>
-    <a href="/admin/index.php?page=ventas" class="btn btn-outline-secondary btn-sm">
-        <i class="bi bi-arrow-left me-1"></i>Volver
+    <a href="/admin/index.php?page=<?php echo $backPage; ?>" class="btn btn-outline-secondary btn-sm">
+        <i class="bi bi-arrow-left me-1"></i>Volver a <?php echo $backLabel; ?>
     </a>
 </div>
 

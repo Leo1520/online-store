@@ -95,15 +95,20 @@ $ap = $_GET['page'] ?? 'dashboard';
 
 function isAct($page) {
     global $ap;
-    // Subpáginas comparten el estado activo con su padre
     $grupos = [
-        'productos'  => ['productos',  'productos_crear',  'productos_editar'],
-        'categorias' => ['categorias', 'categorias_crear', 'categorias_editar'],
-        'marcas'     => ['marcas',     'marcas_crear',     'marcas_editar'],
-        'industrias' => ['industrias', 'industrias_crear', 'industrias_editar'],
-        'clientes'   => ['clientes',   'clientes_crear',   'clientes_editar'],
-        'vendedores' => ['vendedores', 'vendedores_crear', 'vendedores_editar'],
-        'ventas'     => ['ventas',     'ventas_detalle'],
+        'productos'          => ['productos',  'productos_crear',  'productos_editar'],
+        'categorias'         => ['categorias', 'categorias_crear', 'categorias_editar'],
+        'marcas'             => ['marcas',     'marcas_crear',     'marcas_editar'],
+        'industrias'         => ['industrias', 'industrias_crear', 'industrias_editar'],
+        'clientes'           => ['clientes',   'clientes_crear',   'clientes_editar'],
+        'vendedores'         => ['vendedores', 'vendedores_crear', 'vendedores_editar'],
+        'pedidos'            => ['pedidos',    'ventas_detalle'],
+        'ventas'             => ['ventas'],
+        'almacen'            => ['almacen'],
+        'almacen_kardex'     => ['almacen_kardex'],
+        'almacen_traspasos'  => ['almacen_traspasos'],
+        'almacen_ajustes'    => ['almacen_ajustes'],
+        'almacen_critico'    => ['almacen_critico'],
     ];
     $grupo = $grupos[$page] ?? [$page];
     return in_array($ap, $grupo) ? 'active' : '';
@@ -146,8 +151,11 @@ function aUrl($page, $extra = '') {
         </a>
 
         <div class="nav-section">Ventas</div>
+        <a href="<?php echo aUrl('pedidos'); ?>" class="nav-link <?php echo isAct('pedidos'); ?>">
+            <i class="bi bi-clock-history"></i> Pedidos
+        </a>
         <a href="<?php echo aUrl('ventas'); ?>" class="nav-link <?php echo isAct('ventas'); ?>">
-            <i class="bi bi-bag-check"></i> Pedidos / Ventas
+            <i class="bi bi-bag-check"></i> Ventas
         </a>
         <a href="<?php echo aUrl('clientes'); ?>" class="nav-link <?php echo isAct('clientes'); ?>">
             <i class="bi bi-people"></i> Clientes
@@ -158,7 +166,22 @@ function aUrl($page, $extra = '') {
 
         <div class="nav-section">Almacén</div>
         <a href="<?php echo aUrl('almacen'); ?>" class="nav-link <?php echo isAct('almacen'); ?>">
-            <i class="bi bi-archive"></i> Stock / Kardex
+            <i class="bi bi-table"></i> Stock Actual
+        </a>
+        <a href="<?php echo aUrl('almacen_kardex'); ?>" class="nav-link <?php echo isAct('almacen_kardex'); ?>">
+            <i class="bi bi-journal-text"></i> Kardex
+        </a>
+        <a href="<?php echo aUrl('almacen_traspasos'); ?>" class="nav-link <?php echo isAct('almacen_traspasos'); ?>">
+            <i class="bi bi-arrow-left-right"></i> Traspasos
+        </a>
+        <a href="<?php echo aUrl('almacen_ajustes'); ?>" class="nav-link <?php echo isAct('almacen_ajustes'); ?>">
+            <i class="bi bi-pencil-square"></i> Ajustes
+        </a>
+        <a href="<?php echo aUrl('almacen_critico'); ?>" class="nav-link <?php echo isAct('almacen_critico'); ?>">
+            <i class="bi bi-exclamation-diamond"></i> Stock Crítico
+            <?php if (isset($totalCriticos) && $totalCriticos > 0): ?>
+                <span class="badge bg-danger badge-alert"><?php echo $totalCriticos; ?></span>
+            <?php endif; ?>
         </a>
 
         <div class="pb-3 px-3 mt-3">

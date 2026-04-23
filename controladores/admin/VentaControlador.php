@@ -3,11 +3,23 @@ require_once __DIR__ . '/../../modelos/NotaVenta.php';
 
 class VentaControlador {
 
+    public function pedidos() {
+        $notaModel   = new NotaVenta();
+        $mensaje     = isset($_GET['msg']) ? trim($_GET['msg']) : null;
+        $activos     = ['pendiente', 'procesando', 'enviado'];
+        $todas       = $notaModel->obtenerTodasConResumen();
+        $ventas      = array_values(array_filter($todas, fn($v) => in_array($v['estado'] ?? 'pendiente', $activos)));
+        $titulo      = 'Pedidos Activos';
+        require_once __DIR__ . '/../../vistas/admin_pedidos.php';
+    }
+
     public function ventas() {
-        $notaModel = new NotaVenta();
-        $mensaje   = isset($_GET['msg']) ? trim($_GET['msg']) : null;
-        $ventas    = $notaModel->obtenerTodasConResumen();
-        $titulo    = 'Pedidos / Ventas';
+        $notaModel   = new NotaVenta();
+        $mensaje     = isset($_GET['msg']) ? trim($_GET['msg']) : null;
+        $completados = ['entregado', 'facturado', 'cancelado'];
+        $todas       = $notaModel->obtenerTodasConResumen();
+        $ventas      = array_values(array_filter($todas, fn($v) => in_array($v['estado'] ?? 'pendiente', $completados)));
+        $titulo      = 'Historial de Ventas';
         require_once __DIR__ . '/../../vistas/admin_ventas.php';
     }
 
@@ -26,7 +38,8 @@ class VentaControlador {
             if ($nro > 0 && in_array($estado, $permitidos)) {
                 $notaModel->actualizarEstado($nro, $estado);
             }
-            header('Location: /admin/index.php?page=ventas_detalle&id=' . $id . '&msg=' . urlencode('Estado actualizado.'));
+            $from = trim($_POST['from'] ?? 'ventas');
+            header('Location: /admin/index.php?page=ventas_detalle&id=' . $id . '&from=' . urlencode($from) . '&msg=' . urlencode('Estado actualizado.'));
             exit();
         }
 

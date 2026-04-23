@@ -6,24 +6,61 @@ require_once __DIR__ . '/../../modelos/Producto.php';
 
 class AlmacenControlador {
 
-    public function almacen() {
+    public function stockActual() {
         $msModel       = new MovimientoStock();
-        $traspasoModel = new Traspaso();
         $sucursalModel = new Sucursal();
-        $productoModel = new Producto();
-
-        $stockCritico = $msModel->obtenerStockCritico(5);
-        $sucursales   = $sucursalModel->obtenerTodas();
-        $productos    = $productoModel->obtenerTodos();
-        $traspasos    = $traspasoModel->listarTodos();
 
         $stockActual    = $msModel->obtenerStockActual();
         $totalProductos = count(array_unique(array_column($stockActual, 'codProducto')));
         $stockTotal     = array_sum(array_column($stockActual, 'stockActual'));
         $stockComp      = array_sum(array_column($stockActual, 'stockComprometido'));
+        $stockCritico   = $msModel->obtenerStockCritico(5);
         $totalCriticos  = count($stockCritico);
+        $sucursales     = $sucursalModel->obtenerTodas();
 
-        $titulo = 'Almacén';
+        $titulo = 'Stock Actual';
         require_once __DIR__ . '/../../vistas/admin_almacen.php';
+    }
+
+    public function kardex() {
+        $productoModel = new Producto();
+        $sucursalModel = new Sucursal();
+
+        $productos  = $productoModel->obtenerTodos();
+        $sucursales = $sucursalModel->obtenerTodas();
+
+        $titulo = 'Kardex';
+        require_once __DIR__ . '/../../vistas/admin_almacen_kardex.php';
+    }
+
+    public function traspasos() {
+        $sucursalModel = new Sucursal();
+        $productoModel = new Producto();
+
+        $sucursales = $sucursalModel->obtenerTodas();
+        $productos  = $productoModel->obtenerTodos();
+
+        $titulo = 'Traspasos';
+        require_once __DIR__ . '/../../vistas/admin_almacen_traspasos.php';
+    }
+
+    public function ajustes() {
+        $productoModel = new Producto();
+        $sucursalModel = new Sucursal();
+
+        $productos  = $productoModel->obtenerTodos();
+        $sucursales = $sucursalModel->obtenerTodas();
+
+        $titulo = 'Ajustes de Inventario';
+        require_once __DIR__ . '/../../vistas/admin_almacen_ajustes.php';
+    }
+
+    public function stockCritico() {
+        $msModel      = new MovimientoStock();
+        $stockCritico = $msModel->obtenerStockCritico(5);
+        $totalCriticos = count($stockCritico);
+
+        $titulo = 'Stock Crítico';
+        require_once __DIR__ . '/../../vistas/admin_almacen_critico.php';
     }
 }
