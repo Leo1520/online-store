@@ -414,13 +414,6 @@ class AdminControlador {
         require_once __DIR__ . '/../vistas/admin_clientes_form.php';
     }
 
-        $cuentas = $cuentaModel->obtenerTodas();
-        $clientes = $clienteModel->obtenerTodos();
-
-        $titulo = 'Administracion - Clientes';
-        require_once __DIR__ . '/../vistas/admin_clientes.php';
-    }
-
     private function procesarImagen(): string {
         $imagen = trim($_POST['imagen'] ?? 'producto.png');
         if (!empty($_FILES['imagen_file']['name'])) {
