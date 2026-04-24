@@ -20,32 +20,98 @@
         }
         body { background: #f0f2f5; font-family: 'Segoe UI', sans-serif; }
 
-        /* ── Sidebar ── */
+        /* ══ SIDEBAR ══ */
         .sidebar {
-            width: var(--sidebar-w); min-height: 100vh;
+            width: var(--sidebar-w);
+            height: 100vh;
             background: var(--primary);
             position: fixed; top: 0; left: 0; z-index: 1000;
-            overflow-y: auto; transition: transform .3s;
+            overflow-y: auto;
+            overflow-x: hidden;
+            transition: transform .3s;
+            display: flex;
+            flex-direction: column;
         }
-        .sidebar-brand { padding: 1.2rem 1.5rem; border-bottom: 1px solid rgba(255,255,255,.1); }
+        /* Scrollbar fina dentro del sidebar */
+        .sidebar::-webkit-scrollbar { width: 4px; }
+        .sidebar::-webkit-scrollbar-track { background: transparent; }
+        .sidebar::-webkit-scrollbar-thumb { background: rgba(255,255,255,.2); border-radius: 4px; }
+
+        .sidebar-brand {
+            padding: 1.2rem 1.5rem;
+            border-bottom: 1px solid rgba(255,255,255,.1);
+            flex-shrink: 0;
+        }
         .sidebar-brand span { color: var(--accent); }
-        .sidebar .nav-link {
-            color: rgba(255,255,255,.75); padding: .6rem 1.5rem;
-            border-radius: 0; display: flex; align-items: center;
-            gap: .6rem; font-size: .9rem; text-decoration: none;
+
+        /* ── Módulo (botón colapsable) ── */
+        .sidebar .menu-module {
+            width: 100%;
+            text-align: left;
+            background: none;
+            border: none;
+            color: rgba(255,255,255,.85);
+            padding: .65rem 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: .6rem;
+            font-size: .88rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background .15s;
+            letter-spacing: .01em;
         }
-        .sidebar .nav-link:hover,
-        .sidebar .nav-link.active { color: #fff; background: rgba(255,255,255,.12); }
+        .sidebar .menu-module:hover { background: rgba(255,255,255,.08); color: #fff; }
+        .sidebar .menu-module.open  { background: rgba(255,255,255,.1); color: #fff; }
+        .sidebar .menu-module .chevron {
+            margin-left: auto;
+            font-size: .75rem;
+            transition: transform .25s;
+            opacity: .7;
+        }
+        .sidebar .menu-module.open .chevron { transform: rotate(180deg); }
+        .sidebar .menu-module .mod-icon { font-size: 1rem; opacity: .9; }
+
+        /* ── Sub-ítems ── */
+        .sidebar .submenu { background: rgba(0,0,0,.18); }
+        .sidebar .submenu .nav-link {
+            color: rgba(255,255,255,.7);
+            padding: .5rem 1.5rem .5rem 2.8rem;
+            display: flex;
+            align-items: center;
+            gap: .55rem;
+            font-size: .845rem;
+            text-decoration: none;
+            border-left: 3px solid transparent;
+            transition: all .15s;
+        }
+        .sidebar .submenu .nav-link:hover { color: #fff; background: rgba(255,255,255,.07); border-left-color: rgba(255,255,255,.3); }
+        .sidebar .submenu .nav-link.active { color: #fff; background: rgba(255,255,255,.13); border-left-color: var(--accent); font-weight: 600; }
+
+        /* ── Separador de secciones ── */
         .sidebar .nav-section {
-            color: rgba(255,255,255,.4); font-size: .7rem;
-            text-transform: uppercase; padding: 1rem 1.5rem .3rem;
-            letter-spacing: .08em;
-        }
-        .sidebar .badge-alert {
-            margin-left: auto; font-size: .65rem; border-radius: 20px;
+            color: rgba(255,255,255,.35);
+            font-size: .65rem;
+            text-transform: uppercase;
+            padding: .9rem 1.5rem .25rem;
+            letter-spacing: .1em;
         }
 
-        /* ── Main ── */
+        /* ── Dashboard (ítem directo sin colapso) ── */
+        .sidebar .nav-link-direct {
+            color: rgba(255,255,255,.75);
+            padding: .6rem 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: .6rem;
+            font-size: .9rem;
+            text-decoration: none;
+            transition: background .15s;
+        }
+        .sidebar .nav-link-direct:hover,
+        .sidebar .nav-link-direct.active { color: #fff; background: rgba(255,255,255,.12); }
+
+        /* ── Main content ── */
         .main-content { margin-left: var(--sidebar-w); min-height: 100vh; }
         .topbar {
             background: #fff; border-bottom: 1px solid #e5e7eb;
@@ -93,102 +159,163 @@
 <?php
 $ap = $_GET['page'] ?? 'dashboard';
 
+/* Retorna 'active' si la página actual pertenece al grupo del ítem */
 function isAct($page) {
     global $ap;
     $grupos = [
-        'productos'          => ['productos',  'productos_crear',  'productos_editar'],
-        'categorias'         => ['categorias', 'categorias_crear', 'categorias_editar'],
-        'marcas'             => ['marcas',     'marcas_crear',     'marcas_editar'],
-        'industrias'         => ['industrias', 'industrias_crear', 'industrias_editar'],
-        'clientes'           => ['clientes',   'clientes_crear',   'clientes_editar'],
-        'vendedores'         => ['vendedores', 'vendedores_crear', 'vendedores_editar'],
-        'pedidos'            => ['pedidos',    'ventas_detalle'],
-        'ventas'             => ['ventas'],
-        'almacen'            => ['almacen'],
-        'almacen_kardex'     => ['almacen_kardex'],
-        'almacen_traspasos'  => ['almacen_traspasos'],
-        'almacen_ajustes'    => ['almacen_ajustes'],
-        'almacen_critico'    => ['almacen_critico'],
+        'inicio'            => ['inicio'],
+        'productos'         => ['productos',  'productos_crear',  'productos_editar'],
+        'categorias'        => ['categorias', 'categorias_crear', 'categorias_editar'],
+        'marcas'            => ['marcas',     'marcas_crear',     'marcas_editar'],
+        'industrias'        => ['industrias', 'industrias_crear', 'industrias_editar'],
+        'clientes'          => ['clientes',   'clientes_crear',   'clientes_editar'],
+        'vendedores'        => ['vendedores', 'vendedores_crear', 'vendedores_editar'],
+        'pedidos'           => ['pedidos',    'ventas_detalle'],
+        'ventas'            => ['ventas'],
+        'almacen'           => ['almacen'],
+        'almacen_kardex'    => ['almacen_kardex'],
+        'almacen_traspasos' => ['almacen_traspasos'],
+        'almacen_ajustes'   => ['almacen_ajustes'],
+        'almacen_critico'   => ['almacen_critico'],
     ];
     $grupo = $grupos[$page] ?? [$page];
     return in_array($ap, $grupo) ? 'active' : '';
 }
+
+/* Retorna 'show' si alguna página del array es la actual (para auto-abrir el colapso) */
+function menuAbierto(array $paginas): string {
+    global $ap;
+    return in_array($ap, $paginas) ? 'show' : '';
+}
+
+/* Retorna 'open' para el botón módulo cuando su submenú está abierto */
+function moduloActivo(array $paginas): string {
+    global $ap;
+    return in_array($ap, $paginas) ? 'open' : '';
+}
+
 function aUrl($page, $extra = '') {
     return '/admin/index.php?page=' . $page . ($extra ? '&' . $extra : '');
 }
+
+// Grupos de páginas por módulo
+$pCatalogo = ['productos','productos_crear','productos_editar','categorias','categorias_crear','categorias_editar','marcas','marcas_crear','marcas_editar','industrias','industrias_crear','industrias_editar','sucursales'];
+$pVentas   = ['pedidos','ventas','ventas_detalle','clientes','clientes_crear','clientes_editar','vendedores','vendedores_crear','vendedores_editar'];
+$pAlmacen  = ['almacen','almacen_kardex','almacen_traspasos','almacen_ajustes','almacen_critico'];
 ?>
 
 <!-- ══ SIDEBAR ══ -->
 <aside class="sidebar" id="sidebar">
+
     <div class="sidebar-brand">
-        <a href="/admin/index.php" class="text-white text-decoration-none fw-bold fs-5">
+        <a href="/admin/index.php?page=inicio" class="text-white text-decoration-none fw-bold fs-5">
             <i class="bi bi-lightning-charge-fill text-warning me-2"></i>Electro<span>Hogar</span>
         </a>
         <div class="text-white-50 small mt-1">Panel Administración</div>
     </div>
 
-    <nav class="mt-2">
+    <nav class="mt-1 pb-3">
+
+        <!-- ── Inicio / Dashboard ── -->
         <div class="nav-section">Principal</div>
-        <a href="<?php echo aUrl('dashboard'); ?>" class="nav-link <?php echo isAct('dashboard'); ?>">
+        <a href="<?php echo aUrl('inicio'); ?>" class="nav-link-direct <?php echo isAct('inicio'); ?>">
+            <i class="bi bi-house-door"></i> Inicio
+        </a>
+        <a href="<?php echo aUrl('dashboard'); ?>" class="nav-link-direct <?php echo isAct('dashboard'); ?>">
             <i class="bi bi-speedometer2"></i> Dashboard
         </a>
 
+        <!-- ══ MÓDULO: CATÁLOGO ══ -->
         <div class="nav-section">Catálogo</div>
-        <a href="<?php echo aUrl('productos'); ?>" class="nav-link <?php echo isAct('productos'); ?>">
-            <i class="bi bi-box-seam"></i> Productos
-        </a>
-        <a href="<?php echo aUrl('categorias'); ?>" class="nav-link <?php echo isAct('categorias'); ?>">
-            <i class="bi bi-tag"></i> Categorías
-        </a>
-        <a href="<?php echo aUrl('marcas'); ?>" class="nav-link <?php echo isAct('marcas'); ?>">
-            <i class="bi bi-patch-check"></i> Marcas
-        </a>
-        <a href="<?php echo aUrl('industrias'); ?>" class="nav-link <?php echo isAct('industrias'); ?>">
-            <i class="bi bi-gear"></i> Industrias
-        </a>
-        <a href="<?php echo aUrl('sucursales'); ?>" class="nav-link <?php echo isAct('sucursales'); ?>">
-            <i class="bi bi-shop"></i> Sucursales
-        </a>
+        <button class="menu-module <?php echo moduloActivo($pCatalogo); ?>"
+                data-bs-toggle="collapse" data-bs-target="#menu-catalogo"
+                aria-expanded="<?php echo menuAbierto($pCatalogo) ? 'true' : 'false'; ?>">
+            <i class="bi bi-grid mod-icon"></i>
+            Catálogo
+            <i class="bi bi-chevron-down chevron"></i>
+        </button>
+        <div class="collapse submenu <?php echo menuAbierto($pCatalogo); ?>" id="menu-catalogo">
+            <a href="<?php echo aUrl('productos'); ?>" class="nav-link <?php echo isAct('productos'); ?>">
+                <i class="bi bi-box-seam"></i> Productos
+            </a>
+            <a href="<?php echo aUrl('categorias'); ?>" class="nav-link <?php echo isAct('categorias'); ?>">
+                <i class="bi bi-tag"></i> Categorías
+            </a>
+            <a href="<?php echo aUrl('marcas'); ?>" class="nav-link <?php echo isAct('marcas'); ?>">
+                <i class="bi bi-patch-check"></i> Marcas
+            </a>
+            <a href="<?php echo aUrl('industrias'); ?>" class="nav-link <?php echo isAct('industrias'); ?>">
+                <i class="bi bi-gear"></i> Industrias
+            </a>
+            <a href="<?php echo aUrl('sucursales'); ?>" class="nav-link <?php echo isAct('sucursales'); ?>">
+                <i class="bi bi-shop"></i> Sucursales
+            </a>
+        </div>
 
-        <div class="nav-section">Ventas</div>
-        <a href="<?php echo aUrl('pedidos'); ?>" class="nav-link <?php echo isAct('pedidos'); ?>">
-            <i class="bi bi-clock-history"></i> Pedidos
-        </a>
-        <a href="<?php echo aUrl('ventas'); ?>" class="nav-link <?php echo isAct('ventas'); ?>">
-            <i class="bi bi-bag-check"></i> Ventas
-        </a>
-        <a href="<?php echo aUrl('clientes'); ?>" class="nav-link <?php echo isAct('clientes'); ?>">
-            <i class="bi bi-people"></i> Clientes
-        </a>
-        <a href="<?php echo aUrl('vendedores'); ?>" class="nav-link <?php echo isAct('vendedores'); ?>">
-            <i class="bi bi-person-badge"></i> Vendedores
-        </a>
+        <!-- ══ MÓDULO: VENTAS ══ -->
+        <div class="nav-section">Comercial</div>
+        <button class="menu-module <?php echo moduloActivo($pVentas); ?>"
+                data-bs-toggle="collapse" data-bs-target="#menu-ventas"
+                aria-expanded="<?php echo menuAbierto($pVentas) ? 'true' : 'false'; ?>">
+            <i class="bi bi-bag-check mod-icon"></i>
+            Ventas
+            <i class="bi bi-chevron-down chevron"></i>
+        </button>
+        <div class="collapse submenu <?php echo menuAbierto($pVentas); ?>" id="menu-ventas">
+            <a href="<?php echo aUrl('pedidos'); ?>" class="nav-link <?php echo isAct('pedidos'); ?>">
+                <i class="bi bi-clock-history"></i> Pedidos
+            </a>
+            <a href="<?php echo aUrl('ventas'); ?>" class="nav-link <?php echo isAct('ventas'); ?>">
+                <i class="bi bi-receipt"></i> Historial de Ventas
+            </a>
+            <a href="<?php echo aUrl('clientes'); ?>" class="nav-link <?php echo isAct('clientes'); ?>">
+                <i class="bi bi-people"></i> Clientes
+            </a>
+            <a href="<?php echo aUrl('vendedores'); ?>" class="nav-link <?php echo isAct('vendedores'); ?>">
+                <i class="bi bi-person-badge"></i> Vendedores
+            </a>
+        </div>
 
+        <!-- ══ MÓDULO: ALMACÉN ══ -->
         <div class="nav-section">Almacén</div>
-        <a href="<?php echo aUrl('almacen'); ?>" class="nav-link <?php echo isAct('almacen'); ?>">
-            <i class="bi bi-table"></i> Stock Actual
-        </a>
-        <a href="<?php echo aUrl('almacen_kardex'); ?>" class="nav-link <?php echo isAct('almacen_kardex'); ?>">
-            <i class="bi bi-journal-text"></i> Kardex
-        </a>
-        <a href="<?php echo aUrl('almacen_traspasos'); ?>" class="nav-link <?php echo isAct('almacen_traspasos'); ?>">
-            <i class="bi bi-arrow-left-right"></i> Traspasos
-        </a>
-        <a href="<?php echo aUrl('almacen_ajustes'); ?>" class="nav-link <?php echo isAct('almacen_ajustes'); ?>">
-            <i class="bi bi-pencil-square"></i> Ajustes
-        </a>
-        <a href="<?php echo aUrl('almacen_critico'); ?>" class="nav-link <?php echo isAct('almacen_critico'); ?>">
-            <i class="bi bi-exclamation-diamond"></i> Stock Crítico
+        <button class="menu-module <?php echo moduloActivo($pAlmacen); ?>"
+                data-bs-toggle="collapse" data-bs-target="#menu-almacen"
+                aria-expanded="<?php echo menuAbierto($pAlmacen) ? 'true' : 'false'; ?>">
+            <i class="bi bi-archive mod-icon"></i>
+            Almacén
             <?php if (isset($totalCriticos) && $totalCriticos > 0): ?>
-                <span class="badge bg-danger badge-alert"><?php echo $totalCriticos; ?></span>
+                <span class="badge bg-danger ms-1" style="font-size:.6rem;"><?php echo $totalCriticos; ?></span>
             <?php endif; ?>
-        </a>
+            <i class="bi bi-chevron-down chevron"></i>
+        </button>
+        <div class="collapse submenu <?php echo menuAbierto($pAlmacen); ?>" id="menu-almacen">
+            <a href="<?php echo aUrl('almacen'); ?>" class="nav-link <?php echo isAct('almacen'); ?>">
+                <i class="bi bi-table"></i> Stock Actual
+            </a>
+            <a href="<?php echo aUrl('almacen_kardex'); ?>" class="nav-link <?php echo isAct('almacen_kardex'); ?>">
+                <i class="bi bi-journal-text"></i> Kardex
+            </a>
+            <a href="<?php echo aUrl('almacen_traspasos'); ?>" class="nav-link <?php echo isAct('almacen_traspasos'); ?>">
+                <i class="bi bi-arrow-left-right"></i> Traspasos
+            </a>
+            <a href="<?php echo aUrl('almacen_ajustes'); ?>" class="nav-link <?php echo isAct('almacen_ajustes'); ?>">
+                <i class="bi bi-pencil-square"></i> Ajustes
+            </a>
+            <a href="<?php echo aUrl('almacen_critico'); ?>" class="nav-link <?php echo isAct('almacen_critico'); ?>">
+                <i class="bi bi-exclamation-diamond"></i> Stock Crítico
+                <?php if (isset($totalCriticos) && $totalCriticos > 0): ?>
+                    <span class="badge bg-danger ms-auto" style="font-size:.6rem;"><?php echo $totalCriticos; ?></span>
+                <?php endif; ?>
+            </a>
+        </div>
 
-        <div class="pb-3 px-3 mt-3">
+        <!-- Cerrar sesión -->
+        <div class="px-3 mt-4">
             <a href="/admin/logout.php" class="btn btn-sm btn-outline-light w-100">
                 <i class="bi bi-box-arrow-right me-1"></i>Cerrar Sesión
             </a>
         </div>
+
     </nav>
 </aside>
 

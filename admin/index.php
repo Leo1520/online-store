@@ -8,10 +8,10 @@ if (!isset($_SESSION['usuario']) || !isset($_SESSION['es_admin']) || !$_SESSION[
 }
 
 // ── Router ────────────────────────────────────────────────────
-$page = trim($_GET['page'] ?? 'dashboard');
+$page = trim($_GET['page'] ?? 'inicio');
 
 $paginas = [
-    'dashboard',
+    'inicio', 'dashboard',
     'sucursales',
     'productos', 'productos_crear', 'productos_editar',
     'categorias', 'categorias_crear', 'categorias_editar',
@@ -40,6 +40,10 @@ require_once __DIR__ . '/../controladores/admin/AlmacenControlador.php';
 
 // ── Despachar ─────────────────────────────────────────────────
 switch ($page) {
+    case 'inicio':
+        (new DashboardControlador())->inicio();
+        break;
+
     case 'dashboard':
         (new DashboardControlador())->dashboard();
         break;
