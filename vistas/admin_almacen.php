@@ -1,6 +1,4 @@
 <?php require_once __DIR__ . '/layout_admin/head.php'; ?>
-<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
 <style>
 
@@ -14,7 +12,14 @@
 .btn-exp.print { background:#6c757d; color:#fff; }
 .btn-exp.xls   { background:#1d7a35; color:#fff; }
 
-.alm-table-wrap { background:#fff; border-radius:12px; box-shadow:0 2px 8px rgba(27,58,107,.06); overflow:hidden; }
+.alm-table-wrap { background:#fff; border-radius:12px; box-shadow:0 2px 8px rgba(27,58,107,.06); overflow-x:auto; }
+.alm-paginacion { display:flex; align-items:center; justify-content:space-between; padding:10px 16px; background:#fafbff; border-top:1px solid #f0f0f0; font-size:13px; }
+.alm-paginacion .pag-info { color:#666; }
+.alm-paginacion .pag-btns { display:flex; gap:4px; }
+.alm-paginacion .pag-btns button { border:1px solid #dde2f0; background:#fff; border-radius:6px; padding:3px 10px; font-size:12px; cursor:pointer; transition:all .15s; }
+.alm-paginacion .pag-btns button:hover:not(:disabled) { background:var(--primary); color:#fff; border-color:var(--primary); }
+.alm-paginacion .pag-btns button.activo { background:var(--primary); color:#fff; border-color:var(--primary); }
+.alm-paginacion .pag-btns button:disabled { opacity:.4; cursor:default; }
 .alm-table { width:100%; border-collapse:collapse; font-size:13px; }
 .alm-table thead tr { background:var(--primary); color:#fff; }
 .alm-table thead th { padding:10px 12px; font-weight:600; font-size:12px; white-space:nowrap; }
@@ -141,6 +146,10 @@
             </tr>
         </tfoot>
     </table>
+    <div class="alm-paginacion" id="paginacion" style="display:none;">
+        <span class="pag-info" id="pagInfo"></span>
+        <div class="pag-btns" id="pagBtns"></div>
+    </div>
 </div>
 
 <script>
@@ -269,31 +278,79 @@ function esc(str) {
     return String(str||'—').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
 
-function exportarPDF(tablaId, nombre) {
-    const tabla = document.getElementById(tablaId); if (!tabla) return;
-    const fecha = new Date().toLocaleDateString('es-BO');
-    const wrapper = document.createElement('div');
-    wrapper.style.cssText = 'font-family:Arial,sans-serif;padding:20px;background:#fff;';
-    wrapper.innerHTML = `<div style="display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid #1B3A6B;padding-bottom:10px;margin-bottom:16px;"><div><h2 style="margin:0;color:#1B3A6B;font-size:18px;">⚡ Electrohogar</h2><p style="margin:0;color:#888;font-size:11px;">Almacén</p></div><div style="text-align:right;"><p style="margin:0;font-size:14px;font-weight:700;">${nombre.replace(/_/g,' ')}</p><p style="margin:0;font-size:11px;color:#888;">Generado: ${fecha}</p></div></div>${tabla.outerHTML}`;
-    wrapper.querySelectorAll('th').forEach(t => t.style.cssText = 'background:#1B3A6B;color:#fff;padding:6px 8px;font-size:10px;');
-    wrapper.querySelectorAll('td').forEach(t => t.style.cssText = 'padding:5px 8px;border-bottom:1px solid #eee;font-size:10px;');
-    html2pdf().set({ margin:[10,8,10,8], filename:`${nombre}_${new Date().toISOString().slice(0,10)}.pdf`, html2canvas:{scale:2,useCORS:true}, jsPDF:{unit:'mm',format:'a4',orientation:'landscape'} }).from(wrapper).save();
+function cargarScript(src) {
+    return new Promise((resolve, reject) => {
+        if (document.querySelector(`script[src="${src}"]`)) { resolve(); return; }
+        const s = document.createElement('script');
+        s.src = src; s.onload = resolve; s.onerror = reject;
+        document.head.appendChild(s);
+    });
+}
+
+async function exportarPDF(tablaId, nombre) {
+    const btn = document.querySelector('.btn-exp.pdf');
+    btn.disabled = true; btn.textContent = 'Generando...';
+    try {
+        await cargarScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js');
+        await cargarScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js');
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF({ orientation:'landscape', unit:'mm', format:'a4' });
+        const fecha = new Date().toLocaleDateString('es-BO');
+        doc.setFontSize(16); doc.setTextColor(27,58,107);
+        doc.text('Electrohogar — ' + nombre.replace(/_/g,' '), 14, 14);
+        doc.setFontSize(9); doc.setTextColor(150,150,150);
+        doc.text('Generado: ' + fecha, 14, 20);
+        doc.autoTable({
+            head: [['#','Código','Producto','Categoría','Marca','Industria','P. Propuesto','P. Vigente','Stock Total','Comprometido','Disponible','Estado']],
+            body: consolidado.map((r,i) => [
+                i+1,
+                r.codigo||'—',
+                r.producto,
+                r.categoria||'—',
+                r.marca||'—',
+                r.industria||'—',
+                parseFloat(r.precioPropuesto)>0 ? 'Bs.'+parseFloat(r.precioPropuesto).toFixed(2) : '—',
+                'Bs.'+parseFloat(r.precioVigente||0).toFixed(2),
+                r.stockActual,
+                r.stockComprometido,
+                r.stockDisponible,
+                r.stockDisponible===0?'AGOTADO':(r.stockDisponible<=5?'BAJO':'OK')
+            ]),
+            startY: 25,
+            styles: { fontSize:8, cellPadding:2 },
+            headStyles: { fillColor:[27,58,107], textColor:255, fontStyle:'bold' },
+            alternateRowStyles: { fillColor:[248,249,255] },
+            margin: { top:25, right:8, bottom:10, left:8 }
+        });
+        doc.save(`${nombre}_${new Date().toISOString().slice(0,10)}.pdf`);
+    } finally {
+        btn.disabled = false; btn.innerHTML = '<i class="bi bi-file-earmark-pdf"></i> PDF';
+    }
 }
 
 function imprimirTabla(tablaId, titulo) {
     const tabla = document.getElementById(tablaId); if (!tabla) return;
+    const clon = tabla.cloneNode(true);
+    clon.querySelectorAll('button').forEach(b => { b.outerHTML = b.textContent; });
     const w = window.open('','_blank','width=1000,height=700');
-    w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>${titulo}</title><style>body{font-family:Arial;font-size:11px;margin:15px;}table{width:100%;border-collapse:collapse;}thead tr{background:#1B3A6B;}thead th{color:#fff;padding:6px 8px;font-size:10px;}tbody td{padding:5px 8px;border-bottom:1px solid #eee;}tfoot td{font-weight:bold;background:#e8ecf8;padding:5px 8px;}</style></head><body><h3 style="color:#1B3A6B;">${titulo} — Electrohogar</h3>${tabla.outerHTML}</body></html>`);
+    w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>${titulo}</title><style>body{font-family:Arial;font-size:11px;margin:15px;}table{width:100%;border-collapse:collapse;}thead tr{background:#1B3A6B;}thead th{color:#fff;padding:6px 8px;font-size:10px;}tbody td{padding:5px 8px;border-bottom:1px solid #eee;}tfoot td{font-weight:bold;background:#e8ecf8;padding:5px 8px;}</style></head><body><h3 style="color:#1B3A6B;">${titulo} — Electrohogar</h3>${clon.outerHTML}</body></html>`);
     w.document.close(); setTimeout(() => w.print(), 500);
 }
 
-function exportarExcel(tablaId, nombre) {
+async function exportarExcel(tablaId, nombre) {
     const tabla = document.getElementById(tablaId); if (!tabla) return;
-    const clon = tabla.cloneNode(true);
-    clon.querySelectorAll('button,.btn').forEach(b => b.remove());
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, XLSX.utils.table_to_sheet(clon), nombre.slice(0,31));
-    XLSX.writeFile(wb, `${nombre}_${new Date().toISOString().slice(0,10)}.xlsx`);
+    const btn = document.querySelector('.btn-exp.xls');
+    btn.disabled = true; btn.textContent = 'Exportando...';
+    try {
+        await cargarScript('https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js');
+        const clon = tabla.cloneNode(true);
+        clon.querySelectorAll('button,.btn').forEach(b => { b.replaceWith(document.createTextNode(b.textContent)); });
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, XLSX.utils.table_to_sheet(clon), nombre.slice(0,31));
+        XLSX.writeFile(wb, `${nombre}_${new Date().toISOString().slice(0,10)}.xlsx`);
+    } finally {
+        btn.disabled = false; btn.innerHTML = '<i class="bi bi-file-earmark-excel"></i> Excel';
+    }
 }
 
 document.addEventListener('DOMContentLoaded', cargarStock);
