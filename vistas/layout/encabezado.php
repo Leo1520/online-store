@@ -897,7 +897,11 @@ document.addEventListener('DOMContentLoaded', function () {
                     var html = '';
                     productos.forEach(function(p) {
                         var img = p.imagen ? 'recursos/imagenes/' + p.imagen : 'recursos/imagenes/no-image.png';
-                        var precio = 'Bs. ' + parseFloat(p.precio).toFixed(2);
+                        var pv_ = parseFloat(p.precioVigente) || 0;
+                        var pp_ = parseFloat(p.precioPropuesto) || 0;
+                        var precio = (pp_ > 0 && pv_ < pp_)
+                            ? '<span style="color:#dc3545;font-weight:700;">Bs. ' + pv_.toFixed(2) + '</span> <span style="text-decoration:line-through;color:#aaa;font-size:11px;">Bs. ' + pp_.toFixed(2) + '</span>'
+                            : 'Bs. ' + pv_.toFixed(2);
                         html += '<a class="sd-item" href="index.php?pagina=producto&id=' + p.id_producto + '" onclick="cerrarDropdown()">'
                             + '<img src="' + img + '" alt="' + p.nombre + '" onerror="this.src=\'recursos/imagenes/no-image.png\'">'
                             + '<div class="sd-item-info">'
@@ -1027,7 +1031,7 @@ function renderMegaProductos(id, nombre, productos) {
             html += '<a class="mega-prod-card" href="index.php?pagina=producto&id=' + p.id_producto + '" onclick="cerrarMega();">'
                 + '<img src="' + img + '" alt="' + p.nombre + '" onerror="this.src=\'recursos/imagenes/no-image.png\'">'
                 + '<div class="mp-nombre">' + p.nombre + '</div>'
-                + '<div class="mp-precio">Bs. ' + parseFloat(p.precio).toFixed(2) + '</div>'
+                + '<div class="mp-precio">Bs. ' + (parseFloat(p.precioVigente)||0).toFixed(2) + '</div>'
                 + '</a>';
         });
         html += '</div>';
@@ -1077,7 +1081,7 @@ function renderCarritoDrawer(d) {
         var img = item.imagen
             ? 'recursos/imagenes/' + item.imagen
             : 'recursos/imagenes/no-image.png';
-        var precio   = parseFloat(item.precio).toFixed(2);
+        var precio   = parseFloat(item.precioVigente).toFixed(2);
         var subtotal = parseFloat(item.subtotal).toFixed(2);
         html += '<div class="carrito-item" id="citem-' + item.id_producto + '">'
             + '<img src="' + img + '" alt="' + item.nombre + '" onerror="this.src=\'recursos/imagenes/no-image.png\'">'

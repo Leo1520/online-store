@@ -63,19 +63,22 @@ class ProductoControlador {
         $stocks   = [];
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $nombre       = trim($_POST['nombre']        ?? '');
-            $descripcion  = trim($_POST['descripcion']   ?? '');
-            $precio       = (float)($_POST['precio']     ?? 0);
-            $estado       = trim($_POST['estado']        ?? 'activo');
-            $codMarca     = (int)($_POST['codMarca']     ?? 0);
-            $codIndustria = (int)($_POST['codIndustria'] ?? 0);
-            $codCategoria = (int)($_POST['codCategoria'] ?? 0);
-            $imagen       = $this->procesarImagen();
+            $codigo          = trim($_POST['codigo']          ?? '') ?: null;
+            $nombre          = trim($_POST['nombre']          ?? '');
+            $descripcion     = trim($_POST['descripcion']     ?? '');
+            $precioVigente   = (float)($_POST['precioVigente']   ?? 0);
+            $precioPropuesto = (float)($_POST['precioPropuesto'] ?? 0);
+            $estado          = trim($_POST['estado']          ?? 'activo');
+            $codMarca        = (int)($_POST['codMarca']       ?? 0);
+            $codIndustria    = (int)($_POST['codIndustria']   ?? 0);
+            $codCategoria    = (int)($_POST['codCategoria']   ?? 0);
+            $imagen          = $this->procesarImagen();
+            if ($precioPropuesto <= 0) $precioPropuesto = $precioVigente;
 
-            if ($nombre === '' || $descripcion === '' || $precio <= 0 || $codMarca === 0 || $codIndustria === 0 || $codCategoria === 0) {
+            if ($nombre === '' || $descripcion === '' || $precioVigente <= 0 || $codMarca === 0 || $codIndustria === 0 || $codCategoria === 0) {
                 $error = 'Completa todos los campos obligatorios.';
             } else {
-                $productoModel->agregar($nombre, $descripcion, $precio, $imagen, $codMarca, $codIndustria, $codCategoria, $estado);
+                $productoModel->agregar($nombre, $descripcion, $precioVigente, $precioPropuesto, $imagen, $codMarca, $codIndustria, $codCategoria, $estado, $codigo);
 
                 $codSucursal  = (int)($_POST['codSucursal']   ?? 0);
                 $stockInicial = (int)($_POST['stock_inicial'] ?? 0);
@@ -87,6 +90,8 @@ class ProductoControlador {
                 header('Location: /admin/index.php?page=productos&msg=' . urlencode('Producto creado correctamente.'));
                 exit();
             }
+
+            $producto = compact('codigo', 'nombre', 'descripcion', 'precioVigente', 'precioPropuesto', 'estado', 'codMarca', 'codIndustria', 'codCategoria', 'imagen');
         }
 
         $marcas     = $marcaModel->obtenerTodos();
@@ -117,19 +122,22 @@ class ProductoControlador {
         }
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $nombre       = trim($_POST['nombre']        ?? '');
-            $descripcion  = trim($_POST['descripcion']   ?? '');
-            $precio       = (float)($_POST['precio']     ?? 0);
-            $estado       = trim($_POST['estado']        ?? 'activo');
-            $codMarca     = (int)($_POST['codMarca']     ?? 0);
-            $codIndustria = (int)($_POST['codIndustria'] ?? 0);
-            $codCategoria = (int)($_POST['codCategoria'] ?? 0);
-            $imagen       = $this->procesarImagen();
+            $codigo          = trim($_POST['codigo']          ?? '') ?: null;
+            $nombre          = trim($_POST['nombre']          ?? '');
+            $descripcion     = trim($_POST['descripcion']     ?? '');
+            $precioVigente   = (float)($_POST['precioVigente']   ?? 0);
+            $precioPropuesto = (float)($_POST['precioPropuesto'] ?? 0);
+            $estado          = trim($_POST['estado']          ?? 'activo');
+            $codMarca        = (int)($_POST['codMarca']       ?? 0);
+            $codIndustria    = (int)($_POST['codIndustria']   ?? 0);
+            $codCategoria    = (int)($_POST['codCategoria']   ?? 0);
+            $imagen          = $this->procesarImagen();
+            if ($precioPropuesto <= 0) $precioPropuesto = $precioVigente;
 
-            if ($nombre === '' || $descripcion === '' || $precio <= 0 || $codMarca === 0 || $codIndustria === 0 || $codCategoria === 0) {
+            if ($nombre === '' || $descripcion === '' || $precioVigente <= 0 || $codMarca === 0 || $codIndustria === 0 || $codCategoria === 0) {
                 $error = 'Completa todos los campos obligatorios.';
             } else {
-                $productoModel->actualizar($id, $nombre, $descripcion, $precio, $imagen, $codMarca, $codIndustria, $codCategoria, $estado);
+                $productoModel->actualizar($id, $nombre, $descripcion, $precioVigente, $precioPropuesto, $imagen, $codMarca, $codIndustria, $codCategoria, $estado, $codigo);
 
                 $codSucursal  = (int)($_POST['codSucursal']   ?? 0);
                 $stockInicial = (int)($_POST['stock_inicial'] ?? 0);
@@ -141,12 +149,7 @@ class ProductoControlador {
                 exit();
             }
 
-            $producto = array_merge($producto, [
-                'nombre' => $nombre, 'descripcion' => $descripcion,
-                'precio' => $precio, 'estado' => $estado,
-                'codMarca' => $codMarca, 'codIndustria' => $codIndustria,
-                'codCategoria' => $codCategoria, 'imagen' => $imagen,
-            ]);
+            $producto = array_merge($producto, compact('codigo', 'nombre', 'descripcion', 'precioVigente', 'precioPropuesto', 'estado', 'codMarca', 'codIndustria', 'codCategoria', 'imagen'));
         }
 
         $marcas     = $marcaModel->obtenerTodos();

@@ -38,7 +38,7 @@ class PagoControlador {
             if (!$producto) continue;
 
             $cantidad = (int)$itemCarrito['cantidad'];
-            $subtotal = (float)$producto['precio'] * $cantidad;
+            $subtotal = (float)$producto['precioVigente'] * $cantidad;
             $total   += $subtotal;
 
             $items[] = [

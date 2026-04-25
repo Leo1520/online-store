@@ -22,6 +22,10 @@
         <div class="col-md-7">
             <h1 class="mb-2"><?php echo htmlspecialchars($producto['nombre']); ?></h1>
 
+            <?php if (!empty($producto['codigo'])): ?>
+            <p class="text-muted mb-1"><small>Código: <span class="font-monospace fw-semibold"><?php echo htmlspecialchars($producto['codigo']); ?></span></small></p>
+            <?php endif; ?>
+
             <p class="text-muted mb-1">
                 <small>
                     Categoría: <strong><?php echo htmlspecialchars($producto['categoria'] ?? 'N/D'); ?></strong>
@@ -36,7 +40,24 @@
 
             <p class="lead"><?php echo htmlspecialchars($producto['descripcion']); ?></p>
 
-            <h2 class="text-success my-3">$<?php echo number_format((float)$producto['precio'], 2); ?></h2>
+            <?php
+                $pv = (float)($producto['precioVigente'] ?? 0);
+                $pp = (float)($producto['precioPropuesto'] ?? 0);
+                $hayDesc = $pp > 0 && $pv < $pp;
+                $pct     = $hayDesc ? round((($pp - $pv) / $pp) * 100) : 0;
+            ?>
+            <div class="my-3">
+                <?php if ($hayDesc): ?>
+                    <div class="d-flex align-items-center gap-3 mb-1">
+                        <span class="badge bg-danger fs-6">-<?php echo $pct; ?>% OFF</span>
+                        <span class="text-muted text-decoration-line-through fs-5">Bs. <?php echo number_format($pp, 2); ?></span>
+                    </div>
+                <?php endif; ?>
+                <h2 class="text-success mb-0">Bs. <?php echo number_format($pv, 2); ?></h2>
+                <?php if ($hayDesc): ?>
+                    <small class="text-muted">Ahorras Bs. <?php echo number_format($pp - $pv, 2); ?></small>
+                <?php endif; ?>
+            </div>
 
             <?php $stockServidor = (int)$producto['stock']; ?>
             <p id="infoStock" class="<?php echo $stockServidor > 0 ? 'text-success' : 'text-danger'; ?>">

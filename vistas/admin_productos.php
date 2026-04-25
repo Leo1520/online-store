@@ -85,9 +85,11 @@ if (!empty($_GET['stock_bajo'])) {
                     <tr>
                         <th style="width:60px;">Img</th>
                         <th>Producto</th>
+                        <th>Código</th>
                         <th>Categoría</th>
                         <th>Marca</th>
-                        <th>Precio</th>
+                        <th>P. Propuesto</th>
+                        <th>P. Vigente</th>
                         <th>Stock</th>
                         <th>Estado</th>
                         <th class="text-end">Acciones</th>
@@ -96,7 +98,7 @@ if (!empty($_GET['stock_bajo'])) {
                 <tbody>
                     <?php if (empty($lista)): ?>
                         <tr>
-                            <td colspan="8" class="text-center text-muted py-5">
+                            <td colspan="10" class="text-center text-muted py-5">
                                 <i class="bi bi-box-seam d-block mb-2" style="font-size:2rem;"></i>
                                 No hay productos.
                                 <a href="/admin/index.php?page=productos_crear">Crear el primero</a>
@@ -120,10 +122,22 @@ if (!empty($_GET['stock_bajo'])) {
                                 <div class="fw-semibold small"><?php echo htmlspecialchars($p['nombre']); ?></div>
                                 <small class="text-muted"><?php echo htmlspecialchars(mb_strimwidth($p['descripcion'] ?? '', 0, 50, '…')); ?></small>
                             </td>
+                            <td><small class="text-muted font-monospace"><?php echo htmlspecialchars($p['codigo'] ?? '—'); ?></small></td>
                             <td><small><?php echo htmlspecialchars($p['categoria'] ?? '—'); ?></small></td>
                             <td><small><?php echo htmlspecialchars($p['marca'] ?? '—'); ?></small></td>
                             <td>
-                                <span class="fw-semibold small">Bs. <?php echo number_format((float)$p['precio'], 2); ?></span>
+                                <small class="text-muted">Bs. <?php echo number_format((float)($p['precioPropuesto'] ?? 0), 2); ?></small>
+                            </td>
+                            <td>
+                                <?php
+                                    $pv = (float)($p['precioVigente'] ?? 0);
+                                    $pp = (float)($p['precioPropuesto'] ?? 0);
+                                    $hayDescuento = $pp > 0 && $pv < $pp;
+                                ?>
+                                <span class="fw-semibold small text-success">Bs. <?php echo number_format($pv, 2); ?></span>
+                                <?php if ($hayDescuento): ?>
+                                    <br><span class="badge bg-danger" style="font-size:.65rem;">-<?php echo round((($pp - $pv)/$pp)*100); ?>%</span>
+                                <?php endif; ?>
                             </td>
                             <td>
                                 <?php $s = (int)($p['stock'] ?? 0); ?>

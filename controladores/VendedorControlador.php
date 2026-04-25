@@ -54,7 +54,7 @@ class VendedorControlador {
     private function obtenerUltimasVentas($limite) {
         $sql = "SELECT nv.`nro`, nv.`fechaHora`, nv.`ciCliente`, nv.`estado`,
                        CONCAT(cl.`nombres`, ' ', cl.`apPaterno`) AS cliente,
-                       COALESCE(SUM(dnv.`cant` * p.`precio`), 0)  AS totalMonto,
+                       COALESCE(SUM(dnv.`cant` * p.`precioVigente`), 0)  AS totalMonto,
                        COALESCE(SUM(dnv.`cant`), 0)               AS totalItems
                 FROM `NotaVenta` nv
                 INNER JOIN `Cliente` cl ON cl.`ci` = nv.`ciCliente`

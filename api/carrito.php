@@ -19,15 +19,17 @@ function calcularResumen() {
     foreach ($_SESSION['carrito'] as $item) {
         $producto = $modelo->obtenerPorId($item['id_producto']);
         if ($producto) {
-            $subtotal = (float)$producto['precio'] * (int)$item['cantidad'];
+            $subtotal = (float)$producto['precioVigente'] * (int)$item['cantidad'];
             $total   += $subtotal;
             $items[]  = [
-                'id_producto' => $item['id_producto'],
-                'nombre'      => $producto['nombre'],
-                'precio'      => (float)$producto['precio'],
-                'cantidad'    => (int)$item['cantidad'],
-                'subtotal'    => $subtotal,
-                'imagen'      => $producto['imagen'],
+                'id_producto'    => $item['id_producto'],
+                'nombre'         => $producto['nombre'],
+                'codigo'         => $producto['codigo'] ?? '',
+                'precioVigente'  => (float)$producto['precioVigente'],
+                'precioPropuesto'=> (float)$producto['precioPropuesto'],
+                'cantidad'       => (int)$item['cantidad'],
+                'subtotal'       => $subtotal,
+                'imagen'         => $producto['imagen'],
             ];
         }
     }

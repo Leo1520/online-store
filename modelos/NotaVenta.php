@@ -26,7 +26,7 @@ class NotaVenta {
         $sql = "SELECT nv.nro, nv.fechaHora, nv.ciCliente, nv.estado,
                        CONCAT(cl.nombres, ' ', cl.apPaterno, ' ', cl.apMaterno) AS cliente,
                        COALESCE(SUM(dnv.cant), 0) AS totalItems,
-                       COALESCE(SUM(dnv.cant * p.precio), 0) AS totalMonto
+                       COALESCE(SUM(dnv.cant * p.precioVigente), 0) AS totalMonto
                 FROM `NotaVenta` nv
                 INNER JOIN `Cliente` cl ON cl.ci = nv.ciCliente
                 LEFT JOIN `DetalleNotaVenta` dnv ON dnv.nroNotaVenta = nv.nro
@@ -99,7 +99,7 @@ class NotaVenta {
             $this->limpiarResultadosPendientes();
         }
 
-        $sql = "SELECT dnv.nroNotaVenta, dnv.item, dnv.cant, dnv.codProducto, p.nombre AS producto, p.precio
+        $sql = "SELECT dnv.nroNotaVenta, dnv.item, dnv.cant, dnv.codProducto, p.nombre AS producto, p.precioVigente AS precio
                 FROM `DetalleNotaVenta` dnv
                 INNER JOIN `Producto` p ON p.cod = dnv.codProducto
                 WHERE dnv.nroNotaVenta = ?

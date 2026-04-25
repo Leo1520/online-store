@@ -333,7 +333,7 @@
                 return (p.estado || '').toLowerCase() === 'activo' && parseInt(p.stock) > 0;
             });
             // Tomar 3 productos: los de mayor precio (más llamativos como oferta)
-            activos.sort(function(a, b) { return parseFloat(b.precio) - parseFloat(a.precio); });
+            activos.sort(function(a, b) { return parseFloat(b.precioVigente) - parseFloat(a.precioVigente); });
             var seleccion = activos.slice(0, 3);
             var cont = document.getElementById('ofertaProductos');
             if (!seleccion.length) { cont.innerHTML = ''; return; }
@@ -341,13 +341,15 @@
             var html = '';
             seleccion.forEach(function(p) {
                 var img    = p.imagen ? 'recursos/imagenes/' + p.imagen : 'recursos/imagenes/no-image.png';
-                var precio = parseFloat(p.precio);
-                var antes  = (precio * 1.25).toFixed(2);
-                var ahora  = precio.toFixed(2);
-                var cuota  = (precio / 12).toFixed(2);
+                var pv     = parseFloat(p.precioVigente) || 0;
+                var pp     = parseFloat(p.precioPropuesto) || 0;
+                var hayDesc = pp > 0 && pv < pp;
+                var pct    = hayDesc ? Math.round(((pp - pv) / pp) * 100) : 0;
+                var ahora  = pv.toFixed(2);
+                var cuota  = (pv / 12).toFixed(2);
                 var stock  = parseInt(p.stock) || 0;
                 html += '<div class="oferta-prod-card">'
-                    + '<span class="op-badge-desc">−20%</span>'
+                    + (hayDesc ? '<span class="op-badge-desc">−' + pct + '%</span>' : '')
                     + (stock <= 5 && stock > 0 ? '<span class="op-badge-stock">¡Últimas ' + stock + '!</span>' : '')
                     + '<div class="op-img-wrap">'
                     +   '<a href="index.php?pagina=producto&id=' + p.id_producto + '">'
@@ -359,7 +361,7 @@
                     +   '<div class="op-nombre">' + p.nombre + '</div>'
                     +   '<div class="op-precios">'
                     +     '<span class="op-precio-ahora">Bs. ' + ahora + '</span>'
-                    +     '<span class="op-precio-antes">Bs. ' + antes + '</span>'
+                    +     (hayDesc ? '<span class="op-precio-antes">Bs. ' + pp.toFixed(2) + '</span>' : '')
                     +   '</div>'
                     +   '<div class="op-cuotas"><i class="bi bi-credit-card mr-1"></i>12 cuotas de Bs. ' + cuota + '</div>'
                     +   '<button class="btn-oferta btn-agregar-oferta" data-id="' + p.id_producto + '" data-stock="' + stock + '">'
@@ -537,7 +539,16 @@
             nodo.querySelector('.producto-nombre').textContent      = p.nombre;
             nodo.querySelector('.producto-descripcion').textContent = p.descripcion;
             nodo.querySelector('.producto-categoria').textContent   = p.categoria || '';
-            nodo.querySelector('.producto-precio').textContent      = parseFloat(p.precio).toFixed(2);
+            var pv2 = parseFloat(p.precioVigente) || 0;
+            var pp2 = parseFloat(p.precioPropuesto) || 0;
+            var precioHtml = 'Bs. ' + pv2.toFixed(2);
+            if (pp2 > 0 && pv2 < pp2) {
+                var pct2 = Math.round(((pp2 - pv2) / pp2) * 100);
+                precioHtml = '<span class="badge bg-danger me-1">-' + pct2 + '%</span>'
+                           + '<span class="fw-bold">Bs. ' + pv2.toFixed(2) + '</span>'
+                           + ' <small class="text-muted text-decoration-line-through">Bs. ' + pp2.toFixed(2) + '</small>';
+            }
+            nodo.querySelector('.producto-precio').innerHTML = precioHtml;
             var stockReal   = parseInt(p.stock) || 0;
             var enCarrito   = carritoActual[p.id_producto] || 0;
             var disponible  = Math.max(0, stockReal - enCarrito);

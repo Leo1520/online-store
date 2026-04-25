@@ -9,25 +9,13 @@ class Producto {
     }
 
     public function obtenerTodos() {
-        $stmtSp = $this->db->prepare("CALL sp_listar_productos_con_stock_total()");
-        if ($stmtSp) {
-            $ok = $stmtSp->execute();
-            if ($ok) {
-                $resultado = $stmtSp->get_result();
-                $datos = $resultado ? $resultado->fetch_all(MYSQLI_ASSOC) : [];
-                $stmtSp->close();
-                $this->limpiarResultadosPendientes();
-                return $datos;
-            }
-            $stmtSp->close();
-            $this->limpiarResultadosPendientes();
-        }
-
         $sql = "SELECT
                     p.cod AS id_producto,
+                    p.codigo,
                     p.nombre,
                     p.descripcion,
-                    p.precio,
+                    p.precioVigente,
+                    p.precioPropuesto,
                     p.imagen,
                     p.estado,
                     p.codMarca,
@@ -42,45 +30,29 @@ class Producto {
                 LEFT JOIN `Marca` m ON m.cod = p.codMarca
                 LEFT JOIN `Categoria` c ON c.cod = p.codCategoria
                 LEFT JOIN `Industria` i ON i.cod = p.codIndustria
-                GROUP BY p.cod, p.nombre, p.descripcion, p.precio, p.imagen, p.estado, p.codMarca, p.codIndustria, p.codCategoria, m.nombre, c.nombre, i.nombre
+                GROUP BY p.cod, p.codigo, p.nombre, p.descripcion, p.precioVigente, p.precioPropuesto, p.imagen, p.estado, p.codMarca, p.codIndustria, p.codCategoria, m.nombre, c.nombre, i.nombre
                 ORDER BY p.cod DESC";
 
         $resultado = $this->db->query($sql);
-        if (!$resultado) {
-            return [];
-        }
+        if (!$resultado) return [];
 
         $productos = [];
         while ($fila = $resultado->fetch_assoc()) {
             $productos[] = $fila;
         }
-
         return $productos;
     }
 
     public function obtenerPorId($id) {
         $id = (int)$id;
 
-        $stmtSp = $this->db->prepare("CALL sp_obtener_producto_por_id(?)");
-        if ($stmtSp) {
-            $stmtSp->bind_param("i", $id);
-            $ok = $stmtSp->execute();
-            if ($ok) {
-                $resultado = $stmtSp->get_result();
-                $fila = $resultado ? $resultado->fetch_assoc() : null;
-                $stmtSp->close();
-                $this->limpiarResultadosPendientes();
-                return $fila ?: null;
-            }
-            $stmtSp->close();
-            $this->limpiarResultadosPendientes();
-        }
-
         $sql = "SELECT
                     p.cod AS id_producto,
+                    p.codigo,
                     p.nombre,
                     p.descripcion,
-                    p.precio,
+                    p.precioVigente,
+                    p.precioPropuesto,
                     p.imagen,
                     p.estado,
                     p.codMarca,
@@ -96,19 +68,15 @@ class Producto {
                 LEFT JOIN `Categoria` c ON c.cod = p.codCategoria
                 LEFT JOIN `Industria` i ON i.cod = p.codIndustria
                 WHERE p.cod = ?
-                GROUP BY p.cod, p.nombre, p.descripcion, p.precio, p.imagen, p.estado, p.codMarca, p.codIndustria, p.codCategoria, m.nombre, c.nombre, i.nombre";
+                GROUP BY p.cod, p.codigo, p.nombre, p.descripcion, p.precioVigente, p.precioPropuesto, p.imagen, p.estado, p.codMarca, p.codIndustria, p.codCategoria, m.nombre, c.nombre, i.nombre";
 
         $stmt = $this->db->prepare($sql);
-        if (!$stmt) {
-            return null;
-        }
+        if (!$stmt) return null;
 
         $stmt->bind_param("i", $id);
         $stmt->execute();
         $resultado = $stmt->get_result();
-        if (!$resultado || $resultado->num_rows === 0) {
-            return null;
-        }
+        if (!$resultado || $resultado->num_rows === 0) return null;
 
         return $resultado->fetch_assoc();
     }
@@ -119,14 +87,68 @@ class Producto {
         $precioMin    = (float)$precioMin;
         $precioMax    = (float)$precioMax;
 
-        $stmt = $this->db->prepare("CALL sp_buscar_productos(?, ?, ?, ?)");
-        if (!$stmt) return [];
-        $stmt->bind_param('sidd', $nombre, $codCategoria, $precioMin, $precioMax);
-        $stmt->execute();
-        $resultado = $stmt->get_result();
-        $datos = $resultado ? $resultado->fetch_all(MYSQLI_ASSOC) : [];
-        $stmt->close();
-        $this->limpiarResultadosPendientes();
+        $where = ['p.estado = "activo"'];
+        $params = []; $types = '';
+
+        if ($nombre !== '') {
+            $where[] = 'p.nombre LIKE ?';
+            $params[] = '%' . $nombre . '%';
+            $types .= 's';
+        }
+        if ($codCategoria > 0) {
+            $where[] = 'p.codCategoria = ?';
+            $params[] = $codCategoria;
+            $types .= 'i';
+        }
+        if ($precioMin > 0) {
+            $where[] = 'p.precioVigente >= ?';
+            $params[] = $precioMin;
+            $types .= 'd';
+        }
+        if ($precioMax > 0) {
+            $where[] = 'p.precioVigente <= ?';
+            $params[] = $precioMax;
+            $types .= 'd';
+        }
+
+        $sql = "SELECT
+                    p.cod AS id_producto,
+                    p.codigo,
+                    p.nombre,
+                    p.descripcion,
+                    p.precioVigente,
+                    p.precioPropuesto,
+                    p.imagen,
+                    p.estado,
+                    p.codMarca,
+                    p.codIndustria,
+                    p.codCategoria,
+                    COALESCE(SUM(CAST(dps.stock AS UNSIGNED)), 0) AS stock,
+                    m.nombre AS marca,
+                    c.nombre AS categoria,
+                    i.nombre AS industria
+                FROM `Producto` p
+                LEFT JOIN `DetalleProductoSucursal` dps ON dps.codProducto = p.cod
+                LEFT JOIN `Marca` m ON m.cod = p.codMarca
+                LEFT JOIN `Categoria` c ON c.cod = p.codCategoria
+                LEFT JOIN `Industria` i ON i.cod = p.codIndustria
+                WHERE " . implode(' AND ', $where) . "
+                GROUP BY p.cod, p.codigo, p.nombre, p.descripcion, p.precioVigente, p.precioPropuesto, p.imagen, p.estado, p.codMarca, p.codIndustria, p.codCategoria, m.nombre, c.nombre, i.nombre
+                ORDER BY p.cod DESC";
+
+        if (!empty($params)) {
+            $stmt = $this->db->prepare($sql);
+            if (!$stmt) return [];
+            $stmt->bind_param($types, ...$params);
+            $stmt->execute();
+            $resultado = $stmt->get_result();
+            $datos = $resultado ? $resultado->fetch_all(MYSQLI_ASSOC) : [];
+            $stmt->close();
+        } else {
+            $resultado = $this->db->query($sql);
+            $datos = $resultado ? $resultado->fetch_all(MYSQLI_ASSOC) : [];
+        }
+
         return $this->aplicarOrden($datos, $orden);
     }
 
@@ -134,8 +156,8 @@ class Producto {
         if (empty($orden) || empty($datos)) return $datos;
         usort($datos, function ($a, $b) use ($orden) {
             switch ($orden) {
-                case 'precio_asc':  return $a['precio'] <=> $b['precio'];
-                case 'precio_desc': return $b['precio'] <=> $a['precio'];
+                case 'precio_asc':  return $a['precioVigente'] <=> $b['precioVigente'];
+                case 'precio_desc': return $b['precioVigente'] <=> $a['precioVigente'];
                 case 'nombre_asc':  return strcmp($a['nombre'], $b['nombre']);
                 case 'nombre_desc': return strcmp($b['nombre'], $a['nombre']);
                 default: return 0;
@@ -144,63 +166,39 @@ class Producto {
         return $datos;
     }
 
-    public function agregar($nombre, $descripcion, $precio, $imagen, $codMarca, $codIndustria, $codCategoria, $estado = 'activo') {
-        $precio = (float)$precio;
-        $codMarca = (int)$codMarca;
-        $codIndustria = (int)$codIndustria;
-        $codCategoria = (int)$codCategoria;
+    public function agregar($nombre, $descripcion, $precioVigente, $precioPropuesto, $imagen, $codMarca, $codIndustria, $codCategoria, $estado = 'activo', $codigo = null) {
+        $precioVigente   = (float)$precioVigente;
+        $precioPropuesto = (float)$precioPropuesto;
+        $codMarca        = (int)$codMarca;
+        $codIndustria    = (int)$codIndustria;
+        $codCategoria    = (int)$codCategoria;
 
-        $stmtSp = $this->db->prepare("CALL sp_crear_producto(?, ?, ?, ?, ?, ?, ?, ?)");
-        if ($stmtSp) {
-            $stmtSp->bind_param("ssdssiii", $nombre, $descripcion, $precio, $imagen, $estado, $codMarca, $codIndustria, $codCategoria);
-            $ok = $stmtSp->execute();
-            $stmtSp->close();
-            $this->limpiarResultadosPendientes();
-            if ($ok) {
-                return true;
-            }
-        }
-
-        $sql = "INSERT INTO `Producto` (nombre, descripcion, precio, imagen, estado, codMarca, codIndustria, codCategoria)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+        $sql = "INSERT INTO `Producto` (codigo, nombre, descripcion, precioVigente, precioPropuesto, imagen, estado, codMarca, codIndustria, codCategoria)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         $stmt = $this->db->prepare($sql);
-        if (!$stmt) {
-            return false;
-        }
+        if (!$stmt) return false;
 
-        $stmt->bind_param("ssdssiii", $nombre, $descripcion, $precio, $imagen, $estado, $codMarca, $codIndustria, $codCategoria);
+        $stmt->bind_param("sssddssiii", $codigo, $nombre, $descripcion, $precioVigente, $precioPropuesto, $imagen, $estado, $codMarca, $codIndustria, $codCategoria);
         return $stmt->execute();
     }
 
-    public function actualizar($id, $nombre, $descripcion, $precio, $imagen, $codMarca, $codIndustria, $codCategoria, $estado = 'activo') {
-        $id = (int)$id;
-        $precio = (float)$precio;
-        $codMarca = (int)$codMarca;
-        $codIndustria = (int)$codIndustria;
-        $codCategoria = (int)$codCategoria;
-
-        $stmtSp = $this->db->prepare("CALL sp_actualizar_producto(?, ?, ?, ?, ?, ?, ?, ?, ?)");
-        if ($stmtSp) {
-            $stmtSp->bind_param("issdssiii", $id, $nombre, $descripcion, $precio, $imagen, $estado, $codMarca, $codIndustria, $codCategoria);
-            $ok = $stmtSp->execute();
-            $stmtSp->close();
-            $this->limpiarResultadosPendientes();
-            if ($ok) {
-                return true;
-            }
-        }
+    public function actualizar($id, $nombre, $descripcion, $precioVigente, $precioPropuesto, $imagen, $codMarca, $codIndustria, $codCategoria, $estado = 'activo', $codigo = null) {
+        $id              = (int)$id;
+        $precioVigente   = (float)$precioVigente;
+        $precioPropuesto = (float)$precioPropuesto;
+        $codMarca        = (int)$codMarca;
+        $codIndustria    = (int)$codIndustria;
+        $codCategoria    = (int)$codCategoria;
 
         $sql = "UPDATE `Producto`
-                SET nombre = ?, descripcion = ?, precio = ?, imagen = ?, estado = ?, codMarca = ?, codIndustria = ?, codCategoria = ?
+                SET codigo = ?, nombre = ?, descripcion = ?, precioVigente = ?, precioPropuesto = ?, imagen = ?, estado = ?, codMarca = ?, codIndustria = ?, codCategoria = ?
                 WHERE cod = ?";
 
         $stmt = $this->db->prepare($sql);
-        if (!$stmt) {
-            return false;
-        }
+        if (!$stmt) return false;
 
-        $stmt->bind_param("ssdssiiii", $nombre, $descripcion, $precio, $imagen, $estado, $codMarca, $codIndustria, $codCategoria, $id);
+        $stmt->bind_param("sssddssiiii", $codigo, $nombre, $descripcion, $precioVigente, $precioPropuesto, $imagen, $estado, $codMarca, $codIndustria, $codCategoria, $id);
         return $stmt->execute();
     }
 
@@ -215,34 +213,10 @@ class Producto {
 
     public function eliminar($id) {
         $id = (int)$id;
-
-        $stmtSp = $this->db->prepare("CALL sp_eliminar_producto(?)");
-        if ($stmtSp) {
-            $stmtSp->bind_param("i", $id);
-            $ok = $stmtSp->execute();
-            $stmtSp->close();
-            $this->limpiarResultadosPendientes();
-            if ($ok) {
-                return true;
-            }
-        }
-
         $sql = "DELETE FROM `Producto` WHERE cod = ?";
         $stmt = $this->db->prepare($sql);
-        if (!$stmt) {
-            return false;
-        }
-
+        if (!$stmt) return false;
         $stmt->bind_param("i", $id);
         return $stmt->execute();
-    }
-
-    private function limpiarResultadosPendientes() {
-        while ($this->db->more_results() && $this->db->next_result()) {
-            $resultado = $this->db->use_result();
-            if ($resultado instanceof mysqli_result) {
-                $resultado->free();
-            }
-        }
     }
 }

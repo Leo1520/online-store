@@ -161,7 +161,7 @@
                     <div style="flex:1;min-width:0;">
                         <div class="nombre"><?php echo htmlspecialchars($item['producto']['nombre']); ?></div>
                         <div class="detalle">
-                            <?php echo (int)$item['cantidad']; ?> × Bs. <?php echo number_format((float)$item['producto']['precio'], 2); ?>
+                            <?php echo (int)$item['cantidad']; ?> × Bs. <?php echo number_format((float)$item['producto']['precioVigente'], 2); ?>
                         </div>
                     </div>
                     <div class="subtotal">Bs. <?php echo number_format($item['subtotal'], 2); ?></div>

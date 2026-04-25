@@ -17,7 +17,7 @@ class CarritoControlador {
             foreach ($_SESSION['carrito'] as $item) {
                 $producto = $modelo->obtenerPorId($item['id_producto']);
                 if ($producto) {
-                    $subtotal = $producto['precio'] * $item['cantidad'];
+                    $subtotal = $producto['precioVigente'] * $item['cantidad'];
                     $total   += $subtotal;
                     $items[]  = [
                         'producto' => $producto,

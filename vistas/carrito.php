@@ -44,7 +44,7 @@
                     '<a href="index.php?pagina=producto&id=' + item.id_producto + '" class="text-dark font-weight-bold">' +
                     escHtml(item.nombre) + '</a>' +
                 '</td>' +
-                '<td>$' + item.precio.toFixed(2) + '</td>' +
+                '<td>Bs. ' + (parseFloat(item.precioVigente)||0).toFixed(2) + '</td>' +
                 '<td>' +
                     '<div class="d-flex align-items-center">' +
                     '<button class="btn btn-outline-secondary btn-sm btn-menos" data-id="' + item.id_producto + '" data-cant="' + (item.cantidad - 1) + '">-</button>' +
