@@ -52,40 +52,61 @@
 
 <!-- Modal desglose por sucursal -->
 <div class="modal fade" id="modalSucursales" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header" style="background:var(--primary);">
-                <h5 class="modal-title text-white">
-                    <i class="bi bi-building me-2"></i>Stock por Sucursal
-                </h5>
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content border-0" style="border-radius:14px;overflow:hidden;box-shadow:0 8px 32px rgba(27,58,107,.18);">
+
+            <!-- Header -->
+            <div class="modal-header border-0 px-4 py-3" style="background:var(--primary);">
+                <div>
+                    <h5 class="modal-title text-white mb-0 fw-bold">
+                        <i class="bi bi-buildings me-2"></i>Desglose por Sucursal
+                    </h5>
+                    <small class="text-white-50">Distribución de stock por punto de venta</small>
+                </div>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
-            <div class="modal-body p-0">
-                <div id="modalProdNombre" class="px-4 py-3 border-bottom bg-light">
-                    <small class="text-muted d-block">Producto</small>
-                    <strong id="modalProdTexto"></strong>
-                    <span id="modalProdCodigo" class="ms-2 text-muted" style="font-family:monospace;font-size:12px;"></span>
+
+            <!-- Info del producto -->
+            <div class="px-4 py-3" style="background:#f8f9ff;border-bottom:1px solid #e8ecf8;">
+                <div class="d-flex align-items-center gap-3">
+                    <div style="width:42px;height:42px;background:#e8f0fe;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                        <i class="bi bi-box-seam" style="color:var(--primary);font-size:18px;"></i>
+                    </div>
+                    <div>
+                        <div class="fw-bold" id="modalProdTexto" style="font-size:15px;color:#1a1a2e;"></div>
+                        <div style="font-family:monospace;font-size:12px;color:#888;" id="modalProdCodigo"></div>
+                    </div>
                 </div>
-                <table class="table table-hover mb-0">
-                    <thead class="table-light">
-                        <tr>
-                            <th class="ps-4">Sucursal</th>
-                            <th class="text-end">Stock Actual</th>
-                            <th class="text-end">Comprometido</th>
-                            <th class="text-end pe-4">Disponible</th>
+            </div>
+
+            <!-- Tabla -->
+            <div class="modal-body p-0">
+                <table class="table mb-0" style="font-size:13px;">
+                    <thead>
+                        <tr style="background:#f0f4ff;">
+                            <th class="ps-4 py-3 fw-600 text-uppercase" style="font-size:11px;letter-spacing:.4px;color:#555;font-weight:700;">Sucursal</th>
+                            <th class="text-end py-3 fw-600 text-uppercase" style="font-size:11px;letter-spacing:.4px;color:#555;font-weight:700;">Stock Actual</th>
+                            <th class="text-end py-3 fw-600 text-uppercase" style="font-size:11px;letter-spacing:.4px;color:#555;font-weight:700;">Comprometido</th>
+                            <th class="text-end pe-4 py-3 fw-600 text-uppercase" style="font-size:11px;letter-spacing:.4px;color:#555;font-weight:700;">Disponible</th>
                         </tr>
                     </thead>
                     <tbody id="modalBodySuc"></tbody>
-                    <tfoot class="table-light fw-bold">
-                        <tr>
-                            <td class="ps-4">TOTAL</td>
-                            <td class="text-end" id="modalTotStock"></td>
-                            <td class="text-end" id="modalTotComp"></td>
-                            <td class="text-end pe-4" id="modalTotDisp"></td>
+                    <tfoot>
+                        <tr style="background:#f0f4ff;border-top:2px solid #d0d9f0;">
+                            <td class="ps-4 py-3 fw-bold" style="font-size:13px;">TOTAL</td>
+                            <td class="text-end py-3 fw-bold" id="modalTotStock"></td>
+                            <td class="text-end py-3 fw-bold" id="modalTotComp"></td>
+                            <td class="text-end pe-4 py-3 fw-bold" id="modalTotDisp"></td>
                         </tr>
                     </tfoot>
                 </table>
             </div>
+
+            <!-- Footer -->
+            <div class="modal-footer border-0 px-4 py-3" style="background:#fafbff;">
+                <button type="button" class="btn btn-secondary btn-sm px-4" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+
         </div>
     </div>
 </div>
@@ -219,11 +240,13 @@ function abrirModalSucursal(idx) {
     let ts = 0, tc = 0, td = 0;
     const rows = r.sucursales.map(s => {
         ts += s.stockActual; tc += s.stockComprometido; td += s.stockDisponible;
-        return `<tr>
-            <td class="ps-4">${esc(s.sucursal)}</td>
-            <td class="text-end fw-bold">${s.stockActual}</td>
-            <td class="text-end">${s.stockComprometido}</td>
-            <td class="text-end pe-4">${s.stockDisponible}</td>
+        return `<tr style="border-bottom:1px solid #f0f0f0;">
+            <td class="ps-4 py-3">
+                <i class="bi bi-geo-alt me-2" style="color:#aaa;"></i>${esc(s.sucursal)}
+            </td>
+            <td class="text-end py-3 fw-bold">${s.stockActual}</td>
+            <td class="text-end py-3">${s.stockComprometido}</td>
+            <td class="text-end pe-4 py-3">${s.stockDisponible}</td>
         </tr>`;
     }).join('');
 
