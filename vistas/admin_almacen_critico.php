@@ -56,19 +56,41 @@
     <table class="alm-table" id="tablaCritico">
         <thead>
             <tr>
-                <th>#</th><th>Producto</th><th>Categoría</th>
-                <th class="text-end">Stock Total</th><th class="text-center">Alerta</th>
+                <th>#</th>
+                <th>Código</th>
+                <th>Producto</th>
+                <th>Categoría</th>
+                <th>Marca</th>
+                <th>Industria</th>
+                <th class="text-end">P. Propuesto</th>
+                <th class="text-end">P. Vigente</th>
+                <th class="text-end">Stock Total</th>
+                <th class="text-center">Alerta</th>
             </tr>
         </thead>
         <tbody id="bodyCritico">
             <?php if (empty($stockCritico)): ?>
-                <tr><td colspan="5" class="text-center text-muted py-4">No hay productos en stock crítico (≤5).</td></tr>
+                <tr><td colspan="10" class="text-center text-muted py-4">No hay productos en stock crítico (≤5).</td></tr>
             <?php else: ?>
-                <?php foreach ($stockCritico as $i => $c): ?>
+                <?php foreach ($stockCritico as $i => $c):
+                    $pv = (float)($c['precioVigente'] ?? 0);
+                    $pp = (float)($c['precioPropuesto'] ?? 0);
+                    $hayDesc = $pp > 0 && $pv < $pp;
+                ?>
                 <tr>
                     <td><?php echo $i + 1; ?></td>
+                    <td><span style="font-family:monospace;font-size:11px;"><?php echo htmlspecialchars($c['codigo'] ?? '—'); ?></span></td>
                     <td><strong><?php echo htmlspecialchars($c['producto']); ?></strong></td>
-                    <td><?php echo htmlspecialchars($c['categoria'] ?? '—'); ?></td>
+                    <td><small><?php echo htmlspecialchars($c['categoria'] ?? '—'); ?></small></td>
+                    <td><small><?php echo htmlspecialchars($c['marca'] ?? '—'); ?></small></td>
+                    <td><small><?php echo htmlspecialchars($c['industria'] ?? '—'); ?></small></td>
+                    <td class="text-end"><small <?php echo $hayDesc ? 'style="text-decoration:line-through;color:#aaa;"' : ''; ?>>
+                        <?php echo $pp > 0 ? 'Bs. ' . number_format($pp, 2) : '—'; ?>
+                    </small></td>
+                    <td class="text-end">
+                        <strong style="color:#28a745;">Bs. <?php echo number_format($pv, 2); ?></strong>
+                        <?php if ($hayDesc): ?><span class="badge bg-danger ms-1" style="font-size:9px;">-<?php echo round((($pp-$pv)/$pp)*100); ?>%</span><?php endif; ?>
+                    </td>
                     <td class="text-end"><strong><?php echo (int)$c['stockTotal']; ?></strong></td>
                     <td class="text-center">
                         <span class="badge-<?php echo $c['alerta'] === 'agotado' ? 'agotado' : 'bajo'; ?>">
@@ -95,20 +117,29 @@ function cargarCritico() {
             const data  = res.data || [];
             const tbody = document.getElementById('bodyCritico');
             if (!data.length) {
-                tbody.innerHTML = `<tr><td colspan="5" class="text-center text-muted py-4">No hay productos con stock ≤ ${umbral}.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="10" class="text-center text-muted py-4">No hay productos con stock ≤ ${umbral}.</td></tr>`;
             } else {
-                tbody.innerHTML = data.map((r, i) => `
-                    <tr>
+                tbody.innerHTML = data.map((r, i) => {
+                    const pv = parseFloat(r.precioVigente)||0, pp = parseFloat(r.precioPropuesto)||0;
+                    const hayDesc = pp > 0 && pv < pp;
+                    return `<tr>
                         <td>${i+1}</td>
+                        <td><span style="font-family:monospace;font-size:11px;">${esc(r.codigo||'—')}</span></td>
                         <td><strong>${esc(r.producto)}</strong></td>
-                        <td>${esc(r.categoria||'—')}</td>
+                        <td><small>${esc(r.categoria||'—')}</small></td>
+                        <td><small>${esc(r.marca||'—')}</small></td>
+                        <td><small>${esc(r.industria||'—')}</small></td>
+                        <td class="text-end"><small ${hayDesc?'style="text-decoration:line-through;color:#aaa;"':''}>${pp>0?'Bs.'+pp.toFixed(2):'—'}</small></td>
+                        <td class="text-end"><strong style="color:#28a745;">Bs.${pv.toFixed(2)}</strong>${hayDesc?` <span style="background:#dc3545;color:#fff;padding:1px 5px;border-radius:8px;font-size:10px;">-${Math.round(((pp-pv)/pp)*100)}%</span>`:''}
+                        </td>
                         <td class="text-end"><strong>${r.stockTotal}</strong></td>
                         <td class="text-center">
                             <span class="badge-${r.alerta==='agotado'?'agotado':'bajo'}">
                                 ${r.alerta==='agotado'?'AGOTADO':'STOCK BAJO'}
                             </span>
                         </td>
-                    </tr>`).join('');
+                    </tr>`;
+                }).join('');
             }
             document.getElementById('loadingCritico').style.display = 'none';
             document.getElementById('tablaCritico').style.display   = 'table';

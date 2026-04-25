@@ -3,16 +3,6 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
 <style>
-.alm-cards { display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-bottom:1.5rem; }
-@media(max-width:768px){ .alm-cards{ grid-template-columns:repeat(2,1fr); } }
-.alm-card { background:#fff; border-radius:14px; padding:18px 20px; box-shadow:0 2px 12px rgba(27,58,107,.08); display:flex; align-items:center; gap:14px; }
-.alm-card-ico { width:48px; height:48px; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:22px; flex-shrink:0; }
-.alm-card-ico.azul  { background:#e8f0fe; color:var(--primary); }
-.alm-card-ico.verde { background:#e6f9ed; color:#28a745; }
-.alm-card-ico.amari { background:#fff7e0; color:var(--accent); }
-.alm-card-ico.rojo  { background:#fdecea; color:#dc3545; }
-.alm-card-num { font-size:26px; font-weight:900; color:var(--primary); line-height:1; }
-.alm-card-lbl { font-size:12px; color:#888; margin-top:2px; }
 
 .alm-barra { background:#fff; border-radius:12px; padding:14px 18px; box-shadow:0 2px 8px rgba(27,58,107,.06); margin-bottom:16px; display:flex; align-items:flex-end; gap:10px; flex-wrap:wrap; }
 .alm-barra .form-group { margin-bottom:0; flex:1; min-width:130px; }
@@ -46,52 +36,12 @@
     </div>
 </div>
 
-<!-- Métricas -->
-<div class="alm-cards">
-    <div class="alm-card">
-        <div class="alm-card-ico azul"><i class="bi bi-box-seam"></i></div>
-        <div>
-            <div class="alm-card-num"><?php echo $totalProductos; ?></div>
-            <div class="alm-card-lbl">Productos con stock</div>
-        </div>
-    </div>
-    <div class="alm-card">
-        <div class="alm-card-ico verde"><i class="bi bi-layers"></i></div>
-        <div>
-            <div class="alm-card-num"><?php echo number_format($stockTotal); ?></div>
-            <div class="alm-card-lbl">Unidades en almacén</div>
-        </div>
-    </div>
-    <div class="alm-card">
-        <div class="alm-card-ico amari"><i class="bi bi-cart-check"></i></div>
-        <div>
-            <div class="alm-card-num"><?php echo number_format($stockComp); ?></div>
-            <div class="alm-card-lbl">Stock comprometido</div>
-        </div>
-    </div>
-    <div class="alm-card">
-        <div class="alm-card-ico rojo"><i class="bi bi-exclamation-triangle"></i></div>
-        <div>
-            <div class="alm-card-num"><?php echo $totalCriticos; ?></div>
-            <div class="alm-card-lbl">Productos críticos (≤5)</div>
-        </div>
-    </div>
-</div>
 
 <!-- Filtros + exportar -->
 <div class="alm-barra">
     <div class="form-group">
         <label>Buscar producto</label>
         <input type="text" class="form-control form-control-sm" id="filtroStockProd" placeholder="Nombre del producto..." oninput="filtrarTablaStock()">
-    </div>
-    <div class="form-group" style="max-width:180px;">
-        <label>Sucursal</label>
-        <select class="form-control form-control-sm" id="filtroStockSuc" onchange="filtrarTablaStock()">
-            <option value="">Todas</option>
-            <?php foreach ($sucursales as $s): ?>
-                <option value="<?php echo htmlspecialchars($s['nombre']); ?>"><?php echo htmlspecialchars($s['nombre']); ?></option>
-            <?php endforeach; ?>
-        </select>
     </div>
     <div class="export-btns">
         <button class="btn-exp pdf"   onclick="exportarPDF('tablaStock','Stock_Actual')"><i class="bi bi-file-earmark-pdf"></i> PDF</button>
@@ -100,13 +50,60 @@
     </div>
 </div>
 
+<!-- Modal desglose por sucursal -->
+<div class="modal fade" id="modalSucursales" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header" style="background:var(--primary);">
+                <h5 class="modal-title text-white">
+                    <i class="bi bi-building me-2"></i>Stock por Sucursal
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-0">
+                <div id="modalProdNombre" class="px-4 py-3 border-bottom bg-light">
+                    <small class="text-muted d-block">Producto</small>
+                    <strong id="modalProdTexto"></strong>
+                    <span id="modalProdCodigo" class="ms-2 text-muted" style="font-family:monospace;font-size:12px;"></span>
+                </div>
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="ps-4">Sucursal</th>
+                            <th class="text-end">Stock Actual</th>
+                            <th class="text-end">Comprometido</th>
+                            <th class="text-end pe-4">Disponible</th>
+                        </tr>
+                    </thead>
+                    <tbody id="modalBodySuc"></tbody>
+                    <tfoot class="table-light fw-bold">
+                        <tr>
+                            <td class="ps-4">TOTAL</td>
+                            <td class="text-end" id="modalTotStock"></td>
+                            <td class="text-end" id="modalTotComp"></td>
+                            <td class="text-end pe-4" id="modalTotDisp"></td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div class="alm-table-wrap">
     <div id="loadingStock" class="alm-loading"><div class="spinner-border" style="color:var(--primary);"></div><p class="mt-2">Cargando stock...</p></div>
     <table class="alm-table" id="tablaStock" style="display:none;">
         <thead>
             <tr>
-                <th>#</th><th>Producto</th><th>Categoría</th><th>Sucursal</th>
-                <th class="text-end">Stock Actual</th>
+                <th>#</th>
+                <th>Código</th>
+                <th>Producto</th>
+                <th>Categoría</th>
+                <th>Marca</th>
+                <th>Industria</th>
+                <th class="text-end">P. Propuesto</th>
+                <th class="text-end">P. Vigente</th>
+                <th class="text-end">Stock Total</th>
                 <th class="text-end">Comprometido</th>
                 <th class="text-end">Disponible</th>
                 <th>Estado</th>
@@ -115,7 +112,7 @@
         <tbody id="bodyStock"></tbody>
         <tfoot>
             <tr>
-                <td colspan="4">TOTALES</td>
+                <td colspan="8">TOTALES</td>
                 <td class="text-end" id="totStock">—</td>
                 <td class="text-end" id="totComp">—</td>
                 <td class="text-end" id="totDisp">—</td>
@@ -128,34 +125,80 @@
 <script>
 const API = '/api/almacen.php';
 let stockData = [];
+let consolidado = []; // filas agrupadas por producto
 
 function cargarStock() {
     document.getElementById('loadingStock').style.display = 'block';
     document.getElementById('tablaStock').style.display   = 'none';
     fetch(API + '?action=stock_actual')
         .then(r => r.json())
-        .then(res => { stockData = res.data || []; renderStock(stockData); });
+        .then(res => {
+            stockData = res.data || [];
+            consolidado = consolidar(stockData);
+            renderStock(consolidado);
+        });
+}
+
+// Agrupa filas por codProducto y suma stocks
+function consolidar(data) {
+    const map = {};
+    data.forEach(r => {
+        const k = r.codProducto;
+        if (!map[k]) {
+            map[k] = {
+                codProducto:     r.codProducto,
+                codigo:          r.codigo,
+                producto:        r.producto,
+                categoria:       r.categoria,
+                marca:           r.marca,
+                industria:       r.industria,
+                precioVigente:   r.precioVigente,
+                precioPropuesto: r.precioPropuesto,
+                stockActual:     0,
+                stockComprometido: 0,
+                stockDisponible: 0,
+                sucursales: []
+            };
+        }
+        const sa = parseInt(r.stockActual)||0;
+        const sc = parseInt(r.stockComprometido)||0;
+        const sd = parseInt(r.stockDisponible)||0;
+        map[k].stockActual      += sa;
+        map[k].stockComprometido += sc;
+        map[k].stockDisponible  += sd;
+        map[k].sucursales.push({ sucursal: r.sucursal, stockActual: sa, stockComprometido: sc, stockDisponible: sd });
+    });
+    return Object.values(map);
 }
 
 function renderStock(data) {
     const tbody = document.getElementById('bodyStock');
     let html = '', ts = 0, tc = 0, td = 0;
     if (!data.length) {
-        tbody.innerHTML = '<tr><td colspan="8" class="text-center text-muted py-4">Sin datos de stock.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="12" class="text-center text-muted py-4">Sin datos de stock.</td></tr>';
     } else {
         data.forEach((r, i) => {
-            const sa = parseInt(r.stockActual), sc = parseInt(r.stockComprometido), sd = parseInt(r.stockDisponible);
+            const sa = r.stockActual, sc = r.stockComprometido, sd = r.stockDisponible;
             ts += sa; tc += sc; td += sd;
-            const color = sd === 0 ? 'color:#dc3545;font-weight:700;' : (sd <= 5 ? 'color:#e65100;font-weight:700;' : '');
+            const pv = parseFloat(r.precioVigente)||0, pp = parseFloat(r.precioPropuesto)||0;
             html += `<tr>
                 <td>${i+1}</td>
+                <td><span style="font-family:monospace;font-size:11px;">${esc(r.codigo||'—')}</span></td>
                 <td><strong>${esc(r.producto)}</strong></td>
-                <td>${esc(r.categoria||'—')}</td>
-                <td>${esc(r.sucursal)}</td>
-                <td class="text-end">${sa}</td>
-                <td class="text-end">${sc > 0 ? `<span style="color:#856404;">${sc}</span>` : '0'}</td>
-                <td class="text-end"><span style="${color}">${sd}</span></td>
-                <td>${sd===0?'<span class="badge-agotado">AGOTADO</span>':(sd<=5?'<span class="badge-bajo">BAJO</span>':'<span style="color:#1b5e20;font-weight:600;font-size:11px;">OK</span>')}</td>
+                <td><small>${esc(r.categoria||'—')}</small></td>
+                <td><small>${esc(r.marca||'—')}</small></td>
+                <td><small>${esc(r.industria||'—')}</small></td>
+                <td class="text-end">${pp > 0 ? `Bs.${pp.toFixed(2)}` : '—'}</td>
+                <td class="text-end">Bs.${pv.toFixed(2)}</td>
+                <td class="text-end">
+                    <button class="btn btn-link p-0 fw-bold text-decoration-none text-dark"
+                        onclick="abrirModalSucursal(${i})" title="Ver por sucursal">
+                        ${sa}
+                    </button>
+                </td>
+                <td class="text-end">${sc}</td>
+                <td class="text-end">${sd}</td>
+                <td>${sd===0?'<span class="badge-agotado">AGOTADO</span>':(sd<=5?'<span class="badge-bajo">BAJO</span>':'OK')}</td>
             </tr>`;
         });
         tbody.innerHTML = html;
@@ -167,12 +210,35 @@ function renderStock(data) {
     document.getElementById('tablaStock').style.display   = 'table';
 }
 
+function abrirModalSucursal(idx) {
+    const r = consolidado[idx];
+    if (!r) return;
+    document.getElementById('modalProdTexto').textContent  = r.producto;
+    document.getElementById('modalProdCodigo').textContent = r.codigo ? '(' + r.codigo + ')' : '';
+
+    let ts = 0, tc = 0, td = 0;
+    const rows = r.sucursales.map(s => {
+        ts += s.stockActual; tc += s.stockComprometido; td += s.stockDisponible;
+        return `<tr>
+            <td class="ps-4">${esc(s.sucursal)}</td>
+            <td class="text-end fw-bold">${s.stockActual}</td>
+            <td class="text-end">${s.stockComprometido}</td>
+            <td class="text-end pe-4">${s.stockDisponible}</td>
+        </tr>`;
+    }).join('');
+
+    document.getElementById('modalBodySuc').innerHTML   = rows;
+    document.getElementById('modalTotStock').textContent = ts;
+    document.getElementById('modalTotComp').textContent  = tc;
+    document.getElementById('modalTotDisp').textContent  = td;
+
+    new bootstrap.Modal(document.getElementById('modalSucursales')).show();
+}
+
 function filtrarTablaStock() {
     const busq = document.getElementById('filtroStockProd').value.toLowerCase();
-    const suc  = document.getElementById('filtroStockSuc').value.toLowerCase();
-    renderStock(stockData.filter(r =>
-        (!busq || r.producto.toLowerCase().includes(busq)) &&
-        (!suc  || r.sucursal.toLowerCase().includes(suc))
+    renderStock(consolidado.filter(r =>
+        !busq || r.producto.toLowerCase().includes(busq) || (r.codigo||'').toLowerCase().includes(busq)
     ));
 }
 

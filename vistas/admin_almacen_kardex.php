@@ -97,14 +97,17 @@
     <table class="alm-table" id="tablaKardex">
         <thead>
             <tr>
-                <th>ID</th><th>Fecha/Hora</th><th>Producto</th><th>Sucursal</th>
+                <th>ID</th><th>Fecha/Hora</th>
+                <th>Código</th><th>Producto</th>
+                <th class="text-end">P. Vigente</th>
+                <th>Sucursal</th>
                 <th>Tipo</th><th class="text-end">Cantidad</th>
                 <th class="text-end">Stock Antes</th><th class="text-end">Stock Después</th>
                 <th>Referencia</th><th>Observación</th><th>Usuario</th>
             </tr>
         </thead>
         <tbody id="bodyKardex">
-            <tr><td colspan="11" class="text-center text-muted py-4">Aplica filtros y presiona <strong>Filtrar</strong> para ver el kardex.</td></tr>
+            <tr><td colspan="13" class="text-center text-muted py-4">Aplica filtros y presiona <strong>Filtrar</strong> para ver el kardex.</td></tr>
         </tbody>
     </table>
 </div>
@@ -128,13 +131,15 @@ function cargarKardex() {
             const data  = res.data || [];
             const tbody = document.getElementById('bodyKardex');
             if (!data.length) {
-                tbody.innerHTML = '<tr><td colspan="11" class="text-center text-muted py-4">Sin movimientos para los filtros aplicados.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="13" class="text-center text-muted py-4">Sin movimientos para los filtros aplicados.</td></tr>';
             } else {
                 tbody.innerHTML = data.map(r => `
                     <tr>
                         <td>${r.id}</td>
                         <td><small>${r.fechaHora}</small></td>
+                        <td><span style="font-family:monospace;font-size:11px;">${esc(r.codigo||'—')}</span></td>
                         <td>${esc(r.producto)}</td>
+                        <td class="text-end"><small style="color:#28a745;font-weight:700;">Bs.${parseFloat(r.precioVigente||0).toFixed(2)}</small></td>
                         <td>${esc(r.sucursal)}</td>
                         <td><span class="badge-tipo tipo-${r.tipo}">${labelTipo(r.tipo)}</span></td>
                         <td class="text-end"><strong>${r.cantidad}</strong></td>
