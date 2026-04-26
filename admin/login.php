@@ -54,14 +54,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $cuenta = $res ? $res->fetch_assoc() : null;
         $stmt->close();
 
-        if ($cuenta && password_verify($password, $cuenta['password']) && $cuenta['rol'] === 'admin') {
+        $rolesPermitidos = ['admin', 'vendedor', 'almacenero', 'repartidor', 'it'];
+        if ($cuenta && password_verify($password, $cuenta['password']) && in_array($cuenta['rol'], $rolesPermitidos)) {
             $_SESSION['usuario']  = $cuenta['usuario'];
             $_SESSION['rol']      = $cuenta['rol'];
             $_SESSION['es_admin'] = true;
             header('Location: index.php');
             exit();
         } else {
-            $error = 'Credenciales incorrectas o sin acceso de administrador.';
+            $error = 'Credenciales incorrectas o sin acceso al panel.';
         }
     } else {
         $error = 'Completa todos los campos.';
@@ -76,7 +77,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </div>
 
     <div class="login-card">
-        <h5><i class="fas fa-lock mr-2" style="color:#F5A623;"></i>Acceso Restringido</h5>
+        <h5><i class="fas fa-lock mr-2" style="color:#F5A623;"></i>Acceso al Panel</h5>
 
         <?php if ($error): ?>
             <div class="alert alert-danger py-2">
@@ -89,7 +90,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <label style="font-size:12px;font-weight:600;color:#555;">Usuario</label>
                 <div class="input-group">
                     <input type="text" name="usuario" class="form-control"
-                           placeholder="Usuario admin" autofocus
+                           placeholder="Usuario" autofocus
                            value="<?php echo htmlspecialchars($_POST['usuario'] ?? ''); ?>">
                     <div class="input-group-append">
                         <span class="input-group-text"><i class="fas fa-user-shield"></i></span>
