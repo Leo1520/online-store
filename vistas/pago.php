@@ -155,9 +155,9 @@
 
                 <?php foreach ($items as $item): ?>
                 <div class="resumen-item">
-                    <img src="recursos/imagenes/<?php echo htmlspecialchars($item['producto']['imagen']); ?>"
+                    <img src="<?php echo !empty($item['producto']['imagen']) ? 'recursos/imagenes/' . htmlspecialchars($item['producto']['imagen']) : 'ups.png'; ?>"
                          alt="<?php echo htmlspecialchars($item['producto']['nombre']); ?>"
-                         onerror="this.src='recursos/imagenes/no-image.png'">
+                         onerror="this.onerror=null;this.src='ups.png';">
                     <div style="flex:1;min-width:0;">
                         <div class="nombre"><?php echo htmlspecialchars($item['producto']['nombre']); ?></div>
                         <div class="detalle">
