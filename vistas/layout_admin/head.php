@@ -263,6 +263,7 @@ function aUrl($page, $extra = '') {
 $pCatalogo = ['productos','productos_crear','productos_editar','categorias','categorias_crear','categorias_editar','marcas','marcas_crear','marcas_editar','industrias','industrias_crear','industrias_editar','sucursales'];
 $pVentas   = ['pedidos','ventas','ventas_detalle','clientes','clientes_crear','clientes_editar','vendedores','vendedores_crear','vendedores_editar'];
 $pAlmacen  = ['almacen','almacen_kardex','almacen_traspasos','almacen_ajustes','almacen_critico'];
+$pAdmin    = ['roles','permisos'];
 ?>
 
 <!-- ══ SIDEBAR ══ -->
@@ -398,6 +399,29 @@ $pAlmacen  = ['almacen','almacen_kardex','almacen_traspasos','almacen_ajustes','
                 <a href="<?php echo aUrl('almacen_traspasos'); ?>" class="nav-link <?php echo isAct('almacen_traspasos'); ?>"><i class="bi bi-arrow-left-right"></i> Traspasos</a>
                 <a href="<?php echo aUrl('almacen_ajustes'); ?>"   class="nav-link <?php echo isAct('almacen_ajustes'); ?>"><i class="bi bi-pencil-square"></i> Ajustes</a>
                 <a href="<?php echo aUrl('almacen_critico'); ?>"   class="nav-link <?php echo isAct('almacen_critico'); ?>"><i class="bi bi-exclamation-diamond"></i> Stock Crítico</a>
+            </div>
+        </div>
+
+        <!-- Administración -->
+        <div class="nav-section sidebar-label">Administración</div>
+
+        <div class="sidebar-group">
+            <button class="menu-module <?php echo moduloActivo($pAdmin); ?>"
+                    data-bs-toggle="collapse" data-bs-target="#menu-admin"
+                    aria-expanded="<?php echo menuAbierto($pAdmin) ? 'true' : 'false'; ?>">
+                <i class="bi bi-shield-lock mod-icon"></i>
+                <span class="sidebar-label">Roles y Permisos</span>
+                <i class="bi bi-chevron-down chevron sidebar-label"></i>
+            </button>
+            <div class="collapse submenu <?php echo menuAbierto($pAdmin); ?>" id="menu-admin">
+                <a href="<?php echo aUrl('roles'); ?>"    class="nav-link <?php echo isAct('roles'); ?>"><i class="bi bi-shield-lock"></i> Roles</a>
+                <a href="<?php echo aUrl('permisos'); ?>" class="nav-link <?php echo isAct('permisos'); ?>"><i class="bi bi-key"></i> Permisos</a>
+            </div>
+            <!-- Flyout administración -->
+            <div class="sidebar-flyout" id="fly-admin">
+                <div class="flyout-header">Administración</div>
+                <a href="<?php echo aUrl('roles'); ?>"    class="nav-link <?php echo isAct('roles'); ?>"><i class="bi bi-shield-lock"></i> Roles</a>
+                <a href="<?php echo aUrl('permisos'); ?>" class="nav-link <?php echo isAct('permisos'); ?>"><i class="bi bi-key"></i> Permisos</a>
             </div>
         </div>
 
