@@ -23,6 +23,7 @@ $paginas = [
     'vendedores', 'vendedores_crear', 'vendedores_editar',
     'almacen', 'almacen_kardex', 'almacen_traspasos', 'almacen_ajustes', 'almacen_critico',
     'roles', 'permisos',
+    'usuarios_internos',
 ];
 
 if (!in_array($page, $paginas)) {
@@ -39,6 +40,7 @@ require_once __DIR__ . '/../controladores/admin/VentaControlador.php';
 require_once __DIR__ . '/../controladores/admin/SucursalControlador.php';
 require_once __DIR__ . '/../controladores/admin/AlmacenControlador.php';
 require_once __DIR__ . '/../controladores/admin/RolControlador.php';
+require_once __DIR__ . '/../controladores/admin/UsuarioInternoControlador.php';
 
 // ── Despachar ─────────────────────────────────────────────────
 switch ($page) {
@@ -88,4 +90,6 @@ switch ($page) {
 
     case 'roles':    (new RolControlador())->roles();    break;
     case 'permisos': (new RolControlador())->permisos(); break;
+
+    case 'usuarios_internos': (new UsuarioInternoControlador())->usuariosInternos(); break;
 }

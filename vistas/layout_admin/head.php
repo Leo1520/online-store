@@ -241,6 +241,7 @@ function isAct($page) {
         'almacen_traspasos' => ['almacen_traspasos'],
         'almacen_ajustes'   => ['almacen_ajustes'],
         'almacen_critico'   => ['almacen_critico'],
+        'usuarios_internos' => ['usuarios_internos'],
     ];
     $grupo = $grupos[$page] ?? [$page];
     return in_array($ap, $grupo) ? 'active' : '';
@@ -263,7 +264,7 @@ function aUrl($page, $extra = '') {
 $pCatalogo = ['productos','productos_crear','productos_editar','categorias','categorias_crear','categorias_editar','marcas','marcas_crear','marcas_editar','industrias','industrias_crear','industrias_editar','sucursales'];
 $pVentas   = ['pedidos','ventas','ventas_detalle','clientes','clientes_crear','clientes_editar','vendedores','vendedores_crear','vendedores_editar'];
 $pAlmacen  = ['almacen','almacen_kardex','almacen_traspasos','almacen_ajustes','almacen_critico'];
-$pAdmin    = ['roles','permisos'];
+$pAdmin    = ['roles','permisos','usuarios_internos'];
 ?>
 
 <!-- ══ SIDEBAR ══ -->
@@ -414,12 +415,14 @@ $pAdmin    = ['roles','permisos'];
                 <i class="bi bi-chevron-down chevron sidebar-label"></i>
             </button>
             <div class="collapse submenu <?php echo menuAbierto($pAdmin); ?>" id="menu-admin">
+                <a href="<?php echo aUrl('usuarios_internos'); ?>" class="nav-link <?php echo isAct('usuarios_internos'); ?>"><i class="bi bi-people"></i> Usuarios Internos</a>
                 <a href="<?php echo aUrl('roles'); ?>"    class="nav-link <?php echo isAct('roles'); ?>"><i class="bi bi-shield-lock"></i> Roles</a>
                 <a href="<?php echo aUrl('permisos'); ?>" class="nav-link <?php echo isAct('permisos'); ?>"><i class="bi bi-key"></i> Permisos</a>
             </div>
             <!-- Flyout administración -->
             <div class="sidebar-flyout" id="fly-admin">
                 <div class="flyout-header">Administración</div>
+                <a href="<?php echo aUrl('usuarios_internos'); ?>" class="nav-link <?php echo isAct('usuarios_internos'); ?>"><i class="bi bi-people"></i> Usuarios Internos</a>
                 <a href="<?php echo aUrl('roles'); ?>"    class="nav-link <?php echo isAct('roles'); ?>"><i class="bi bi-shield-lock"></i> Roles</a>
                 <a href="<?php echo aUrl('permisos'); ?>" class="nav-link <?php echo isAct('permisos'); ?>"><i class="bi bi-key"></i> Permisos</a>
             </div>
