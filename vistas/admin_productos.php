@@ -108,15 +108,9 @@ if (!empty($_GET['stock_bajo'])) {
                         <?php foreach ($lista as $p): ?>
                         <tr>
                             <td>
-                                <?php if (!empty($p['imagen'])): ?>
-                                    <img src="/recursos/imagenes/<?php echo htmlspecialchars($p['imagen']); ?>"
-                                         class="rounded" style="width:48px;height:48px;object-fit:contain;background:#f8f9fa;">
-                                <?php else: ?>
-                                    <div class="rounded bg-light d-flex align-items-center justify-content-center"
-                                         style="width:48px;height:48px;">
-                                        <i class="bi bi-image text-muted"></i>
-                                    </div>
-                                <?php endif; ?>
+                                <img src="<?php echo !empty($p['imagen']) ? '/recursos/imagenes/' . htmlspecialchars($p['imagen']) : '/ups.png'; ?>"
+                                     class="rounded" style="width:48px;height:48px;object-fit:contain;background:#f8f9fa;"
+                                     onerror="this.onerror=null;this.src='/ups.png';">
                             </td>
                             <td>
                                 <div class="fw-semibold small"><?php echo htmlspecialchars($p['nombre']); ?></div>

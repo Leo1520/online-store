@@ -340,7 +340,7 @@
 
             var html = '';
             seleccion.forEach(function(p) {
-                var img    = p.imagen ? 'recursos/imagenes/' + p.imagen : 'recursos/imagenes/no-image.png';
+                var img    = p.imagen ? 'recursos/imagenes/' + p.imagen : 'ups.png';
                 var pv     = parseFloat(p.precioVigente) || 0;
                 var pp     = parseFloat(p.precioPropuesto) || 0;
                 var hayDesc = pp > 0 && pv < pp;
@@ -353,7 +353,7 @@
                     + (stock <= 5 && stock > 0 ? '<span class="op-badge-stock">¡Últimas ' + stock + '!</span>' : '')
                     + '<div class="op-img-wrap">'
                     +   '<a href="index.php?pagina=producto&id=' + p.id_producto + '">'
-                    +     '<img src="' + img + '" alt="' + p.nombre + '" onerror="this.src=\'recursos/imagenes/no-image.png\'">'
+                    +     '<img src="' + img + '" alt="' + p.nombre + '" onerror="this.onerror=null;this.src=\'ups.png\'">'
                     +   '</a>'
                     + '</div>'
                     + '<div class="op-body">'
@@ -534,8 +534,11 @@
             var nodo = document.importNode(plantilla.content, true);
             var url  = 'index.php?pagina=producto&id=' + p.id_producto;
             nodo.querySelector('.producto-imagen-link').href        = url;
-            nodo.querySelector('.producto-imagen').src              = 'recursos/imagenes/' + p.imagen;
-            nodo.querySelector('.producto-imagen').alt              = p.nombre;
+            var imgEl = nodo.querySelector('.producto-imagen');
+            imgEl.src     = p.imagen ? 'recursos/imagenes/' + p.imagen : 'ups.png';
+            imgEl.alt     = p.nombre;
+            imgEl.onerror = function() { this.onerror=null; this.src='ups.png'; };
+
             nodo.querySelector('.producto-nombre').textContent      = p.nombre;
             nodo.querySelector('.producto-descripcion').textContent = p.descripcion;
             nodo.querySelector('.producto-categoria').textContent   = p.categoria || '';
