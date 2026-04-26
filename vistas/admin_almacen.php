@@ -154,8 +154,11 @@
 
 <script>
 const API = '/api/almacen.php';
-let stockData = [];
-let consolidado = []; // filas agrupadas por producto
+let stockData    = [];
+let consolidado  = [];
+let filtrados    = [];
+let paginaActual = 1;
+const POR_PAGINA = 10;
 
 function cargarStock() {
     document.getElementById('loadingStock').style.display = 'block';
@@ -202,46 +205,114 @@ function consolidar(data) {
 }
 
 function renderStock(data) {
+    filtrados    = data;
+    paginaActual = 1;
+    renderPagina();
+}
+
+function renderPagina() {
+    const total    = filtrados.length;
+    const totalPag = Math.max(1, Math.ceil(total / POR_PAGINA));
+    if (paginaActual > totalPag) paginaActual = totalPag;
+
+    const desde = (paginaActual - 1) * POR_PAGINA;
+    const slice  = filtrados.slice(desde, desde + POR_PAGINA);
+
+    // Totales sobre todos los datos filtrados (no solo la página)
+    let ts = 0, tc = 0, td = 0;
+    filtrados.forEach(r => { ts += r.stockActual; tc += r.stockComprometido; td += r.stockDisponible; });
+
     const tbody = document.getElementById('bodyStock');
-    let html = '', ts = 0, tc = 0, td = 0;
-    if (!data.length) {
+    let html = '';
+    if (!slice.length) {
         tbody.innerHTML = '<tr><td colspan="12" class="text-center text-muted py-4">Sin datos de stock.</td></tr>';
     } else {
-        data.forEach((r, i) => {
+        slice.forEach((r, i) => {
             const sa = r.stockActual, sc = r.stockComprometido, sd = r.stockDisponible;
-            ts += sa; tc += sc; td += sd;
             const pv = parseFloat(r.precioVigente)||0, pp = parseFloat(r.precioPropuesto)||0;
             html += `<tr>
-                <td>${i+1}</td>
-                <td><span style="font-family:monospace;font-size:11px;">${esc(r.codigo||'—')}</span></td>
-                <td><strong>${esc(r.producto)}</strong></td>
-                <td><small>${esc(r.categoria||'—')}</small></td>
-                <td><small>${esc(r.marca||'—')}</small></td>
-                <td><small>${esc(r.industria||'—')}</small></td>
+                <td>${desde + i + 1}</td>
+                <td>${esc(r.codigo||'—')}</td>
+                <td>${esc(r.producto)}</td>
+                <td>${esc(r.categoria||'—')}</td>
+                <td>${esc(r.marca||'—')}</td>
+                <td>${esc(r.industria||'—')}</td>
                 <td class="text-end">${pp > 0 ? `Bs.${pp.toFixed(2)}` : '—'}</td>
                 <td class="text-end">Bs.${pv.toFixed(2)}</td>
                 <td class="text-end">
-                    <button class="btn btn-link p-0 fw-bold text-decoration-none text-dark"
-                        onclick="abrirModalSucursal(${i})" title="Ver por sucursal">
+                    <span onclick="abrirModalSucursal('${r.codProducto}')" title="Ver por sucursal"
+                        style="cursor:pointer;text-decoration:underline dotted;">
                         ${sa}
-                    </button>
+                    </span>
                 </td>
                 <td class="text-end">${sc}</td>
                 <td class="text-end">${sd}</td>
-                <td>${sd===0?'<span class="badge-agotado">AGOTADO</span>':(sd<=5?'<span class="badge-bajo">BAJO</span>':'OK')}</td>
+                <td>${sd===0?'Agotado':(sd<=5?'Últimas unidades':'Disponible')}</td>
             </tr>`;
         });
         tbody.innerHTML = html;
     }
+
     document.getElementById('totStock').textContent = ts;
     document.getElementById('totComp').textContent  = tc;
     document.getElementById('totDisp').textContent  = td;
     document.getElementById('loadingStock').style.display = 'none';
     document.getElementById('tablaStock').style.display   = 'table';
+
+    renderPaginacion(total, totalPag);
 }
 
-function abrirModalSucursal(idx) {
-    const r = consolidado[idx];
+function renderPaginacion(total, totalPag) {
+    const pagEl  = document.getElementById('paginacion');
+    const infoEl = document.getElementById('pagInfo');
+    const btnsEl = document.getElementById('pagBtns');
+
+    if (total === 0) { pagEl.style.display = 'none'; return; }
+    pagEl.style.display = 'flex';
+
+    const desde = (paginaActual - 1) * POR_PAGINA + 1;
+    const hasta  = Math.min(paginaActual * POR_PAGINA, total);
+    infoEl.textContent = `Mostrando ${desde}–${hasta} de ${total} productos`;
+
+    const rango = paginaRange(paginaActual, totalPag);
+    let btns = '';
+
+    btns += `<button onclick="irPagina(${paginaActual - 1})" ${paginaActual === 1 ? 'disabled' : ''}>‹ Anterior</button>`;
+
+    if (rango[0] > 1) btns += `<button onclick="irPagina(1)">1</button>`;
+    if (rango[0] > 2) btns += `<span style="padding:0 6px;color:#999;align-self:center;">…</span>`;
+
+    rango.forEach(p => {
+        btns += `<button class="${p === paginaActual ? 'activo' : ''}" onclick="irPagina(${p})">${p}</button>`;
+    });
+
+    if (rango[rango.length - 1] < totalPag - 1) btns += `<span style="padding:0 6px;color:#999;align-self:center;">…</span>`;
+    if (rango[rango.length - 1] < totalPag)     btns += `<button onclick="irPagina(${totalPag})">${totalPag}</button>`;
+
+    btns += `<button onclick="irPagina(${paginaActual + 1})" ${paginaActual === totalPag ? 'disabled' : ''}>Siguiente ›</button>`;
+
+    btnsEl.innerHTML = btns;
+}
+
+function paginaRange(actual, total) {
+    const delta = 2;
+    const ini   = Math.max(1, actual - delta);
+    const fin   = Math.min(total, actual + delta);
+    const arr   = [];
+    for (let i = ini; i <= fin; i++) arr.push(i);
+    return arr;
+}
+
+function irPagina(p) {
+    const totalPag = Math.max(1, Math.ceil(filtrados.length / POR_PAGINA));
+    if (p < 1 || p > totalPag) return;
+    paginaActual = p;
+    renderPagina();
+    document.querySelector('.alm-table-wrap').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function abrirModalSucursal(codProducto) {
+    const r = consolidado.find(x => String(x.codProducto) === String(codProducto));
     if (!r) return;
     document.getElementById('modalProdTexto').textContent  = r.producto;
     document.getElementById('modalProdCodigo').textContent = r.codigo ? '(' + r.codigo + ')' : '';
@@ -268,9 +339,9 @@ function abrirModalSucursal(idx) {
 }
 
 function filtrarTablaStock() {
-    const busq = document.getElementById('filtroStockProd').value.toLowerCase();
-    renderStock(consolidado.filter(r =>
-        !busq || r.producto.toLowerCase().includes(busq) || (r.codigo||'').toLowerCase().includes(busq)
+    const busq = document.getElementById('filtroStockProd').value.toLowerCase().trim();
+    renderStock(!busq ? consolidado : consolidado.filter(r =>
+        r.producto.toLowerCase().includes(busq) || (r.codigo||'').toLowerCase().includes(busq)
     ));
 }
 
