@@ -46,11 +46,11 @@
                             <td>
                                 <?php
                                 $colores = [
-                                    'admin'       => '#1B3A6B',
-                                    'vendedor'    => '#0d6efd',
-                                    'almacenero'  => '#198754',
-                                    'repartidor'  => '#fd7e14',
-                                    'it'          => '#6f42c1',
+                                    'admin'      => '#1B3A6B',
+                                    'vendedor'   => '#0d6efd',
+                                    'almacenero' => '#198754',
+                                    'repartidor' => '#fd7e14',
+                                    'it'         => '#6f42c1',
                                 ];
                                 $color = $colores[$u['rol']] ?? '#6c757d';
                                 ?>
@@ -70,7 +70,7 @@
                             <td class="text-muted"><?php echo htmlspecialchars($u['correo'] ?? '—'); ?></td>
                             <td class="text-muted"><?php echo htmlspecialchars($u['nroCelular'] ?? '—'); ?></td>
                             <td class="text-end">
-                                <?php if ($u['tipo_perfil'] === 'empleado'): ?>
+                                <?php if (in_array($u['tipo_perfil'], ['empleado', 'vendedor'])): ?>
                                 <button class="btn btn-sm btn-outline-secondary py-0 px-2 me-1"
                                         title="Editar"
                                         onclick="abrirEditar(<?php echo htmlspecialchars(json_encode($u), ENT_QUOTES); ?>)">
@@ -100,7 +100,7 @@
 <div class="modal fade" id="modalCrear" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content border-0" style="border-radius:14px;">
-            <form method="POST" action="/admin/index.php?page=usuarios_internos">
+            <form method="POST" action="/admin/index.php?page=usuarios_internos" id="formCrear">
                 <input type="hidden" name="accion" value="crear">
                 <div class="modal-header border-0 px-4 pt-4 pb-2" style="background:var(--primary);border-radius:14px 14px 0 0;">
                     <h5 class="modal-title fw-bold text-white"><i class="bi bi-person-plus me-2"></i>Nuevo Usuario Interno</h5>
@@ -118,9 +118,10 @@
                         </div>
                         <div class="col-md-6">
                             <label class="form-label small fw-semibold">Rol <span class="text-danger">*</span></label>
-                            <select name="rol" class="form-select" required>
+                            <select name="rol" id="crearRol" class="form-select" required onchange="toggleCargoCrear(this.value)">
                                 <option value="">Seleccionar...</option>
                                 <option value="admin">admin</option>
+                                <option value="vendedor">vendedor</option>
                                 <option value="almacenero">almacenero</option>
                                 <option value="repartidor">repartidor</option>
                                 <option value="it">it</option>
@@ -150,7 +151,7 @@
                             <label class="form-label small fw-semibold">Celular</label>
                             <input type="text" name="nroCelular" class="form-control" maxlength="30">
                         </div>
-                        <div class="col-md-3">
+                        <div class="col-md-3" id="crearCargoWrap">
                             <label class="form-label small fw-semibold">Cargo</label>
                             <input type="text" name="cargo" class="form-control" maxlength="40" placeholder="ej: Almacenero Senior">
                         </div>
@@ -170,15 +171,16 @@
     <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content border-0" style="border-radius:14px;">
             <form method="POST" action="/admin/index.php?page=usuarios_internos">
-                <input type="hidden" name="accion"  value="editar">
-                <input type="hidden" name="usuario" id="editUsuario">
+                <input type="hidden" name="accion"      value="editar">
+                <input type="hidden" name="usuario"     id="editUsuario">
+                <input type="hidden" name="tipo_perfil" id="editTipoPerfil">
                 <div class="modal-header border-0 px-4 pt-4 pb-2" style="background:var(--primary);border-radius:14px 14px 0 0;">
-                    <h5 class="modal-title fw-bold text-white"><i class="bi bi-pencil me-2"></i>Editar Usuario: <span id="editUsuarioLabel"></span></h5>
+                    <h5 class="modal-title fw-bold text-white"><i class="bi bi-pencil me-2"></i>Editar: <span id="editUsuarioLabel"></span></h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body px-4 py-3">
                     <div class="row g-3">
-                        <div class="col-md-6">
+                        <div class="col-md-6" id="editRolWrap">
                             <label class="form-label small fw-semibold">Rol <span class="text-danger">*</span></label>
                             <select name="rol" id="editRol" class="form-select" required>
                                 <option value="admin">admin</option>
@@ -186,6 +188,10 @@
                                 <option value="repartidor">repartidor</option>
                                 <option value="it">it</option>
                             </select>
+                        </div>
+                        <div class="col-md-6" id="editRolVendedorWrap" style="display:none;">
+                            <label class="form-label small fw-semibold">Rol</label>
+                            <input type="text" class="form-control" value="vendedor" disabled>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label small fw-semibold">CI <span class="text-danger">*</span></label>
@@ -211,7 +217,7 @@
                             <label class="form-label small fw-semibold">Celular</label>
                             <input type="text" name="nroCelular" id="editCelular" class="form-control" maxlength="30">
                         </div>
-                        <div class="col-md-3">
+                        <div class="col-md-3" id="editCargoWrap">
                             <label class="form-label small fw-semibold">Cargo</label>
                             <input type="text" name="cargo" id="editCargo" class="form-control" maxlength="40">
                         </div>
@@ -231,17 +237,33 @@
 </div>
 
 <script>
+function toggleCargoCrear(rol) {
+    document.getElementById('crearCargoWrap').style.display = (rol === 'vendedor') ? 'none' : '';
+}
+
 function abrirEditar(u) {
-    document.getElementById('editUsuario').value      = u.usuario;
+    const esVendedor = u.tipo_perfil === 'vendedor';
+
+    document.getElementById('editUsuario').value         = u.usuario;
+    document.getElementById('editTipoPerfil').value      = u.tipo_perfil;
     document.getElementById('editUsuarioLabel').textContent = u.usuario;
-    document.getElementById('editRol').value          = u.rol;
-    document.getElementById('editCi').value           = u.ci       || '';
-    document.getElementById('editNombres').value      = u.nombres  || '';
-    document.getElementById('editApPaterno').value    = u.apPaterno|| '';
-    document.getElementById('editApMaterno').value    = u.apMaterno|| '';
-    document.getElementById('editCorreo').value       = u.correo   || '';
-    document.getElementById('editCelular').value      = u.nroCelular|| '';
-    document.getElementById('editCargo').value        = u.cargo    || '';
+    document.getElementById('editCi').value              = u.ci        || '';
+    document.getElementById('editNombres').value         = u.nombres   || '';
+    document.getElementById('editApPaterno').value       = u.apPaterno || '';
+    document.getElementById('editApMaterno').value       = u.apMaterno || '';
+    document.getElementById('editCorreo').value          = u.correo    || '';
+    document.getElementById('editCelular').value         = u.nroCelular|| '';
+    document.getElementById('editCargo').value           = u.cargo     || '';
+
+    // Rol: vendedores tienen rol fijo, empleados lo pueden cambiar
+    document.getElementById('editRolWrap').style.display        = esVendedor ? 'none' : '';
+    document.getElementById('editRolVendedorWrap').style.display = esVendedor ? '' : 'none';
+    document.getElementById('editRol').required = !esVendedor;
+    if (!esVendedor) document.getElementById('editRol').value = u.rol;
+
+    // Cargo: solo empleados
+    document.getElementById('editCargoWrap').style.display = esVendedor ? 'none' : '';
+
     new bootstrap.Modal(document.getElementById('modalEditar')).show();
 }
 </script>

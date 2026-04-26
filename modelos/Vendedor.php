@@ -51,6 +51,17 @@ class Vendedor {
         return $ok;
     }
 
+    public function actualizar(string $usuarioCuenta, string $ci, string $nombres, string $apPaterno, string $apMaterno, string $correo, string $nroCelular): bool {
+        $stmt = $this->db->prepare(
+            "UPDATE `Vendedor` SET ci=?, nombres=?, apPaterno=?, apMaterno=?, correo=?, nroCelular=? WHERE usuarioCuenta=?"
+        );
+        if (!$stmt) return false;
+        $stmt->bind_param("sssssss", $ci, $nombres, $apPaterno, $apMaterno, $correo, $nroCelular, $usuarioCuenta);
+        $ok = $stmt->execute();
+        $stmt->close();
+        return $ok;
+    }
+
     public function eliminarVendedorYCuenta($ci, $usuarioCuenta) {
         $stmt = $this->db->prepare("CALL sp_eliminar_vendedor_y_cuenta(?, ?)");
         if (!$stmt) return false;

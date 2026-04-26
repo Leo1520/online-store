@@ -262,7 +262,7 @@ function aUrl($page, $extra = '') {
 }
 
 $pCatalogo = ['productos','productos_crear','productos_editar','categorias','categorias_crear','categorias_editar','marcas','marcas_crear','marcas_editar','industrias','industrias_crear','industrias_editar','sucursales'];
-$pVentas   = ['pedidos','ventas','ventas_detalle','clientes','clientes_crear','clientes_editar','vendedores','vendedores_crear','vendedores_editar'];
+$pVentas   = ['pedidos','ventas','ventas_detalle','clientes','clientes_crear','clientes_editar'];
 $pAlmacen  = ['almacen','almacen_kardex','almacen_traspasos','almacen_ajustes','almacen_critico'];
 $pAdmin    = ['roles','permisos','usuarios_internos'];
 ?>
@@ -351,18 +351,16 @@ $pAdmin    = ['roles','permisos','usuarios_internos'];
                 <i class="bi bi-chevron-down chevron sidebar-label"></i>
             </button>
             <div class="collapse submenu <?php echo menuAbierto($pVentas); ?>" id="menu-ventas">
-                <a href="<?php echo aUrl('pedidos'); ?>"   class="nav-link <?php echo isAct('pedidos'); ?>"><i class="bi bi-clock-history"></i> Pedidos</a>
-                <a href="<?php echo aUrl('ventas'); ?>"    class="nav-link <?php echo isAct('ventas'); ?>"><i class="bi bi-receipt"></i> Historial de Ventas</a>
-                <a href="<?php echo aUrl('clientes'); ?>"  class="nav-link <?php echo isAct('clientes'); ?>"><i class="bi bi-people"></i> Clientes</a>
-                <a href="<?php echo aUrl('vendedores'); ?>" class="nav-link <?php echo isAct('vendedores'); ?>"><i class="bi bi-person-badge"></i> Vendedores</a>
+                <a href="<?php echo aUrl('pedidos'); ?>"  class="nav-link <?php echo isAct('pedidos'); ?>"><i class="bi bi-clock-history"></i> Pedidos</a>
+                <a href="<?php echo aUrl('ventas'); ?>"   class="nav-link <?php echo isAct('ventas'); ?>"><i class="bi bi-receipt"></i> Historial de Ventas</a>
+                <a href="<?php echo aUrl('clientes'); ?>" class="nav-link <?php echo isAct('clientes'); ?>"><i class="bi bi-people"></i> Clientes</a>
             </div>
             <!-- Flyout ventas -->
             <div class="sidebar-flyout" id="fly-ventas">
                 <div class="flyout-header">Comercial</div>
-                <a href="<?php echo aUrl('pedidos'); ?>"   class="nav-link <?php echo isAct('pedidos'); ?>"><i class="bi bi-clock-history"></i> Pedidos</a>
-                <a href="<?php echo aUrl('ventas'); ?>"    class="nav-link <?php echo isAct('ventas'); ?>"><i class="bi bi-receipt"></i> Historial de Ventas</a>
-                <a href="<?php echo aUrl('clientes'); ?>"  class="nav-link <?php echo isAct('clientes'); ?>"><i class="bi bi-people"></i> Clientes</a>
-                <a href="<?php echo aUrl('vendedores'); ?>" class="nav-link <?php echo isAct('vendedores'); ?>"><i class="bi bi-person-badge"></i> Vendedores</a>
+                <a href="<?php echo aUrl('pedidos'); ?>"  class="nav-link <?php echo isAct('pedidos'); ?>"><i class="bi bi-clock-history"></i> Pedidos</a>
+                <a href="<?php echo aUrl('ventas'); ?>"   class="nav-link <?php echo isAct('ventas'); ?>"><i class="bi bi-receipt"></i> Historial de Ventas</a>
+                <a href="<?php echo aUrl('clientes'); ?>" class="nav-link <?php echo isAct('clientes'); ?>"><i class="bi bi-people"></i> Clientes</a>
             </div>
         </div>
 
