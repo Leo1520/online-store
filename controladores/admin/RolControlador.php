@@ -7,6 +7,7 @@ class RolControlador {
     /* ══ ROLES ══════════════════════════════════════════════════════ */
 
     public function roles(): void {
+        requierePermiso('gestionar_roles');
         $rolModel  = new Rol();
         $permModel = new Permiso();
         $mensaje   = isset($_GET['msg']) ? trim($_GET['msg']) : null;
@@ -78,6 +79,7 @@ class RolControlador {
     /* ══ PERMISOS ════════════════════════════════════════════════════ */
 
     public function permisos(): void {
+        requierePermiso('gestionar_roles');
         $permModel = new Permiso();
         $mensaje   = isset($_GET['msg']) ? trim($_GET['msg']) : null;
         $error     = null;

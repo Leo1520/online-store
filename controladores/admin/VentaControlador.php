@@ -4,6 +4,7 @@ require_once __DIR__ . '/../../modelos/NotaVenta.php';
 class VentaControlador {
 
     public function pedidos() {
+        requierePermiso('ver_pedidos');
         $notaModel   = new NotaVenta();
         $mensaje     = isset($_GET['msg']) ? trim($_GET['msg']) : null;
         $activos     = ['pendiente', 'procesando', 'enviado'];
@@ -14,6 +15,7 @@ class VentaControlador {
     }
 
     public function ventas() {
+        requierePermiso('gestionar_ventas');
         $notaModel   = new NotaVenta();
         $mensaje     = isset($_GET['msg']) ? trim($_GET['msg']) : null;
         $completados = ['entregado', 'facturado', 'cancelado'];
@@ -24,6 +26,7 @@ class VentaControlador {
     }
 
     public function ventasDetalle() {
+        requierePermiso('gestionar_ventas');
         $notaModel = new NotaVenta();
         $id        = (int)($_GET['id'] ?? 0);
 

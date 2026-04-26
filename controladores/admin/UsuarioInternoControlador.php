@@ -7,6 +7,10 @@ class UsuarioInternoControlador {
     private static array $ROLES_EMPLEADO = ['admin', 'almacenero', 'repartidor', 'it'];
 
     public function usuariosInternos(): void {
+        if (!tieneAlgunPermiso(['gestionar_usuarios', 'ver_usuarios'])) {
+            header('Location: /admin/index.php?page=inicio&msg=' . urlencode('No tienes permiso para acceder a esa sección.'));
+            exit();
+        }
         $empModelo = new Empleado();
         $venModelo = new Vendedor();
         $mensaje   = isset($_GET['msg']) ? trim($_GET['msg']) : null;

@@ -59,6 +59,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $_SESSION['usuario']  = $cuenta['usuario'];
             $_SESSION['rol']      = $cuenta['rol'];
             $_SESSION['es_admin'] = true;
+
+            // Cargar permisos asignados al rol (admin los tiene todos por código)
+            require_once __DIR__ . '/../modelos/Rol.php';
+            $_SESSION['permisos'] = (new Rol())->permisosPorRolNombre($cuenta['rol']);
+
             header('Location: index.php');
             exit();
         } else {

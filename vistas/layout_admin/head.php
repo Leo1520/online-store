@@ -311,6 +311,7 @@ $pAdmin    = ['roles','permisos','usuarios_internos'];
         </div>
 
         <!-- Catálogo -->
+        <?php if (tieneAlgunPermiso(['ver_productos','ver_categorias','ver_marcas','ver_industrias','ver_sucursales'])): ?>
         <div class="nav-section sidebar-label">Catálogo</div>
 
         <div class="sidebar-group">
@@ -322,24 +323,26 @@ $pAdmin    = ['roles','permisos','usuarios_internos'];
                 <i class="bi bi-chevron-down chevron sidebar-label"></i>
             </button>
             <div class="collapse submenu <?php echo menuAbierto($pCatalogo); ?>" id="menu-catalogo">
-                <a href="<?php echo aUrl('productos'); ?>"  class="nav-link <?php echo isAct('productos'); ?>"><i class="bi bi-box-seam"></i> Productos</a>
-                <a href="<?php echo aUrl('categorias'); ?>" class="nav-link <?php echo isAct('categorias'); ?>"><i class="bi bi-tag"></i> Categorías</a>
-                <a href="<?php echo aUrl('marcas'); ?>"     class="nav-link <?php echo isAct('marcas'); ?>"><i class="bi bi-patch-check"></i> Marcas</a>
-                <a href="<?php echo aUrl('industrias'); ?>" class="nav-link <?php echo isAct('industrias'); ?>"><i class="bi bi-gear"></i> Industrias</a>
-                <a href="<?php echo aUrl('sucursales'); ?>" class="nav-link <?php echo isAct('sucursales'); ?>"><i class="bi bi-shop"></i> Sucursales</a>
+                <?php if (tienePermiso('ver_productos')):  ?><a href="<?php echo aUrl('productos'); ?>"  class="nav-link <?php echo isAct('productos'); ?>"><i class="bi bi-box-seam"></i> Productos</a><?php endif; ?>
+                <?php if (tienePermiso('ver_categorias')): ?><a href="<?php echo aUrl('categorias'); ?>" class="nav-link <?php echo isAct('categorias'); ?>"><i class="bi bi-tag"></i> Categorías</a><?php endif; ?>
+                <?php if (tienePermiso('ver_marcas')):     ?><a href="<?php echo aUrl('marcas'); ?>"     class="nav-link <?php echo isAct('marcas'); ?>"><i class="bi bi-patch-check"></i> Marcas</a><?php endif; ?>
+                <?php if (tienePermiso('ver_industrias')): ?><a href="<?php echo aUrl('industrias'); ?>" class="nav-link <?php echo isAct('industrias'); ?>"><i class="bi bi-gear"></i> Industrias</a><?php endif; ?>
+                <?php if (tienePermiso('ver_sucursales')): ?><a href="<?php echo aUrl('sucursales'); ?>" class="nav-link <?php echo isAct('sucursales'); ?>"><i class="bi bi-shop"></i> Sucursales</a><?php endif; ?>
             </div>
             <!-- Flyout catálogo -->
             <div class="sidebar-flyout" id="fly-catalogo">
                 <div class="flyout-header">Catálogo</div>
-                <a href="<?php echo aUrl('productos'); ?>"  class="nav-link <?php echo isAct('productos'); ?>"><i class="bi bi-box-seam"></i> Productos</a>
-                <a href="<?php echo aUrl('categorias'); ?>" class="nav-link <?php echo isAct('categorias'); ?>"><i class="bi bi-tag"></i> Categorías</a>
-                <a href="<?php echo aUrl('marcas'); ?>"     class="nav-link <?php echo isAct('marcas'); ?>"><i class="bi bi-patch-check"></i> Marcas</a>
-                <a href="<?php echo aUrl('industrias'); ?>" class="nav-link <?php echo isAct('industrias'); ?>"><i class="bi bi-gear"></i> Industrias</a>
-                <a href="<?php echo aUrl('sucursales'); ?>" class="nav-link <?php echo isAct('sucursales'); ?>"><i class="bi bi-shop"></i> Sucursales</a>
+                <?php if (tienePermiso('ver_productos')):  ?><a href="<?php echo aUrl('productos'); ?>"  class="nav-link <?php echo isAct('productos'); ?>"><i class="bi bi-box-seam"></i> Productos</a><?php endif; ?>
+                <?php if (tienePermiso('ver_categorias')): ?><a href="<?php echo aUrl('categorias'); ?>" class="nav-link <?php echo isAct('categorias'); ?>"><i class="bi bi-tag"></i> Categorías</a><?php endif; ?>
+                <?php if (tienePermiso('ver_marcas')):     ?><a href="<?php echo aUrl('marcas'); ?>"     class="nav-link <?php echo isAct('marcas'); ?>"><i class="bi bi-patch-check"></i> Marcas</a><?php endif; ?>
+                <?php if (tienePermiso('ver_industrias')): ?><a href="<?php echo aUrl('industrias'); ?>" class="nav-link <?php echo isAct('industrias'); ?>"><i class="bi bi-gear"></i> Industrias</a><?php endif; ?>
+                <?php if (tienePermiso('ver_sucursales')): ?><a href="<?php echo aUrl('sucursales'); ?>" class="nav-link <?php echo isAct('sucursales'); ?>"><i class="bi bi-shop"></i> Sucursales</a><?php endif; ?>
             </div>
         </div>
+        <?php endif; ?>
 
         <!-- Ventas -->
+        <?php if (tieneAlgunPermiso(['ver_pedidos','gestionar_ventas','ver_clientes'])): ?>
         <div class="nav-section sidebar-label">Comercial</div>
 
         <div class="sidebar-group">
@@ -351,20 +354,22 @@ $pAdmin    = ['roles','permisos','usuarios_internos'];
                 <i class="bi bi-chevron-down chevron sidebar-label"></i>
             </button>
             <div class="collapse submenu <?php echo menuAbierto($pVentas); ?>" id="menu-ventas">
-                <a href="<?php echo aUrl('pedidos'); ?>"  class="nav-link <?php echo isAct('pedidos'); ?>"><i class="bi bi-clock-history"></i> Pedidos</a>
-                <a href="<?php echo aUrl('ventas'); ?>"   class="nav-link <?php echo isAct('ventas'); ?>"><i class="bi bi-receipt"></i> Historial de Ventas</a>
-                <a href="<?php echo aUrl('clientes'); ?>" class="nav-link <?php echo isAct('clientes'); ?>"><i class="bi bi-people"></i> Clientes</a>
+                <?php if (tienePermiso('ver_pedidos')):      ?><a href="<?php echo aUrl('pedidos'); ?>"  class="nav-link <?php echo isAct('pedidos'); ?>"><i class="bi bi-clock-history"></i> Pedidos</a><?php endif; ?>
+                <?php if (tienePermiso('gestionar_ventas')): ?><a href="<?php echo aUrl('ventas'); ?>"   class="nav-link <?php echo isAct('ventas'); ?>"><i class="bi bi-receipt"></i> Historial de Ventas</a><?php endif; ?>
+                <?php if (tienePermiso('ver_clientes')):     ?><a href="<?php echo aUrl('clientes'); ?>" class="nav-link <?php echo isAct('clientes'); ?>"><i class="bi bi-people"></i> Clientes</a><?php endif; ?>
             </div>
             <!-- Flyout ventas -->
             <div class="sidebar-flyout" id="fly-ventas">
                 <div class="flyout-header">Comercial</div>
-                <a href="<?php echo aUrl('pedidos'); ?>"  class="nav-link <?php echo isAct('pedidos'); ?>"><i class="bi bi-clock-history"></i> Pedidos</a>
-                <a href="<?php echo aUrl('ventas'); ?>"   class="nav-link <?php echo isAct('ventas'); ?>"><i class="bi bi-receipt"></i> Historial de Ventas</a>
-                <a href="<?php echo aUrl('clientes'); ?>" class="nav-link <?php echo isAct('clientes'); ?>"><i class="bi bi-people"></i> Clientes</a>
+                <?php if (tienePermiso('ver_pedidos')):      ?><a href="<?php echo aUrl('pedidos'); ?>"  class="nav-link <?php echo isAct('pedidos'); ?>"><i class="bi bi-clock-history"></i> Pedidos</a><?php endif; ?>
+                <?php if (tienePermiso('gestionar_ventas')): ?><a href="<?php echo aUrl('ventas'); ?>"   class="nav-link <?php echo isAct('ventas'); ?>"><i class="bi bi-receipt"></i> Historial de Ventas</a><?php endif; ?>
+                <?php if (tienePermiso('ver_clientes')):     ?><a href="<?php echo aUrl('clientes'); ?>" class="nav-link <?php echo isAct('clientes'); ?>"><i class="bi bi-people"></i> Clientes</a><?php endif; ?>
             </div>
         </div>
+        <?php endif; ?>
 
         <!-- Almacén -->
+        <?php if (tieneAlgunPermiso(['ver_almacen','gestionar_almacen'])): ?>
         <div class="nav-section sidebar-label">Almacén</div>
 
         <div class="sidebar-group">
@@ -393,15 +398,17 @@ $pAdmin    = ['roles','permisos','usuarios_internos'];
             <!-- Flyout almacén -->
             <div class="sidebar-flyout" id="fly-almacen">
                 <div class="flyout-header">Almacén</div>
-                <a href="<?php echo aUrl('almacen'); ?>"           class="nav-link <?php echo isAct('almacen'); ?>"><i class="bi bi-table"></i> Stock Actual</a>
-                <a href="<?php echo aUrl('almacen_kardex'); ?>"    class="nav-link <?php echo isAct('almacen_kardex'); ?>"><i class="bi bi-journal-text"></i> Kardex</a>
-                <a href="<?php echo aUrl('almacen_traspasos'); ?>" class="nav-link <?php echo isAct('almacen_traspasos'); ?>"><i class="bi bi-arrow-left-right"></i> Traspasos</a>
-                <a href="<?php echo aUrl('almacen_ajustes'); ?>"   class="nav-link <?php echo isAct('almacen_ajustes'); ?>"><i class="bi bi-pencil-square"></i> Ajustes</a>
-                <a href="<?php echo aUrl('almacen_critico'); ?>"   class="nav-link <?php echo isAct('almacen_critico'); ?>"><i class="bi bi-exclamation-diamond"></i> Stock Crítico</a>
+                <?php if (tienePermiso('ver_almacen')):      ?><a href="<?php echo aUrl('almacen'); ?>"           class="nav-link <?php echo isAct('almacen'); ?>"><i class="bi bi-table"></i> Stock Actual</a><?php endif; ?>
+                <?php if (tienePermiso('ver_almacen')):      ?><a href="<?php echo aUrl('almacen_kardex'); ?>"    class="nav-link <?php echo isAct('almacen_kardex'); ?>"><i class="bi bi-journal-text"></i> Kardex</a><?php endif; ?>
+                <?php if (tienePermiso('gestionar_almacen')): ?><a href="<?php echo aUrl('almacen_traspasos'); ?>" class="nav-link <?php echo isAct('almacen_traspasos'); ?>"><i class="bi bi-arrow-left-right"></i> Traspasos</a><?php endif; ?>
+                <?php if (tienePermiso('gestionar_almacen')): ?><a href="<?php echo aUrl('almacen_ajustes'); ?>"   class="nav-link <?php echo isAct('almacen_ajustes'); ?>"><i class="bi bi-pencil-square"></i> Ajustes</a><?php endif; ?>
+                <?php if (tienePermiso('ver_almacen')):      ?><a href="<?php echo aUrl('almacen_critico'); ?>"   class="nav-link <?php echo isAct('almacen_critico'); ?>"><i class="bi bi-exclamation-diamond"></i> Stock Crítico</a><?php endif; ?>
             </div>
         </div>
+        <?php endif; ?>
 
         <!-- Administración -->
+        <?php if (tieneAlgunPermiso(['gestionar_roles','gestionar_usuarios','ver_usuarios'])): ?>
         <div class="nav-section sidebar-label">Administración</div>
 
         <div class="sidebar-group">
@@ -413,18 +420,19 @@ $pAdmin    = ['roles','permisos','usuarios_internos'];
                 <i class="bi bi-chevron-down chevron sidebar-label"></i>
             </button>
             <div class="collapse submenu <?php echo menuAbierto($pAdmin); ?>" id="menu-admin">
-                <a href="<?php echo aUrl('usuarios_internos'); ?>" class="nav-link <?php echo isAct('usuarios_internos'); ?>"><i class="bi bi-people"></i> Usuarios Internos</a>
-                <a href="<?php echo aUrl('roles'); ?>"    class="nav-link <?php echo isAct('roles'); ?>"><i class="bi bi-shield-lock"></i> Roles</a>
-                <a href="<?php echo aUrl('permisos'); ?>" class="nav-link <?php echo isAct('permisos'); ?>"><i class="bi bi-key"></i> Permisos</a>
+                <?php if (tieneAlgunPermiso(['gestionar_usuarios','ver_usuarios'])): ?><a href="<?php echo aUrl('usuarios_internos'); ?>" class="nav-link <?php echo isAct('usuarios_internos'); ?>"><i class="bi bi-people"></i> Usuarios Internos</a><?php endif; ?>
+                <?php if (tienePermiso('gestionar_roles')): ?><a href="<?php echo aUrl('roles'); ?>"    class="nav-link <?php echo isAct('roles'); ?>"><i class="bi bi-shield-lock"></i> Roles</a><?php endif; ?>
+                <?php if (tienePermiso('gestionar_roles')): ?><a href="<?php echo aUrl('permisos'); ?>" class="nav-link <?php echo isAct('permisos'); ?>"><i class="bi bi-key"></i> Permisos</a><?php endif; ?>
             </div>
             <!-- Flyout administración -->
             <div class="sidebar-flyout" id="fly-admin">
                 <div class="flyout-header">Administración</div>
-                <a href="<?php echo aUrl('usuarios_internos'); ?>" class="nav-link <?php echo isAct('usuarios_internos'); ?>"><i class="bi bi-people"></i> Usuarios Internos</a>
-                <a href="<?php echo aUrl('roles'); ?>"    class="nav-link <?php echo isAct('roles'); ?>"><i class="bi bi-shield-lock"></i> Roles</a>
-                <a href="<?php echo aUrl('permisos'); ?>" class="nav-link <?php echo isAct('permisos'); ?>"><i class="bi bi-key"></i> Permisos</a>
+                <?php if (tieneAlgunPermiso(['gestionar_usuarios','ver_usuarios'])): ?><a href="<?php echo aUrl('usuarios_internos'); ?>" class="nav-link <?php echo isAct('usuarios_internos'); ?>"><i class="bi bi-people"></i> Usuarios Internos</a><?php endif; ?>
+                <?php if (tienePermiso('gestionar_roles')): ?><a href="<?php echo aUrl('roles'); ?>"    class="nav-link <?php echo isAct('roles'); ?>"><i class="bi bi-shield-lock"></i> Roles</a><?php endif; ?>
+                <?php if (tienePermiso('gestionar_roles')): ?><a href="<?php echo aUrl('permisos'); ?>" class="nav-link <?php echo isAct('permisos'); ?>"><i class="bi bi-key"></i> Permisos</a><?php endif; ?>
             </div>
         </div>
+        <?php endif; ?>
 
     </nav>
 

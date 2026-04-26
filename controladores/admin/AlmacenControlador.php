@@ -7,6 +7,7 @@ require_once __DIR__ . '/../../modelos/Producto.php';
 class AlmacenControlador {
 
     public function stockActual() {
+        requierePermiso('ver_almacen');
         $msModel       = new MovimientoStock();
         $sucursalModel = new Sucursal();
 
@@ -23,6 +24,7 @@ class AlmacenControlador {
     }
 
     public function kardex() {
+        requierePermiso('ver_almacen');
         $productoModel = new Producto();
         $sucursalModel = new Sucursal();
 
@@ -34,6 +36,7 @@ class AlmacenControlador {
     }
 
     public function traspasos() {
+        requierePermiso('gestionar_almacen');
         $sucursalModel = new Sucursal();
         $productoModel = new Producto();
 
@@ -45,6 +48,7 @@ class AlmacenControlador {
     }
 
     public function ajustes() {
+        requierePermiso('gestionar_almacen');
         $productoModel = new Producto();
         $sucursalModel = new Sucursal();
 
@@ -56,6 +60,7 @@ class AlmacenControlador {
     }
 
     public function stockCritico() {
+        requierePermiso('ver_almacen');
         $msModel      = new MovimientoStock();
         $stockCritico = $msModel->obtenerStockCritico(5);
         $totalCriticos = count($stockCritico);

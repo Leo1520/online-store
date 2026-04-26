@@ -127,6 +127,24 @@ class Rol {
         return $ok;
     }
 
+    public function permisosPorRolNombre(string $rol): array {
+        $stmt = $this->db->prepare(
+            "SELECT p.nombre FROM Permiso p
+             JOIN RolPermiso rp ON rp.codPermiso = p.cod
+             JOIN Rol r ON r.cod = rp.codRol
+             WHERE r.nombre = ?"
+        );
+        if (!$stmt) return [];
+        $stmt->bind_param("s", $rol);
+        $stmt->execute();
+        $res      = $stmt->get_result();
+        $permisos = [];
+        if ($res) while ($row = $res->fetch_row()) $permisos[] = $row[0];
+        $stmt->close();
+        $this->limpiar();
+        return $permisos;
+    }
+
     private function limpiar(): void {
         while ($this->db->more_results() && $this->db->next_result()) {
             $r = $this->db->use_result();

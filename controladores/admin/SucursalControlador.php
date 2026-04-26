@@ -4,6 +4,7 @@ require_once __DIR__ . '/../../modelos/Sucursal.php';
 class SucursalControlador {
 
     public function sucursales() {
+        requierePermiso('ver_sucursales');
         $sucursalModel = new Sucursal();
         $mensaje       = null;
         $sucursalEditar = null;

@@ -27,11 +27,13 @@ class ProductoControlador {
     }
 
     public function productos() {
+        requierePermiso('ver_productos');
         $productoModel  = new Producto();
         $stockModel     = new DetalleProductoSucursal();
         $categoriaModel = new Categoria();
 
         if (isset($_GET['eliminar_producto'])) {
+            requierePermiso('eliminar_productos');
             $productoModel->eliminar((int)$_GET['eliminar_producto']);
             header('Location: /admin/index.php?page=productos&msg=' . urlencode('Producto eliminado.'));
             exit();
@@ -51,6 +53,7 @@ class ProductoControlador {
     }
 
     public function productosCrear() {
+        requierePermiso('crear_productos');
         $productoModel  = new Producto();
         $marcaModel     = new Marca();
         $categoriaModel = new Categoria();
@@ -103,6 +106,7 @@ class ProductoControlador {
     }
 
     public function productosEditar() {
+        requierePermiso('editar_productos');
         $productoModel  = new Producto();
         $marcaModel     = new Marca();
         $categoriaModel = new Categoria();

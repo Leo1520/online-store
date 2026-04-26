@@ -8,10 +8,12 @@
         </h4>
         <small class="text-muted"><?php echo count($productos); ?> productos registrados</small>
     </div>
+    <?php if (tienePermiso('crear_productos')): ?>
     <a href="/admin/index.php?page=productos_crear" class="btn fw-semibold text-white"
        style="background:var(--accent);color:#333!important;">
         <i class="bi bi-plus-lg me-1"></i>Nuevo Producto
     </a>
+    <?php endif; ?>
 </div>
 
 <!-- Filtros -->
@@ -149,11 +151,14 @@ if (!empty($_GET['stock_bajo'])) {
                                 </span>
                             </td>
                             <td class="text-end">
+                                <?php if (tienePermiso('editar_productos')): ?>
                                 <a href="/admin/index.php?page=productos_editar&id=<?php echo (int)$p['id_producto']; ?>"
                                    class="btn btn-sm btn-outline-primary py-0 px-2 me-1"
                                    title="Editar">
                                     <i class="bi bi-pencil"></i>
                                 </a>
+                                <?php endif; ?>
+                                <?php if (tienePermiso('eliminar_productos')): ?>
                                 <button class="btn btn-sm btn-outline-danger py-0 px-2"
                                     title="Eliminar"
                                     onclick="confirmDelete('el producto <?php echo htmlspecialchars($p['nombre'], ENT_QUOTES); ?>', function(){
@@ -161,6 +166,7 @@ if (!empty($_GET['stock_bajo'])) {
                                     })">
                                     <i class="bi bi-trash"></i>
                                 </button>
+                                <?php endif; ?>
                             </td>
                         </tr>
                         <?php endforeach; ?>

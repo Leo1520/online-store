@@ -30,6 +30,8 @@ if (!in_array($page, $paginas)) {
     $page = 'dashboard';
 }
 
+require_once __DIR__ . '/../config/permisos.php';
+
 // ── Cargar controladores ──────────────────────────────────────
 require_once __DIR__ . '/../controladores/admin/DashboardControlador.php';
 require_once __DIR__ . '/../controladores/admin/CatalogoControlador.php';

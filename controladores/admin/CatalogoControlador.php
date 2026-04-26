@@ -7,6 +7,7 @@ class CatalogoControlador {
 
     // ── MARCAS ────────────────────────────────────────────────────
     public function marcas() {
+        requierePermiso('ver_marcas');
         $marcaModel = new Marca();
         $mensaje = isset($_GET['msg']) ? trim($_GET['msg']) : null;
 
@@ -22,6 +23,7 @@ class CatalogoControlador {
     }
 
     public function marcasCrear() {
+        requierePermiso('ver_marcas');
         $marcaModel = new Marca();
         $error  = null;
         $esEditar = false;
@@ -43,6 +45,7 @@ class CatalogoControlador {
     }
 
     public function marcasEditar() {
+        requierePermiso('ver_marcas');
         $marcaModel = new Marca();
         $error  = null;
         $esEditar = true;
@@ -74,6 +77,7 @@ class CatalogoControlador {
 
     // ── CATEGORÍAS ────────────────────────────────────────────────
     public function categorias() {
+        requierePermiso('ver_categorias');
         $categoriaModel = new Categoria();
         $mensaje = isset($_GET['msg']) ? trim($_GET['msg']) : null;
 
@@ -89,6 +93,7 @@ class CatalogoControlador {
     }
 
     public function categoriasCrear() {
+        requierePermiso('ver_categorias');
         $categoriaModel = new Categoria();
         $error  = null;
         $esEditar = false;
@@ -110,6 +115,7 @@ class CatalogoControlador {
     }
 
     public function categoriasEditar() {
+        requierePermiso('ver_categorias');
         $categoriaModel = new Categoria();
         $error  = null;
         $esEditar = true;
@@ -141,6 +147,7 @@ class CatalogoControlador {
 
     // ── INDUSTRIAS ────────────────────────────────────────────────
     public function industrias() {
+        requierePermiso('ver_industrias');
         $industriaModel = new Industria();
         $mensaje = isset($_GET['msg']) ? trim($_GET['msg']) : null;
 
@@ -156,6 +163,7 @@ class CatalogoControlador {
     }
 
     public function industriasCrear() {
+        requierePermiso('ver_industrias');
         $industriaModel = new Industria();
         $error  = null;
         $esEditar = false;
@@ -177,6 +185,7 @@ class CatalogoControlador {
     }
 
     public function industriasEditar() {
+        requierePermiso('ver_industrias');
         $industriaModel = new Industria();
         $error  = null;
         $esEditar = true;

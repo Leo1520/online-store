@@ -5,6 +5,7 @@ require_once __DIR__ . '/../../modelos/MovimientoStock.php';
 class DashboardControlador {
 
     public function inicio() {
+        requierePermiso('ver_dashboard');
         $db       = \Database::conectar();
         $usuario  = $_SESSION['usuario'] ?? '';
 
@@ -55,6 +56,7 @@ class DashboardControlador {
     }
 
     public function dashboard() {
+        requierePermiso('ver_dashboard');
         $db = \Database::conectar();
 
         $stmt = $db->prepare("CALL sp_resumen_dashboard()");

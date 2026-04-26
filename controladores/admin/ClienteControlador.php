@@ -6,6 +6,7 @@ class ClienteControlador {
     private $usuariosProtegidos = ['cliente_demo', 'admin'];
 
     public function clientes() {
+        requierePermiso('ver_clientes');
         $clienteModel = new Cliente();
         $mensaje      = isset($_GET['msg']) ? trim($_GET['msg']) : null;
 
@@ -28,6 +29,7 @@ class ClienteControlador {
     }
 
     public function clientesCrear() {
+        requierePermiso('ver_clientes');
         $clienteModel = new Cliente();
         $esEditar = false;
         $error    = null;
@@ -64,6 +66,7 @@ class ClienteControlador {
     }
 
     public function clientesEditar() {
+        requierePermiso('ver_clientes');
         $clienteModel = new Cliente();
         $esEditar = true;
         $error    = null;
