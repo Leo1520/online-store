@@ -475,7 +475,12 @@ $chatUsuario = htmlspecialchars($_SESSION['usuario'] ?? 'Anónimo', ENT_QUOTES);
                 break;
 
             case 'mensaje':
-                chAgregarMensaje(TODOS, { tipo: 'otro', de: msg.de, texto: msg.texto, hora: ahora() });
+                chAgregarMensaje(TODOS, {
+                    tipo:  msg.de === MI_USUARIO ? 'yo' : 'otro',
+                    de:    msg.de,
+                    texto: msg.texto,
+                    hora:  ahora()
+                }, msg.de !== MI_USUARIO);
                 break;
 
             case 'sistema':
@@ -524,10 +529,11 @@ $chatUsuario = htmlspecialchars($_SESSION['usuario'] ?? 'Anónimo', ENT_QUOTES);
             const esYo = entry.tipo === 'yo' || entry.de === MI_USUARIO;
             wrap.className = 'ch-bubble-wrap ' + (esYo ? 'me' : 'other');
 
-            if (!esYo && entry.de && chatActivo === TODOS) {
+            if (entry.de && chatActivo === TODOS) {
                 const name = document.createElement('div');
                 name.className = 'ch-sender-name';
-                name.textContent = entry.de;
+                name.textContent = esYo ? 'Tú' : entry.de;
+                name.style.textAlign = esYo ? 'right' : 'left';
                 wrap.appendChild(name);
             }
 
@@ -620,7 +626,7 @@ $chatUsuario = htmlspecialchars($_SESSION['usuario'] ?? 'Anónimo', ENT_QUOTES);
 
         if (chatActivo === TODOS) {
             ws.send(txt);
-            chAgregarMensaje(TODOS, { tipo: 'yo', texto: txt, hora: ahora() }, false);
+            // El servidor hace eco del mensaje → lo recibimos en case 'mensaje' como tipo 'yo'
         } else {
             ws.send('@' + chatActivo + ': ' + txt);
             // privado_enviado lo maneja onmessage
