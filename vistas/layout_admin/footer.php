@@ -48,5 +48,6 @@ function confirmAction(title, msg, onConfirm) {
 }
 </script>
 
+<?php require_once __DIR__ . '/chat_widget.php'; ?>
 </body>
 </html>
