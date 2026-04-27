@@ -397,7 +397,7 @@ $chatUsuario = htmlspecialchars($_SESSION['usuario'] ?? 'Anónimo', ENT_QUOTES);
 (function () {
     /* ── Constantes ── */
     const MI_USUARIO  = <?php echo json_encode($chatUsuario); ?>;
-    const WS_URL      = 'ws://localhost:2346';
+    const WS_URL      = 'ws://' + window.location.hostname + ':2346';
     const TODOS       = '★ Todos';
 
     /* ── Estado ── */
