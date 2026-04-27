@@ -12,8 +12,30 @@ $ws        = new Worker('websocket://0.0.0.0:2346');
 $ws->count = 1;
 $ws->name  = 'ChatElectroHogar';
 
-// Almacena nombres de conexión por ID (evita dynamic properties en PHP 8.2+)
+// Nombres de conexión por ID (evita dynamic properties en PHP 8.2+)
 $nombres = [];
+
+// Conexión a la base de datos
+$db = null;
+
+/* ── DB helpers ─────────────────────────────────────────────── */
+function dbConectar(): ?mysqli {
+    $conn = new mysqli('localhost', 'root', '', 'mydb');
+    if ($conn->connect_error) return null;
+    $conn->set_charset('utf8mb4');
+    return $conn;
+}
+
+function dbGuardar(string $tipo, string $de, ?string $para, string $texto): void {
+    global $db;
+    if ($db === null || !$db->ping()) $db = dbConectar();
+    if (!$db) return;
+    $stmt = $db->prepare("INSERT INTO chat_mensajes (tipo, de, para, texto) VALUES (?, ?, ?, ?)");
+    if (!$stmt) return;
+    $stmt->bind_param('ssss', $tipo, $de, $para, $texto);
+    $stmt->execute();
+    $stmt->close();
+}
 
 /* ── Conexión nueva ─────────────────────────────────────────── */
 $ws->onConnect = function ($conn) use (&$nombres) {
@@ -42,23 +64,28 @@ $ws->onMessage = function ($conn, $data) use ($ws, &$nombres) {
     if (str_starts_with($data, '@')) {
         $sep = strpos($data, ':');
         if ($sep > 1) {
-            $dest   = trim(substr($data, 1, $sep - 1));
-            $txt    = trim(substr($data, $sep + 1));
+            $dest     = trim(substr($data, 1, $sep - 1));
+            $txt      = trim(substr($data, $sep + 1));
             $miNombre = $nombres[$conn->id];
-            $ok     = _privado($ws, $nombres, $dest, $miNombre, $txt);
+            $ok       = _privado($ws, $nombres, $dest, $miNombre, $txt);
             if ($ok) {
                 $conn->send(_encode(['tipo' => 'privado_enviado', 'para' => $dest, 'texto' => $txt]));
+                dbGuardar('privado', $miNombre, $dest, $txt);
             } else {
                 $conn->send(_sistema("'$dest' no está conectado."));
             }
         } else {
-            _broadcast($ws, _mensaje($nombres[$conn->id], $data));
+            $miNombre = $nombres[$conn->id];
+            _broadcast($ws, _mensaje($miNombre, $data));
+            dbGuardar('mensaje', $miNombre, null, $data);
         }
         return;
     }
 
     /* Broadcast */
-    _broadcast($ws, _mensaje($nombres[$conn->id], $data));
+    $miNombre = $nombres[$conn->id];
+    _broadcast($ws, _mensaje($miNombre, $data));
+    dbGuardar('mensaje', $miNombre, null, $data);
 };
 
 /* ── Desconexión ────────────────────────────────────────────── */

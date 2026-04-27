@@ -401,13 +401,14 @@ $chatUsuario = htmlspecialchars($_SESSION['usuario'] ?? 'Anónimo', ENT_QUOTES);
     const TODOS       = '★ Todos';
 
     /* ── Estado ── */
-    let ws          = null;
-    let conectado   = false;
-    let chatActivo  = TODOS;
-    let historiales = {};   // { chat: [{tipo,de,texto,hora}] }
-    let noLeidos    = {};   // { chat: number }
-    let contactos   = [];   // ['★ Todos', 'usuario1', ...]
-    let abierto     = false;
+    let ws             = null;
+    let conectado      = false;
+    let chatActivo     = TODOS;
+    let historiales    = {};   // { chat: [{tipo,de,texto,hora}] }
+    let noLeidos       = {};   // { chat: number }
+    let contactos      = [];   // ['★ Todos', 'usuario1', ...]
+    let abierto        = false;
+    let histCargado    = {};   // { chat: bool } — evita recargar si ya se cargó
 
     historiales[TODOS] = [];
     noLeidos[TODOS]    = 0;
@@ -422,6 +423,8 @@ $chatUsuario = htmlspecialchars($_SESSION['usuario'] ?? 'Anónimo', ENT_QUOTES);
             noLeidos[chatActivo] = 0;
             chRenderContactos();
             actualizarBadgeGlobal();
+            // Cargar historial de Todos al abrir por primera vez
+            if (!histCargado[TODOS]) chFetchHistorial(TODOS);
         }
     };
 
@@ -582,7 +585,33 @@ $chatUsuario = htmlspecialchars($_SESSION['usuario'] ?? 'Anónimo', ENT_QUOTES);
         document.getElementById('chMessages').style.display = 'flex';
         document.getElementById('chInputWrap').style.display = 'flex';
 
-        chCargarHistorial();
+        if (!histCargado[chat]) {
+            chFetchHistorial(chat);
+        } else {
+            chCargarHistorial();
+        }
+    }
+
+    /* ── Fetch historial desde BD ── */
+    function chFetchHistorial(chat) {
+        const canal = chat === TODOS ? 'todos' : chat;
+        const area  = document.getElementById('chMessages');
+        area.innerHTML = '<div class="ch-system-msg" style="margin:auto;">Cargando historial...</div>';
+
+        fetch(`/admin/chat_historial.php?chat=${encodeURIComponent(canal)}`)
+            .then(r => r.json())
+            .then(mensajes => {
+                if (!historiales[chat]) historiales[chat] = [];
+                // Prepend: historial BD + mensajes de sesión actuales
+                const sesion = historiales[chat];
+                historiales[chat] = mensajes.concat(sesion);
+                histCargado[chat] = true;
+                chCargarHistorial();
+            })
+            .catch(() => {
+                histCargado[chat] = true;
+                chCargarHistorial();
+            });
     }
 
     /* ── Renderizar lista de contactos ── */
