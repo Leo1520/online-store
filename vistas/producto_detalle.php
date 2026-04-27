@@ -13,10 +13,10 @@
         <div class="col-md-5 text-center">
             <div class="bg-white border rounded d-flex align-items-center justify-content-center"
                  style="height:350px;overflow:hidden;">
-                <img src="<?php echo !empty($producto['imagen']) ? 'recursos/imagenes/' . htmlspecialchars($producto['imagen']) : 'ups.png'; ?>"
+                <img src="<?php echo !empty($producto['imagen']) ? 'recursos/imagenes/' . htmlspecialchars($producto['imagen']) : 'recursos/imagenes/ups.png'; ?>"
                      alt="<?php echo htmlspecialchars($producto['nombre']); ?>"
                      class="img-fluid" style="max-height:340px;object-fit:contain;"
-                     onerror="this.onerror=null;this.src='ups.png';">
+                     onerror="this.onerror=null;this.src='recursos/imagenes/ups.png';">
             </div>
         </div>
 

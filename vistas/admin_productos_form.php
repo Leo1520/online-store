@@ -222,9 +222,9 @@
                 <div class="card-body">
                     <div id="imgPreviewBox" class="text-center mb-3 <?php echo $esEditar ? '' : 'd-none'; ?>">
                         <img id="imgPreview"
-                             src="<?php echo $esEditar ? (!empty($producto['imagen']) ? '/recursos/imagenes/' . htmlspecialchars($producto['imagen']) : '/ups.png') : ''; ?>"
+                             src="<?php echo $esEditar ? (!empty($producto['imagen']) ? '/recursos/imagenes/' . htmlspecialchars($producto['imagen']) : '/recursos/imagenes/ups.png') : ''; ?>"
                              class="img-fluid rounded" style="max-height:180px;object-fit:contain;"
-                             onerror="this.onerror=null;this.src='/ups.png';">
+                             onerror="this.onerror=null;this.src='/recursos/imagenes/ups.png';">
                     </div>
                     <input type="file" name="imagen_file" id="imagenFile" class="form-control form-control-sm mb-2"
                            accept="image/*" onchange="previsualizarImagen(this)">

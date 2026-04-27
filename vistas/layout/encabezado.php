@@ -896,14 +896,14 @@ document.addEventListener('DOMContentLoaded', function () {
 
                     var html = '';
                     productos.forEach(function(p) {
-                        var img = p.imagen ? 'recursos/imagenes/' + p.imagen : 'ups.png';
+                        var img = p.imagen ? 'recursos/imagenes/' + p.imagen : 'recursos/imagenes/ups.png';
                         var pv_ = parseFloat(p.precioVigente) || 0;
                         var pp_ = parseFloat(p.precioPropuesto) || 0;
                         var precio = (pp_ > 0 && pv_ < pp_)
                             ? '<span style="color:#dc3545;font-weight:700;">Bs. ' + pv_.toFixed(2) + '</span> <span style="text-decoration:line-through;color:#aaa;font-size:11px;">Bs. ' + pp_.toFixed(2) + '</span>'
                             : 'Bs. ' + pv_.toFixed(2);
                         html += '<a class="sd-item" href="index.php?pagina=producto&id=' + p.id_producto + '" onclick="cerrarDropdown()">'
-                            + '<img src="' + img + '" alt="' + p.nombre + '" onerror="this.onerror=null;this.src=\'ups.png\'">'
+                            + '<img src="' + img + '" alt="' + p.nombre + '" onerror="this.onerror=null;this.src=\'recursos/imagenes/ups.png\'">'
                             + '<div class="sd-item-info">'
                             +   '<div class="nombre">' + p.nombre + '</div>'
                             +   '<div class="precio">' + precio + '</div>'
@@ -1027,9 +1027,9 @@ function renderMegaProductos(id, nombre, productos) {
     } else {
         html += '<div class="mega-productos-grid">';
         activos.forEach(function(p) {
-            var img = p.imagen ? 'recursos/imagenes/' + p.imagen : 'ups.png';
+            var img = p.imagen ? 'recursos/imagenes/' + p.imagen : 'recursos/imagenes/ups.png';
             html += '<a class="mega-prod-card" href="index.php?pagina=producto&id=' + p.id_producto + '" onclick="cerrarMega();">'
-                + '<img src="' + img + '" alt="' + p.nombre + '" onerror="this.onerror=null;this.src=\'ups.png\'">'
+                + '<img src="' + img + '" alt="' + p.nombre + '" onerror="this.onerror=null;this.src=\'recursos/imagenes/ups.png\'">'
                 + '<div class="mp-nombre">' + p.nombre + '</div>'
                 + '<div class="mp-precio">Bs. ' + (parseFloat(p.precioVigente)||0).toFixed(2) + '</div>'
                 + '</a>';
@@ -1080,11 +1080,11 @@ function renderCarritoDrawer(d) {
     d.items.forEach(function(item) {
         var img = item.imagen
             ? 'recursos/imagenes/' + item.imagen
-            : 'ups.png';
+            : 'recursos/imagenes/ups.png';
         var precio   = parseFloat(item.precioVigente).toFixed(2);
         var subtotal = parseFloat(item.subtotal).toFixed(2);
         html += '<div class="carrito-item" id="citem-' + item.id_producto + '">'
-            + '<img src="' + img + '" alt="' + item.nombre + '" onerror="this.onerror=null;this.src=\'ups.png\'">'
+            + '<img src="' + img + '" alt="' + item.nombre + '" onerror="this.onerror=null;this.src=\'recursos/imagenes/ups.png\'">'
             + '<div class="carrito-item-info">'
             +   '<div class="nombre">' + item.nombre + '</div>'
             +   '<div class="precio">Bs. ' + precio + ' c/u</div>'

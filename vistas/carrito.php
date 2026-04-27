@@ -39,11 +39,11 @@
             '</tr></thead><tbody>';
 
         data.items.forEach(function (item) {
-            var imgSrc = item.imagen ? 'recursos/imagenes/' + item.imagen : 'ups.png';
+            var imgSrc = item.imagen ? 'recursos/imagenes/' + item.imagen : 'recursos/imagenes/ups.png';
             html += '<tr id="fila-' + item.id_producto + '">' +
                 '<td>' +
                     '<div class="d-flex align-items-center gap-2">' +
-                    '<img src="' + imgSrc + '" onerror="this.onerror=null;this.src=\'ups.png\';" ' +
+                    '<img src="' + imgSrc + '" onerror="this.onerror=null;this.src=\'recursos/imagenes/ups.png\';" ' +
                          'style="width:48px;height:48px;object-fit:contain;background:#f8f9fa;border-radius:6px;flex-shrink:0;">' +
                     '<a href="index.php?pagina=producto&id=' + item.id_producto + '" class="text-dark font-weight-bold">' +
                     escHtml(item.nombre) + '</a>' +
