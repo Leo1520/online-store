@@ -258,7 +258,7 @@ function moduloActivo(array $paginas): string {
 }
 
 function aUrl($page, $extra = '') {
-    return '/admin/index.php?page=' . $page . ($extra ? '&' . $extra : '');
+    return 'index.php?page=' . $page . ($extra ? '&' . $extra : '');
 }
 
 $pCatalogo = ['productos','productos_crear','productos_editar','categorias','categorias_crear','categorias_editar','marcas','marcas_crear','marcas_editar','industrias','industrias_crear','industrias_editar','sucursales'];
@@ -272,7 +272,7 @@ $pAdmin    = ['roles','permisos','usuarios_internos'];
 
     <!-- Brand -->
     <div class="sidebar-brand">
-        <a href="/admin/index.php?page=inicio" class="text-white text-decoration-none fw-bold fs-5 d-flex align-items-center gap-2">
+        <a href="index.php?page=inicio" class="text-white text-decoration-none fw-bold fs-5 d-flex align-items-center gap-2">
             <i class="bi bi-lightning-charge-fill text-warning flex-shrink-0"></i>
             <span class="brand-text sidebar-label">Electro<span style="color:var(--accent)">Hogar</span></span>
         </a>
@@ -438,7 +438,7 @@ $pAdmin    = ['roles','permisos','usuarios_internos'];
 
     <!-- Cerrar sesión -->
     <div class="logout-wrap px-3 pb-3">
-        <a href="/admin/logout.php" class="btn btn-sm btn-outline-light w-100 d-flex align-items-center justify-content-center gap-1">
+        <a href="logout.php" class="btn btn-sm btn-outline-light w-100 d-flex align-items-center justify-content-center gap-1">
             <i class="bi bi-box-arrow-right"></i>
             <span class="logout-text sidebar-label">Cerrar Sesión</span>
         </a>
@@ -459,7 +459,7 @@ $pAdmin    = ['roles','permisos','usuarios_internos'];
 
         <nav aria-label="breadcrumb" class="d-none d-md-block ms-3 flex-grow-1">
             <ol class="breadcrumb mb-0 small">
-                <li class="breadcrumb-item"><a href="/admin/index.php">Admin</a></li>
+                <li class="breadcrumb-item"><a href="index.php">Admin</a></li>
                 <li class="breadcrumb-item active"><?php echo htmlspecialchars($titulo ?? ''); ?></li>
             </ol>
         </nav>
@@ -469,7 +469,7 @@ $pAdmin    = ['roles','permisos','usuarios_internos'];
                 <i class="bi bi-person-circle me-1"></i>
                 <?php echo htmlspecialchars($_SESSION['usuario'] ?? 'Administrador'); ?>
             </span>
-            <a href="/index.php?pagina=inicio" class="btn btn-sm btn-outline-primary" target="_blank">
+            <a href="../index.php?pagina=inicio" class="btn btn-sm btn-outline-primary" target="_blank">
                 <i class="bi bi-shop me-1"></i><span class="d-none d-sm-inline">Ver tienda</span>
             </a>
         </div>
@@ -485,7 +485,7 @@ $pAdmin    = ['roles','permisos','usuarios_internos'];
     </div>
     <?php endif; ?>
 
-    <script src="/recursos/js/validacion.js"></script>
+    <script src="../recursos/js/validacion.js"></script>
     <div class="p-4">
 
 <script>

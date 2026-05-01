@@ -20,7 +20,7 @@ function tieneAlgunPermiso(array $permisos): bool {
 
 function requierePermiso(string $permiso): void {
     if (!tienePermiso($permiso)) {
-        header('Location: /admin/index.php?page=inicio&msg=' . urlencode('No tienes permiso para acceder a esa sección.'));
+        header('Location: index.php?page=inicio&msg=' . urlencode('No tienes permiso para acceder a esa sección.'));
         exit();
     }
 }
