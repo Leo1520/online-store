@@ -16,19 +16,23 @@ require_once __DIR__ . '/../config/database.php';
 
 $yo     = $_SESSION['usuario'];
 $chat   = trim($_GET['chat'] ?? 'todos');
+$canal  = trim($_GET['canal'] ?? 'internos');
+if (!in_array($canal, ['internos', 'clientes'])) $canal = 'internos';
 $offset = max(0, (int)($_GET['offset'] ?? 0));
 $limite = 50;
 
 $db = Database::conectar();
+// Migración automática
+$db->query("ALTER TABLE chat_mensajes ADD COLUMN IF NOT EXISTS canal VARCHAR(20) NOT NULL DEFAULT 'internos'");
 
 if ($chat === 'todos') {
     $sql  = "SELECT tipo, de, para, texto, creado_en
              FROM chat_mensajes
-             WHERE tipo = 'mensaje'
+             WHERE tipo = 'mensaje' AND canal = ?
              ORDER BY creado_en DESC
              LIMIT ? OFFSET ?";
     $stmt = $db->prepare($sql);
-    $stmt->bind_param('ii', $limite, $offset);
+    $stmt->bind_param('sii', $canal, $limite, $offset);
 } else {
     $sql  = "SELECT tipo, de, para, texto, creado_en
              FROM chat_mensajes

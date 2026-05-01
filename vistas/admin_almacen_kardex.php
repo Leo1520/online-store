@@ -113,7 +113,7 @@
 </div>
 
 <script>
-const API = '/api/almacen.php';
+const API = '../api/almacen.php';
 
 function cargarKardex() {
     const prod  = document.getElementById('kProd').value;

@@ -63,5 +63,9 @@
     </footer>
 
     <script src="recursos/js/validacion.js"></script>
+
+<?php if (isset($_SESSION['usuario']) && empty($_SESSION['es_admin'])): ?>
+<?php include __DIR__ . '/chat_widget_cliente.php'; ?>
+<?php endif; ?>
 </body>
 </html>

@@ -65,7 +65,7 @@
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center" style="background:#1B3A6B;">
                 <h6 class="mb-0 text-white"><i class="bi bi-receipt me-2"></i>Últimas Ventas</h6>
-                <a href="/admin/index.php?page=ventas" class="btn btn-sm btn-outline-light" style="font-size:11px;">Ver todas</a>
+                <a href="index.php?page=ventas" class="btn btn-sm btn-outline-light" style="font-size:11px;">Ver todas</a>
             </div>
             <div class="card-body p-0">
                 <table class="table table-sm mb-0" style="font-size:13px;">
@@ -122,7 +122,7 @@
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center" style="background:#dc3545;">
                 <h6 class="mb-0 text-white"><i class="bi bi-exclamation-triangle me-2"></i>Stock Crítico</h6>
-                <a href="/admin/index.php?page=almacen" class="btn btn-sm btn-outline-light" style="font-size:11px;">Ver almacén</a>
+                <a href="index.php?page=almacen" class="btn btn-sm btn-outline-light" style="font-size:11px;">Ver almacén</a>
             </div>
             <div class="card-body p-0">
                 <?php if (empty($stockCritico)): ?>

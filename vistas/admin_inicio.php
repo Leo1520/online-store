@@ -250,84 +250,84 @@
 <div class="sec-titulo"><i class="bi bi-grid me-2"></i>Acceso rápido</div>
 <div class="row g-3">
     <div class="col-6 col-md-4 col-xl-2">
-        <a href="/admin/index.php?page=productos" class="modulo-card">
+        <a href="index.php?page=productos" class="modulo-card">
             <div class="modulo-card-ico ico-blue"><i class="bi bi-box-seam"></i></div>
             <div class="modulo-card-titulo">Productos</div>
             <div class="modulo-card-desc">Catálogo completo</div>
         </a>
     </div>
     <div class="col-6 col-md-4 col-xl-2">
-        <a href="/admin/index.php?page=pedidos" class="modulo-card">
+        <a href="index.php?page=pedidos" class="modulo-card">
             <div class="modulo-card-ico ico-yellow"><i class="bi bi-clock-history"></i></div>
             <div class="modulo-card-titulo">Pedidos</div>
             <div class="modulo-card-desc">Órdenes activas</div>
         </a>
     </div>
     <div class="col-6 col-md-4 col-xl-2">
-        <a href="/admin/index.php?page=ventas" class="modulo-card">
+        <a href="index.php?page=ventas" class="modulo-card">
             <div class="modulo-card-ico ico-green"><i class="bi bi-receipt"></i></div>
             <div class="modulo-card-titulo">Ventas</div>
             <div class="modulo-card-desc">Historial de ventas</div>
         </a>
     </div>
     <div class="col-6 col-md-4 col-xl-2">
-        <a href="/admin/index.php?page=clientes" class="modulo-card">
+        <a href="index.php?page=clientes" class="modulo-card">
             <div class="modulo-card-ico ico-purple"><i class="bi bi-people"></i></div>
             <div class="modulo-card-titulo">Clientes</div>
             <div class="modulo-card-desc">Gestión de cuentas</div>
         </a>
     </div>
     <div class="col-6 col-md-4 col-xl-2">
-        <a href="/admin/index.php?page=almacen" class="modulo-card">
+        <a href="index.php?page=almacen" class="modulo-card">
             <div class="modulo-card-ico ico-teal"><i class="bi bi-archive"></i></div>
             <div class="modulo-card-titulo">Stock</div>
             <div class="modulo-card-desc">Inventario actual</div>
         </a>
     </div>
     <div class="col-6 col-md-4 col-xl-2">
-        <a href="/admin/index.php?page=almacen_critico" class="modulo-card">
+        <a href="index.php?page=almacen_critico" class="modulo-card">
             <div class="modulo-card-ico ico-red"><i class="bi bi-exclamation-diamond"></i></div>
             <div class="modulo-card-titulo">Stock Crítico</div>
             <div class="modulo-card-desc">Productos agotados</div>
         </a>
     </div>
     <div class="col-6 col-md-4 col-xl-2">
-        <a href="/admin/index.php?page=vendedores" class="modulo-card">
+        <a href="index.php?page=vendedores" class="modulo-card">
             <div class="modulo-card-ico" style="background:#fff3e0;color:#e65100;"><i class="bi bi-person-badge"></i></div>
             <div class="modulo-card-titulo">Vendedores</div>
             <div class="modulo-card-desc">Gestión de staff</div>
         </a>
     </div>
     <div class="col-6 col-md-4 col-xl-2">
-        <a href="/admin/index.php?page=categorias" class="modulo-card">
+        <a href="index.php?page=categorias" class="modulo-card">
             <div class="modulo-card-ico" style="background:#e8f5e9;color:#1b5e20;"><i class="bi bi-tag"></i></div>
             <div class="modulo-card-titulo">Categorías</div>
             <div class="modulo-card-desc">Organización</div>
         </a>
     </div>
     <div class="col-6 col-md-4 col-xl-2">
-        <a href="/admin/index.php?page=marcas" class="modulo-card">
+        <a href="index.php?page=marcas" class="modulo-card">
             <div class="modulo-card-ico" style="background:#ede9fe;color:#5b21b6;"><i class="bi bi-patch-check"></i></div>
             <div class="modulo-card-titulo">Marcas</div>
             <div class="modulo-card-desc">Catálogo de marcas</div>
         </a>
     </div>
     <div class="col-6 col-md-4 col-xl-2">
-        <a href="/admin/index.php?page=almacen_traspasos" class="modulo-card">
+        <a href="index.php?page=almacen_traspasos" class="modulo-card">
             <div class="modulo-card-ico" style="background:#e0f2fe;color:#0369a1;"><i class="bi bi-arrow-left-right"></i></div>
             <div class="modulo-card-titulo">Traspasos</div>
             <div class="modulo-card-desc">Entre sucursales</div>
         </a>
     </div>
     <div class="col-6 col-md-4 col-xl-2">
-        <a href="/admin/index.php?page=sucursales" class="modulo-card">
+        <a href="index.php?page=sucursales" class="modulo-card">
             <div class="modulo-card-ico" style="background:#fce7f3;color:#9d174d;"><i class="bi bi-shop"></i></div>
             <div class="modulo-card-titulo">Sucursales</div>
             <div class="modulo-card-desc">Puntos de venta</div>
         </a>
     </div>
     <div class="col-6 col-md-4 col-xl-2">
-        <a href="/admin/index.php?page=dashboard" class="modulo-card">
+        <a href="index.php?page=dashboard" class="modulo-card">
             <div class="modulo-card-ico" style="background:#e8f0fe;color:#1B3A6B;"><i class="bi bi-speedometer2"></i></div>
             <div class="modulo-card-titulo">Dashboard</div>
             <div class="modulo-card-desc">Análisis completo</div>

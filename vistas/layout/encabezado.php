@@ -494,7 +494,7 @@
                         <i class="bi bi-gear-fill mr-1"></i>Administración
                     </a>
                     <div class="dropdown-menu" aria-labelledby="adminMenu">
-                        <a class="dropdown-item font-weight-bold" href="/admin/index.php" style="color:#1B3A6B;">
+                        <a class="dropdown-item font-weight-bold" href="admin/index.php" style="color:#1B3A6B;">
                             <i class="bi bi-speedometer2 mr-2 text-warning"></i>Ir al Panel Admin
                         </a>
                     </div>

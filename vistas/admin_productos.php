@@ -9,7 +9,7 @@
         <small class="text-muted"><?php echo count($productos); ?> productos registrados</small>
     </div>
     <?php if (tienePermiso('crear_productos')): ?>
-    <a href="/admin/index.php?page=productos_crear" class="btn fw-semibold text-white"
+    <a href="index.php?page=productos_crear" class="btn fw-semibold text-white"
        style="background:var(--accent);color:#333!important;">
         <i class="bi bi-plus-lg me-1"></i>Nuevo Producto
     </a>
@@ -19,7 +19,7 @@
 <!-- Filtros -->
 <div class="card mb-4">
     <div class="card-body py-3">
-        <form method="GET" action="/admin/index.php" class="row g-2 align-items-end">
+        <form method="GET" action="index.php" class="row g-2 align-items-end">
             <input type="hidden" name="page" value="productos">
             <div class="col-md-4">
                 <input type="text" name="q" class="form-control form-control-sm"
@@ -103,7 +103,7 @@ if (!empty($_GET['stock_bajo'])) {
                             <td colspan="10" class="text-center text-muted py-5">
                                 <i class="bi bi-box-seam d-block mb-2" style="font-size:2rem;"></i>
                                 No hay productos.
-                                <a href="/admin/index.php?page=productos_crear">Crear el primero</a>
+                                <a href="index.php?page=productos_crear">Crear el primero</a>
                             </td>
                         </tr>
                     <?php else: ?>
@@ -152,7 +152,7 @@ if (!empty($_GET['stock_bajo'])) {
                             </td>
                             <td class="text-end">
                                 <?php if (tienePermiso('editar_productos')): ?>
-                                <a href="/admin/index.php?page=productos_editar&id=<?php echo (int)$p['id_producto']; ?>"
+                                <a href="index.php?page=productos_editar&id=<?php echo (int)$p['id_producto']; ?>"
                                    class="btn btn-sm btn-outline-primary py-0 px-2 me-1"
                                    title="Editar">
                                     <i class="bi bi-pencil"></i>

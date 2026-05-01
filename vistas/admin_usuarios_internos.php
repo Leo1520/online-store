@@ -100,7 +100,7 @@
 <div class="modal fade" id="modalCrear" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content border-0" style="border-radius:14px;">
-            <form method="POST" action="/admin/index.php?page=usuarios_internos" id="formCrear">
+            <form method="POST" action="index.php?page=usuarios_internos" id="formCrear">
                 <input type="hidden" name="accion" value="crear">
                 <div class="modal-header border-0 px-4 pt-4 pb-2" style="background:var(--primary);border-radius:14px 14px 0 0;">
                     <h5 class="modal-title fw-bold text-white"><i class="bi bi-person-plus me-2"></i>Nuevo Usuario Interno</h5>
@@ -170,7 +170,7 @@
 <div class="modal fade" id="modalEditar" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content border-0" style="border-radius:14px;">
-            <form method="POST" action="/admin/index.php?page=usuarios_internos">
+            <form method="POST" action="index.php?page=usuarios_internos">
                 <input type="hidden" name="accion"      value="editar">
                 <input type="hidden" name="usuario"     id="editUsuario">
                 <input type="hidden" name="tipo_perfil" id="editTipoPerfil">

@@ -8,7 +8,7 @@
         <small class="text-muted"><?php echo count($roles); ?> roles registrados</small>
     </div>
     <div class="d-flex gap-2">
-        <a href="/admin/index.php?page=permisos" class="btn btn-sm btn-outline-primary">
+        <a href="index.php?page=permisos" class="btn btn-sm btn-outline-primary">
             <i class="bi bi-key me-1"></i>Gestionar Permisos
         </a>
         <button class="btn btn-sm fw-semibold text-white" style="background:var(--accent);"
@@ -112,7 +112,7 @@
                             </span>
                         </td>
                         <td class="text-end">
-                            <form method="POST" action="/admin/index.php?page=roles" class="d-inline-flex align-items-center gap-2">
+                            <form method="POST" action="index.php?page=roles" class="d-inline-flex align-items-center gap-2">
                                 <input type="hidden" name="accion"  value="cambiar_rol_cuenta">
                                 <input type="hidden" name="usuario" value="<?php echo htmlspecialchars($c['usuario']); ?>">
                                 <select name="rol" class="form-select form-select-sm" style="width:130px;">
@@ -140,7 +140,7 @@
 <div class="modal fade" id="modalCrearRol" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border-0" style="border-radius:14px;">
-            <form method="POST" action="/admin/index.php?page=roles">
+            <form method="POST" action="index.php?page=roles">
                 <input type="hidden" name="accion" value="crear_rol">
                 <div class="modal-header border-0 px-4 pt-4 pb-2">
                     <h5 class="modal-title fw-bold" style="color:var(--primary)"><i class="bi bi-plus-circle me-2"></i>Nuevo Rol</h5>
@@ -170,7 +170,7 @@
 <div class="modal fade" id="modalEditarRol" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border-0" style="border-radius:14px;">
-            <form method="POST" action="/admin/index.php?page=roles">
+            <form method="POST" action="index.php?page=roles">
                 <input type="hidden" name="accion" value="editar_rol">
                 <input type="hidden" name="cod"    id="editCod">
                 <div class="modal-header border-0 px-4 pt-4 pb-2">
@@ -200,7 +200,7 @@
 <div class="modal fade" id="modalPermisos" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content border-0" style="border-radius:14px;">
-            <form method="POST" action="/admin/index.php?page=roles" id="formPermisos">
+            <form method="POST" action="index.php?page=roles" id="formPermisos">
                 <input type="hidden" name="accion"  value="asignar_permisos">
                 <input type="hidden" name="codRol"  id="permisosCodRol">
                 <div class="modal-header border-0 px-4 pt-4 pb-2" style="background:var(--primary);border-radius:14px 14px 0 0;">

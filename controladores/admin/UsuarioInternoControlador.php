@@ -8,7 +8,7 @@ class UsuarioInternoControlador {
 
     public function usuariosInternos(): void {
         if (!tieneAlgunPermiso(['gestionar_usuarios', 'ver_usuarios'])) {
-            header('Location: /admin/index.php?page=inicio&msg=' . urlencode('No tienes permiso para acceder a esa sección.'));
+            header('Location: index.php?page=inicio&msg=' . urlencode('No tienes permiso para acceder a esa sección.'));
             exit();
         }
         $empModelo = new Empleado();
@@ -22,7 +22,7 @@ class UsuarioInternoControlador {
             if ($accion === 'crear') {
                 $result = $this->procesarCrear($empModelo, $venModelo);
                 if ($result === true) {
-                    header('Location: /admin/index.php?page=usuarios_internos&msg=' . urlencode('Usuario creado correctamente.'));
+                    header('Location: index.php?page=usuarios_internos&msg=' . urlencode('Usuario creado correctamente.'));
                     exit();
                 }
                 $error = $result;
@@ -31,7 +31,7 @@ class UsuarioInternoControlador {
             if ($accion === 'editar') {
                 $result = $this->procesarEditar($empModelo, $venModelo);
                 if ($result === true) {
-                    header('Location: /admin/index.php?page=usuarios_internos&msg=' . urlencode('Usuario actualizado correctamente.'));
+                    header('Location: index.php?page=usuarios_internos&msg=' . urlencode('Usuario actualizado correctamente.'));
                     exit();
                 }
                 $error = $result;
@@ -43,7 +43,7 @@ class UsuarioInternoControlador {
             if ($usuario !== '') {
                 $res = $empModelo->eliminar($usuario);
                 $msg = $res['ok'] ? 'Usuario eliminado.' : ($res['msg'] ?? 'No se pudo eliminar.');
-                header('Location: /admin/index.php?page=usuarios_internos&msg=' . urlencode($msg));
+                header('Location: index.php?page=usuarios_internos&msg=' . urlencode($msg));
                 exit();
             }
         }

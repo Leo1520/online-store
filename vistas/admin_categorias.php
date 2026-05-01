@@ -7,7 +7,7 @@
         </h4>
         <small class="text-muted"><?php echo count($categorias); ?> categorías registradas</small>
     </div>
-    <a href="/admin/index.php?page=categorias_crear" class="btn fw-semibold text-white"
+    <a href="index.php?page=categorias_crear" class="btn fw-semibold text-white"
        style="background:var(--accent);">
         <i class="bi bi-plus-lg me-1"></i>Nueva Categoría
     </a>
@@ -29,7 +29,7 @@
                         <tr>
                             <td colspan="3" class="text-center text-muted py-5">
                                 <i class="bi bi-tag d-block mb-2" style="font-size:2rem;"></i>
-                                No hay categorías. <a href="/admin/index.php?page=categorias_crear">Crear la primera</a>
+                                No hay categorías. <a href="index.php?page=categorias_crear">Crear la primera</a>
                             </td>
                         </tr>
                     <?php else: ?>
@@ -38,7 +38,7 @@
                             <td class="text-muted"><?php echo (int)$item['cod']; ?></td>
                             <td class="fw-semibold"><?php echo htmlspecialchars($item['nombre']); ?></td>
                             <td class="text-end">
-                                <a href="/admin/index.php?page=categorias_editar&id=<?php echo (int)$item['cod']; ?>"
+                                <a href="index.php?page=categorias_editar&id=<?php echo (int)$item['cod']; ?>"
                                    class="btn btn-sm btn-outline-primary py-0 px-2 me-1" title="Editar">
                                     <i class="bi bi-pencil"></i>
                                 </a>

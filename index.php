@@ -83,17 +83,17 @@ switch ($pagina) {
         (new ProductoControlador())->detalle();
         break;
     case 'admin_catalogos':
-        header('Location: /admin/index.php?page=categorias'); exit();
+        header('Location: admin/index.php?page=categorias'); exit();
     case 'admin_sucursales':
-        header('Location: /admin/index.php?page=sucursales'); exit();
+        header('Location: admin/index.php?page=sucursales'); exit();
     case 'admin_clientes':
-        header('Location: /admin/index.php?page=clientes'); exit();
+        header('Location: admin/index.php?page=clientes'); exit();
     case 'admin_productos':
-        header('Location: /admin/index.php?page=productos'); exit();
+        header('Location: admin/index.php?page=productos'); exit();
     case 'admin_ventas':
-        header('Location: /admin/index.php?page=ventas'); exit();
+        header('Location: admin/index.php?page=ventas'); exit();
     case 'admin_vendedores':
-        header('Location: /admin/index.php?page=vendedores'); exit();
+        header('Location: admin/index.php?page=vendedores'); exit();
     case 'admin_almacen':
-        header('Location: /admin/index.php?page=almacen'); exit();
+        header('Location: admin/index.php?page=almacen'); exit();
 }

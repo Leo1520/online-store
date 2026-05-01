@@ -8,7 +8,7 @@
         <small class="text-muted"><?php echo count($permisos); ?> permisos registrados</small>
     </div>
     <div class="d-flex gap-2">
-        <a href="/admin/index.php?page=roles" class="btn btn-sm btn-outline-secondary">
+        <a href="index.php?page=roles" class="btn btn-sm btn-outline-secondary">
             <i class="bi bi-arrow-left me-1"></i>Volver a Roles
         </a>
         <button class="btn btn-sm fw-semibold text-white" style="background:var(--accent);"
@@ -95,7 +95,7 @@ ksort($grupos);
 <div class="modal fade" id="modalCrearPermiso" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border-0" style="border-radius:14px;">
-            <form method="POST" action="/admin/index.php?page=permisos">
+            <form method="POST" action="index.php?page=permisos">
                 <input type="hidden" name="accion" value="crear_permiso">
                 <div class="modal-header border-0 px-4 pt-4 pb-2">
                     <h5 class="modal-title fw-bold" style="color:var(--primary)"><i class="bi bi-plus-circle me-2"></i>Nuevo Permiso</h5>
@@ -129,7 +129,7 @@ ksort($grupos);
 <div class="modal fade" id="modalEditarPermiso" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border-0" style="border-radius:14px;">
-            <form method="POST" action="/admin/index.php?page=permisos">
+            <form method="POST" action="index.php?page=permisos">
                 <input type="hidden" name="accion" value="editar_permiso">
                 <input type="hidden" name="cod"    id="editCod">
                 <div class="modal-header border-0 px-4 pt-4 pb-2">

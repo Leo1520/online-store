@@ -7,7 +7,7 @@
         </h4>
         <small class="text-muted"><?php echo count($clientes); ?> clientes registrados</small>
     </div>
-    <a href="/admin/index.php?page=clientes_crear" class="btn fw-semibold text-white"
+    <a href="index.php?page=clientes_crear" class="btn fw-semibold text-white"
        style="background:var(--accent);">
         <i class="bi bi-plus-lg me-1"></i>Nuevo Cliente
     </a>
@@ -32,7 +32,7 @@
                         <tr>
                             <td colspan="6" class="text-center text-muted py-5">
                                 <i class="bi bi-people d-block mb-2" style="font-size:2rem;"></i>
-                                No hay clientes. <a href="/admin/index.php?page=clientes_crear">Registrar el primero</a>
+                                No hay clientes. <a href="index.php?page=clientes_crear">Registrar el primero</a>
                             </td>
                         </tr>
                     <?php else: ?>
@@ -46,7 +46,7 @@
                             <td><small><?php echo htmlspecialchars($c['nroCelular'] ?? '—'); ?></small></td>
                             <td><span class="badge bg-light text-dark border"><?php echo htmlspecialchars($c['usuarioCuenta']); ?></span></td>
                             <td class="text-end">
-                                <a href="/admin/index.php?page=clientes_editar&ci=<?php echo urlencode($c['ci']); ?>&usuario=<?php echo urlencode($c['usuarioCuenta']); ?>"
+                                <a href="index.php?page=clientes_editar&ci=<?php echo urlencode($c['ci']); ?>&usuario=<?php echo urlencode($c['usuarioCuenta']); ?>"
                                    class="btn btn-sm btn-outline-primary py-0 px-2 me-1" title="Editar">
                                     <i class="bi bi-pencil"></i>
                                 </a>

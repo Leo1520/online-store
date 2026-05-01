@@ -29,7 +29,7 @@ class SucursalControlador {
 
         if (isset($_GET['eliminar'])) {
             $sucursalModel->eliminar((int)$_GET['eliminar']);
-            header('Location: /admin/index.php?page=sucursales');
+            header('Location: index.php?page=sucursales');
             exit();
         }
 

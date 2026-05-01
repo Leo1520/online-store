@@ -7,7 +7,7 @@
             <?php echo $esEditar ? 'Editar Cliente' : 'Nuevo Cliente'; ?>
         </h4>
     </div>
-    <a href="/admin/index.php?page=clientes" class="btn btn-outline-secondary btn-sm">
+    <a href="index.php?page=clientes" class="btn btn-outline-secondary btn-sm">
         <i class="bi bi-arrow-left me-1"></i>Volver
     </a>
 </div>
@@ -28,7 +28,7 @@
             </div>
             <div class="card-body">
                 <form id="formCliente" method="POST"
-                      action="/admin/index.php?page=<?php echo $esEditar
+                      action="index.php?page=<?php echo $esEditar
                           ? 'clientes_editar&ci=' . urlencode($cliente['ci'] ?? '') . '&usuario=' . urlencode($cliente['usuarioCuenta'] ?? '')
                           : 'clientes_crear'; ?>">
                     <input type="hidden" name="accion" value="<?php echo $esEditar ? 'editar' : 'crear'; ?>">
@@ -136,7 +136,7 @@
                         <i class="bi bi-floppy me-2"></i>
                         <?php echo $esEditar ? 'Actualizar Cliente' : 'Guardar Cliente'; ?>
                     </button>
-                    <a href="/admin/index.php?page=clientes" class="btn btn-outline-secondary btn-sm">Cancelar</a>
+                    <a href="index.php?page=clientes" class="btn btn-outline-secondary btn-sm">Cancelar</a>
                 </div>
             </div>
         </div>

@@ -7,7 +7,7 @@
             <?php echo $esEditar ? 'Editar Producto' : 'Nuevo Producto'; ?>
         </h4>
     </div>
-    <a href="/admin/index.php?page=productos" class="btn btn-outline-secondary btn-sm">
+    <a href="index.php?page=productos" class="btn btn-outline-secondary btn-sm">
         <i class="bi bi-arrow-left me-1"></i>Volver
     </a>
 </div>
@@ -17,7 +17,7 @@
 <?php endif; ?>
 
 <form id="formProducto" method="POST"
-      action="/admin/index.php?page=<?php echo $esEditar ? 'productos_editar&id=' . (int)$producto['id_producto'] : 'productos_crear'; ?>"
+      action="index.php?page=<?php echo $esEditar ? 'productos_editar&id=' . (int)$producto['id_producto'] : 'productos_crear'; ?>"
       enctype="multipart/form-data">
     <input type="hidden" name="accion" value="<?php echo $esEditar ? 'editar_producto' : 'crear_producto'; ?>">
     <?php if ($esEditar): ?>
@@ -283,7 +283,7 @@
                             <i class="bi bi-floppy me-2"></i>
                             <?php echo $esEditar ? 'Actualizar Producto' : 'Guardar Producto'; ?>
                         </button>
-                        <a href="/admin/index.php?page=productos" class="btn btn-outline-secondary btn-sm">Cancelar</a>
+                        <a href="index.php?page=productos" class="btn btn-outline-secondary btn-sm">Cancelar</a>
                     </div>
                 </div>
             </div>

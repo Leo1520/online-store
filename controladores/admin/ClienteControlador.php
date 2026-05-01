@@ -14,12 +14,12 @@ class ClienteControlador {
             $ci      = trim($_GET['eliminar_ci']);
             $usuario = trim($_GET['eliminar_usuario']);
             if (in_array($usuario, $this->usuariosProtegidos, true)) {
-                header('Location: /admin/index.php?page=clientes&msg=' . urlencode('No se puede eliminar la cuenta protegida.'));
+                header('Location: index.php?page=clientes&msg=' . urlencode('No se puede eliminar la cuenta protegida.'));
                 exit();
             }
             $ok  = $clienteModel->eliminarClienteYCuentaSegura($ci, $usuario);
             $msg = $ok ? 'Cliente eliminado correctamente.' : 'No se pudo eliminar el cliente.';
-            header('Location: /admin/index.php?page=clientes&msg=' . urlencode($msg));
+            header('Location: index.php?page=clientes&msg=' . urlencode($msg));
             exit();
         }
 
@@ -53,7 +53,7 @@ class ClienteControlador {
                 $hash = password_hash($password, PASSWORD_DEFAULT);
                 $ok   = $clienteModel->crearConCuenta($usuario, $hash, $ci, $nombres, $apPaterno, $apMaterno, $correo, $direccion, $nroCelular);
                 if ($ok) {
-                    header('Location: /admin/index.php?page=clientes&msg=' . urlencode('Cliente creado correctamente.'));
+                    header('Location: index.php?page=clientes&msg=' . urlencode('Cliente creado correctamente.'));
                     exit();
                 }
                 $error   = 'No se pudo crear el cliente. El usuario o CI ya existe.';
@@ -74,12 +74,12 @@ class ClienteControlador {
         $usuario  = trim($_GET['usuario'] ?? '');
 
         if ($ci === '' || $usuario === '') {
-            header('Location: /admin/index.php?page=clientes'); exit();
+            header('Location: index.php?page=clientes'); exit();
         }
 
         $cliente = $clienteModel->obtenerPorClave($ci, $usuario);
         if (!$cliente) {
-            header('Location: /admin/index.php?page=clientes&msg=' . urlencode('Cliente no encontrado.'));
+            header('Location: index.php?page=clientes&msg=' . urlencode('Cliente no encontrado.'));
             exit();
         }
 
@@ -101,7 +101,7 @@ class ClienteControlador {
                 $hash = $password !== '' ? password_hash($password, PASSWORD_DEFAULT) : '';
                 $ok   = $clienteModel->actualizarConPassword($ciPost, $usuarioCuenta, $nombres, $apPaterno, $apMaterno, $correo, $direccion, $nroCelular, $hash);
                 if ($ok) {
-                    header('Location: /admin/index.php?page=clientes&msg=' . urlencode('Cliente actualizado correctamente.'));
+                    header('Location: index.php?page=clientes&msg=' . urlencode('Cliente actualizado correctamente.'));
                     exit();
                 }
                 $error   = 'No se pudo actualizar el cliente.';

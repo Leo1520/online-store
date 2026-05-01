@@ -35,13 +35,13 @@ class ProductoControlador {
         if (isset($_GET['eliminar_producto'])) {
             requierePermiso('eliminar_productos');
             $productoModel->eliminar((int)$_GET['eliminar_producto']);
-            header('Location: /admin/index.php?page=productos&msg=' . urlencode('Producto eliminado.'));
+            header('Location: index.php?page=productos&msg=' . urlencode('Producto eliminado.'));
             exit();
         }
 
         if (isset($_GET['eliminar_stock_producto'], $_GET['eliminar_stock_sucursal'])) {
             $stockModel->eliminar((int)$_GET['eliminar_stock_producto'], (int)$_GET['eliminar_stock_sucursal']);
-            header('Location: /admin/index.php?page=productos&msg=' . urlencode('Stock eliminado.'));
+            header('Location: index.php?page=productos&msg=' . urlencode('Stock eliminado.'));
             exit();
         }
 
@@ -90,7 +90,7 @@ class ProductoControlador {
                     if ($nuevoId) { $stockModel->guardarStock($nuevoId, $codSucursal, $stockInicial); }
                 }
 
-                header('Location: /admin/index.php?page=productos&msg=' . urlencode('Producto creado correctamente.'));
+                header('Location: index.php?page=productos&msg=' . urlencode('Producto creado correctamente.'));
                 exit();
             }
 
@@ -117,11 +117,11 @@ class ProductoControlador {
         $esEditar = true;
         $id       = (int)($_GET['id'] ?? 0);
 
-        if ($id <= 0) { header('Location: /admin/index.php?page=productos'); exit(); }
+        if ($id <= 0) { header('Location: index.php?page=productos'); exit(); }
 
         $producto = $productoModel->obtenerPorId($id);
         if (!$producto) {
-            header('Location: /admin/index.php?page=productos&msg=' . urlencode('Producto no encontrado.'));
+            header('Location: index.php?page=productos&msg=' . urlencode('Producto no encontrado.'));
             exit();
         }
 
@@ -149,7 +149,7 @@ class ProductoControlador {
                     $stockModel->guardarStock($id, $codSucursal, $stockInicial);
                 }
 
-                header('Location: /admin/index.php?page=productos&msg=' . urlencode('Producto actualizado correctamente.'));
+                header('Location: index.php?page=productos&msg=' . urlencode('Producto actualizado correctamente.'));
                 exit();
             }
 

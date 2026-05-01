@@ -7,7 +7,7 @@
             <?php echo $esEditar ? 'Editar Vendedor' : 'Nuevo Vendedor'; ?>
         </h4>
     </div>
-    <a href="/admin/index.php?page=vendedores" class="btn btn-outline-secondary btn-sm">
+    <a href="index.php?page=vendedores" class="btn btn-outline-secondary btn-sm">
         <i class="bi bi-arrow-left me-1"></i>Volver
     </a>
 </div>
@@ -28,7 +28,7 @@
             </div>
             <div class="card-body">
                 <form id="formVendedor" method="POST"
-                      action="/admin/index.php?page=<?php echo $esEditar ? 'vendedores_editar&ci=' . urlencode($vendedor['ci'] ?? '') . '&usuario=' . urlencode($vendedor['usuarioCuenta'] ?? '') : 'vendedores_crear'; ?>">
+                      action="index.php?page=<?php echo $esEditar ? 'vendedores_editar&ci=' . urlencode($vendedor['ci'] ?? '') . '&usuario=' . urlencode($vendedor['usuarioCuenta'] ?? '') : 'vendedores_crear'; ?>">
                     <input type="hidden" name="accion" value="<?php echo $esEditar ? 'editar' : 'crear'; ?>">
                     <?php if ($esEditar): ?>
                         <input type="hidden" name="usuarioCuenta" value="<?php echo htmlspecialchars($vendedor['usuarioCuenta'] ?? ''); ?>">
@@ -132,7 +132,7 @@
                         <i class="bi bi-floppy me-2"></i>
                         <?php echo $esEditar ? 'Actualizar Vendedor' : 'Guardar Vendedor'; ?>
                     </button>
-                    <a href="/admin/index.php?page=vendedores" class="btn btn-outline-secondary btn-sm">
+                    <a href="index.php?page=vendedores" class="btn btn-outline-secondary btn-sm">
                         Cancelar
                     </a>
                 </div>

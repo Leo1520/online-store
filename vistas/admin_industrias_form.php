@@ -6,7 +6,7 @@
             <i class="bi bi-gear me-2"></i><?php echo $esEditar ? 'Editar' : 'Nueva'; ?> Industria
         </h4>
     </div>
-    <a href="/admin/index.php?page=industrias" class="btn btn-outline-secondary btn-sm">
+    <a href="index.php?page=industrias" class="btn btn-outline-secondary btn-sm">
         <i class="bi bi-arrow-left me-1"></i>Volver
     </a>
 </div>
@@ -34,7 +34,7 @@
                         <button type="submit" class="btn text-white" style="background:var(--accent);">
                             <i class="bi bi-check-lg me-1"></i><?php echo $esEditar ? 'Actualizar' : 'Crear'; ?> Industria
                         </button>
-                        <a href="/admin/index.php?page=industrias" class="btn btn-outline-secondary">
+                        <a href="index.php?page=industrias" class="btn btn-outline-secondary">
                             <i class="bi bi-x-lg me-1"></i>Cancelar
                         </a>
                     </div>

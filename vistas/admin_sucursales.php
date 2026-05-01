@@ -20,7 +20,7 @@
                 </h6>
             </div>
             <div class="card-body">
-                <form id="formSucursal" method="POST" action="/admin/index.php?page=sucursales">
+                <form id="formSucursal" method="POST" action="index.php?page=sucursales">
                     <input type="hidden" name="accion" value="<?php echo !empty($sucursalEditar) ? 'editar' : 'crear'; ?>">
                     <input type="hidden" name="cod" value="<?php echo !empty($sucursalEditar) ? (int)$sucursalEditar['cod'] : 0; ?>">
                     <div class="mb-3">
@@ -43,7 +43,7 @@
                             <i class="bi bi-save me-1"></i><?php echo !empty($sucursalEditar) ? 'Actualizar' : 'Guardar'; ?>
                         </button>
                         <?php if (!empty($sucursalEditar)): ?>
-                            <a href="/admin/index.php?page=sucursales" class="btn btn-secondary">Cancelar</a>
+                            <a href="index.php?page=sucursales" class="btn btn-secondary">Cancelar</a>
                         <?php endif; ?>
                     </div>
                 </form>
@@ -72,7 +72,7 @@
                                     <td><?php echo htmlspecialchars($sucursal['nroTelefono']); ?></td>
                                     <td>
                                         <a class="btn btn-sm btn-outline-warning"
-                                           href="/admin/index.php?page=sucursales&editar=<?php echo (int)$sucursal['cod']; ?>">
+                                           href="index.php?page=sucursales&editar=<?php echo (int)$sucursal['cod']; ?>">
                                             <i class="bi bi-pencil"></i>
                                         </a>
                                         <button class="btn btn-sm btn-outline-danger"

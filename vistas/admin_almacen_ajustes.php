@@ -108,7 +108,7 @@
 </div>
 
 <script>
-const API = '/api/almacen.php';
+const API = '../api/almacen.php';
 const TIPOS_AJUSTE = ['ajuste_entrada','ajuste_salida','devolucion','baja'];
 
 function registrarAjuste() {

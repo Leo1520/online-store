@@ -11,12 +11,12 @@ class VendedorControlador {
             $ci      = trim($_GET['eliminar_ci']);
             $usuario = trim($_GET['eliminar_usuario']);
             if ($usuario === 'admin') {
-                header('Location: /admin/index.php?page=vendedores&msg=' . urlencode('No se puede eliminar la cuenta admin.'));
+                header('Location: index.php?page=vendedores&msg=' . urlencode('No se puede eliminar la cuenta admin.'));
                 exit();
             }
             $ok  = $vendedorModel->eliminarVendedorYCuenta($ci, $usuario);
             $msg = $ok ? 'Vendedor eliminado correctamente.' : 'No se pudo eliminar el vendedor.';
-            header('Location: /admin/index.php?page=vendedores&msg=' . urlencode($msg));
+            header('Location: index.php?page=vendedores&msg=' . urlencode($msg));
             exit();
         }
 
@@ -48,7 +48,7 @@ class VendedorControlador {
                 $hash = password_hash($password, PASSWORD_DEFAULT);
                 $ok   = $vendedorModel->crearConCuenta($usuario, $hash, $ci, $nombres, $apPaterno, $apMaterno, $correo, $nroCelular);
                 if ($ok) {
-                    header('Location: /admin/index.php?page=vendedores&msg=' . urlencode('Vendedor creado correctamente.'));
+                    header('Location: index.php?page=vendedores&msg=' . urlencode('Vendedor creado correctamente.'));
                     exit();
                 }
                 $error    = 'No se pudo crear el vendedor. El usuario o CI ya existe.';
@@ -68,12 +68,12 @@ class VendedorControlador {
         $usuario  = trim($_GET['usuario'] ?? '');
 
         if ($ci === '' || $usuario === '') {
-            header('Location: /admin/index.php?page=vendedores'); exit();
+            header('Location: index.php?page=vendedores'); exit();
         }
 
         $vendedor = $vendedorModel->obtenerPorClave($ci, $usuario);
         if (!$vendedor) {
-            header('Location: /admin/index.php?page=vendedores&msg=' . urlencode('Vendedor no encontrado.'));
+            header('Location: index.php?page=vendedores&msg=' . urlencode('Vendedor no encontrado.'));
             exit();
         }
 
@@ -94,7 +94,7 @@ class VendedorControlador {
                 $hash = $password !== '' ? password_hash($password, PASSWORD_DEFAULT) : '';
                 $ok   = $vendedorModel->actualizarConPassword($ciPost, $usuarioCuenta, $nombres, $apPaterno, $apMaterno, $correo, $nroCelular, $hash);
                 if ($ok) {
-                    header('Location: /admin/index.php?page=vendedores&msg=' . urlencode('Vendedor actualizado correctamente.'));
+                    header('Location: index.php?page=vendedores&msg=' . urlencode('Vendedor actualizado correctamente.'));
                     exit();
                 }
                 $error    = 'No se pudo actualizar el vendedor.';

@@ -23,7 +23,7 @@ class RolControlador {
                     $error = 'El nombre del rol es obligatorio.';
                 } else {
                     $rolModel->crear($nombre, $descripcion);
-                    header('Location: /admin/index.php?page=roles&msg=' . urlencode('Rol creado correctamente.'));
+                    header('Location: index.php?page=roles&msg=' . urlencode('Rol creado correctamente.'));
                     exit();
                 }
             }
@@ -36,7 +36,7 @@ class RolControlador {
                     $error = 'Datos inválidos.';
                 } else {
                     $rolModel->actualizar($cod, $nombre, $descripcion);
-                    header('Location: /admin/index.php?page=roles&msg=' . urlencode('Rol actualizado correctamente.'));
+                    header('Location: index.php?page=roles&msg=' . urlencode('Rol actualizado correctamente.'));
                     exit();
                 }
             }
@@ -47,7 +47,7 @@ class RolControlador {
                 if ($codRol > 0) {
                     $rolModel->asignarPermisos($codRol, $permisos);
                 }
-                header('Location: /admin/index.php?page=roles&msg=' . urlencode('Permisos actualizados correctamente.'));
+                header('Location: index.php?page=roles&msg=' . urlencode('Permisos actualizados correctamente.'));
                 exit();
             }
 
@@ -57,7 +57,7 @@ class RolControlador {
                 if ($usuario !== '' && $rol !== '') {
                     $rolModel->cambiarRolCuenta($usuario, $rol);
                 }
-                header('Location: /admin/index.php?page=roles&msg=' . urlencode('Rol de cuenta actualizado.'));
+                header('Location: index.php?page=roles&msg=' . urlencode('Rol de cuenta actualizado.'));
                 exit();
             }
         }
@@ -65,7 +65,7 @@ class RolControlador {
         if (isset($_GET['eliminar'])) {
             $res = $rolModel->eliminar((int)$_GET['eliminar']);
             $msg = $res['ok'] ? 'Rol eliminado.' : ($res['msg'] ?? 'No se pudo eliminar el rol.');
-            header('Location: /admin/index.php?page=roles&msg=' . urlencode($msg));
+            header('Location: index.php?page=roles&msg=' . urlencode($msg));
             exit();
         }
 
@@ -95,7 +95,7 @@ class RolControlador {
                     $error = 'Nombre y módulo son obligatorios.';
                 } else {
                     $permModel->crear($nombre, $descripcion, $modulo);
-                    header('Location: /admin/index.php?page=permisos&msg=' . urlencode('Permiso creado correctamente.'));
+                    header('Location: index.php?page=permisos&msg=' . urlencode('Permiso creado correctamente.'));
                     exit();
                 }
             }
@@ -109,7 +109,7 @@ class RolControlador {
                     $error = 'Datos inválidos.';
                 } else {
                     $permModel->actualizar($cod, $nombre, $descripcion, $modulo);
-                    header('Location: /admin/index.php?page=permisos&msg=' . urlencode('Permiso actualizado correctamente.'));
+                    header('Location: index.php?page=permisos&msg=' . urlencode('Permiso actualizado correctamente.'));
                     exit();
                 }
             }
@@ -117,7 +117,7 @@ class RolControlador {
 
         if (isset($_GET['eliminar'])) {
             $permModel->eliminar((int)$_GET['eliminar']);
-            header('Location: /admin/index.php?page=permisos&msg=' . urlencode('Permiso eliminado.'));
+            header('Location: index.php?page=permisos&msg=' . urlencode('Permiso eliminado.'));
             exit();
         }
 

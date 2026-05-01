@@ -13,7 +13,7 @@ class CatalogoControlador {
 
         if (isset($_GET['eliminar'])) {
             $marcaModel->eliminar((int)$_GET['eliminar']);
-            header('Location: /admin/index.php?page=marcas&msg=' . urlencode('Marca eliminada.'));
+            header('Location: index.php?page=marcas&msg=' . urlencode('Marca eliminada.'));
             exit();
         }
 
@@ -35,7 +35,7 @@ class CatalogoControlador {
                 $error = 'El nombre de la marca es obligatorio.';
             } else {
                 $marcaModel->crear($nombre);
-                header('Location: /admin/index.php?page=marcas&msg=' . urlencode('Marca creada correctamente.'));
+                header('Location: index.php?page=marcas&msg=' . urlencode('Marca creada correctamente.'));
                 exit();
             }
         }
@@ -51,11 +51,11 @@ class CatalogoControlador {
         $esEditar = true;
         $id = (int)($_GET['id'] ?? 0);
 
-        if ($id <= 0) { header('Location: /admin/index.php?page=marcas'); exit(); }
+        if ($id <= 0) { header('Location: index.php?page=marcas'); exit(); }
 
         $marca = $marcaModel->obtenerPorId($id);
         if (!$marca) {
-            header('Location: /admin/index.php?page=marcas&msg=' . urlencode('Marca no encontrada.'));
+            header('Location: index.php?page=marcas&msg=' . urlencode('Marca no encontrada.'));
             exit();
         }
 
@@ -65,7 +65,7 @@ class CatalogoControlador {
                 $error = 'El nombre de la marca es obligatorio.';
             } else {
                 $marcaModel->actualizar($id, $nombre);
-                header('Location: /admin/index.php?page=marcas&msg=' . urlencode('Marca actualizada correctamente.'));
+                header('Location: index.php?page=marcas&msg=' . urlencode('Marca actualizada correctamente.'));
                 exit();
             }
             $marca = array_merge($marca, ['nombre' => $nombre]);
@@ -83,7 +83,7 @@ class CatalogoControlador {
 
         if (isset($_GET['eliminar'])) {
             $categoriaModel->eliminar((int)$_GET['eliminar']);
-            header('Location: /admin/index.php?page=categorias&msg=' . urlencode('Categoría eliminada.'));
+            header('Location: index.php?page=categorias&msg=' . urlencode('Categoría eliminada.'));
             exit();
         }
 
@@ -105,7 +105,7 @@ class CatalogoControlador {
                 $error = 'El nombre de la categoría es obligatorio.';
             } else {
                 $categoriaModel->crear($nombre);
-                header('Location: /admin/index.php?page=categorias&msg=' . urlencode('Categoría creada correctamente.'));
+                header('Location: index.php?page=categorias&msg=' . urlencode('Categoría creada correctamente.'));
                 exit();
             }
         }
@@ -121,11 +121,11 @@ class CatalogoControlador {
         $esEditar = true;
         $id = (int)($_GET['id'] ?? 0);
 
-        if ($id <= 0) { header('Location: /admin/index.php?page=categorias'); exit(); }
+        if ($id <= 0) { header('Location: index.php?page=categorias'); exit(); }
 
         $categoria = $categoriaModel->obtenerPorId($id);
         if (!$categoria) {
-            header('Location: /admin/index.php?page=categorias&msg=' . urlencode('Categoría no encontrada.'));
+            header('Location: index.php?page=categorias&msg=' . urlencode('Categoría no encontrada.'));
             exit();
         }
 
@@ -135,7 +135,7 @@ class CatalogoControlador {
                 $error = 'El nombre de la categoría es obligatorio.';
             } else {
                 $categoriaModel->actualizar($id, $nombre);
-                header('Location: /admin/index.php?page=categorias&msg=' . urlencode('Categoría actualizada correctamente.'));
+                header('Location: index.php?page=categorias&msg=' . urlencode('Categoría actualizada correctamente.'));
                 exit();
             }
             $categoria = array_merge($categoria, ['nombre' => $nombre]);
@@ -153,7 +153,7 @@ class CatalogoControlador {
 
         if (isset($_GET['eliminar'])) {
             $industriaModel->eliminar((int)$_GET['eliminar']);
-            header('Location: /admin/index.php?page=industrias&msg=' . urlencode('Industria eliminada.'));
+            header('Location: index.php?page=industrias&msg=' . urlencode('Industria eliminada.'));
             exit();
         }
 
@@ -175,7 +175,7 @@ class CatalogoControlador {
                 $error = 'El nombre de la industria es obligatorio.';
             } else {
                 $industriaModel->crear($nombre);
-                header('Location: /admin/index.php?page=industrias&msg=' . urlencode('Industria creada correctamente.'));
+                header('Location: index.php?page=industrias&msg=' . urlencode('Industria creada correctamente.'));
                 exit();
             }
         }
@@ -191,11 +191,11 @@ class CatalogoControlador {
         $esEditar = true;
         $id = (int)($_GET['id'] ?? 0);
 
-        if ($id <= 0) { header('Location: /admin/index.php?page=industrias'); exit(); }
+        if ($id <= 0) { header('Location: index.php?page=industrias'); exit(); }
 
         $industria = $industriaModel->obtenerPorId($id);
         if (!$industria) {
-            header('Location: /admin/index.php?page=industrias&msg=' . urlencode('Industria no encontrada.'));
+            header('Location: index.php?page=industrias&msg=' . urlencode('Industria no encontrada.'));
             exit();
         }
 
@@ -205,7 +205,7 @@ class CatalogoControlador {
                 $error = 'El nombre de la industria es obligatorio.';
             } else {
                 $industriaModel->actualizar($id, $nombre);
-                header('Location: /admin/index.php?page=industrias&msg=' . urlencode('Industria actualizada correctamente.'));
+                header('Location: index.php?page=industrias&msg=' . urlencode('Industria actualizada correctamente.'));
                 exit();
             }
             $industria = array_merge($industria, ['nombre' => $nombre]);

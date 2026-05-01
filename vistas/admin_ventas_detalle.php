@@ -12,7 +12,7 @@ require_once __DIR__ . '/layout_admin/head.php';
         </h4>
         <small class="text-muted"><?php echo htmlspecialchars(substr($venta['fechaHora'], 0, 16)); ?></small>
     </div>
-    <a href="/admin/index.php?page=<?php echo $backPage; ?>" class="btn btn-outline-secondary btn-sm">
+    <a href="index.php?page=<?php echo $backPage; ?>" class="btn btn-outline-secondary btn-sm">
         <i class="bi bi-arrow-left me-1"></i>Volver a <?php echo $backLabel; ?>
     </a>
 </div>
@@ -118,7 +118,7 @@ $badge = $badgeMap[$estado] ?? 'badge-status-pending';
                 <i class="bi bi-arrow-repeat me-2" style="color:var(--primary)"></i>Cambiar Estado
             </div>
             <div class="card-body">
-                <form method="POST" action="/admin/index.php?page=ventas_detalle&id=<?php echo (int)$venta['nro']; ?>">
+                <form method="POST" action="index.php?page=ventas_detalle&id=<?php echo (int)$venta['nro']; ?>">
                     <input type="hidden" name="accion" value="cambiar_estado">
                     <input type="hidden" name="nro" value="<?php echo (int)$venta['nro']; ?>">
                     <div class="mb-3">

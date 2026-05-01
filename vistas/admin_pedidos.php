@@ -57,7 +57,7 @@
                                 <span class="badge rounded-pill <?php echo $badge; ?>"><?php echo ucfirst($estado); ?></span>
                             </td>
                             <td class="text-end">
-                                <a href="/admin/index.php?page=ventas_detalle&id=<?php echo (int)$v['nro']; ?>&from=pedidos"
+                                <a href="index.php?page=ventas_detalle&id=<?php echo (int)$v['nro']; ?>&from=pedidos"
                                    class="btn btn-sm btn-outline-primary py-0 px-2" title="Ver detalle">
                                     <i class="bi bi-eye"></i>
                                 </a>

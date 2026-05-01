@@ -1,8 +1,11 @@
 <?php
 $chatUsuario = htmlspecialchars($_SESSION['usuario'] ?? 'Anónimo', ENT_QUOTES);
+$chatRol     = $_SESSION['rol'] ?? 'interno';
+$chatCanal   = ($chatRol === 'admin') ? 'admin' : 'internos';
+$esAdmin     = ($chatCanal === 'admin');
 ?>
 <!-- ══════════════════════════════════════════════════════════
-     CHAT WIDGET — Flotante estilo WhatsApp
+     CHAT WIDGET — Panel Admin (internos + clientes para admin)
 ══════════════════════════════════════════════════════════════ -->
 <style>
 /* ── Botón flotante ─────────────────────────────── */
@@ -98,6 +101,44 @@ $chatUsuario = htmlspecialchars($_SESSION['usuario'] ?? 'Anónimo', ENT_QUOTES);
     padding: 0 4px;
 }
 .ch-close:hover { color: #fff; }
+
+/* ── Tab bar (admin) ────────────────────────────── */
+.ch-tab-bar {
+    display: flex;
+    background: #162f58;
+    padding: 5px 8px;
+    gap: 4px;
+    flex-shrink: 0;
+}
+.ch-tab-btn {
+    flex: 1;
+    border: none;
+    background: transparent;
+    color: rgba(255,255,255,.6);
+    padding: 6px 8px;
+    border-radius: 8px;
+    font-size: .78rem;
+    cursor: pointer;
+    transition: all .15s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+}
+.ch-tab-btn:hover  { color: #fff; background: rgba(255,255,255,.1); }
+.ch-tab-btn.active { background: rgba(255,255,255,.2); color: #fff; font-weight: 600; }
+.ch-tab-badge {
+    background: #dc3545;
+    color: #fff;
+    font-size: .6rem;
+    min-width: 16px; height: 16px;
+    border-radius: 8px;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 0 4px;
+}
+.ch-tab-badge.visible { display: inline-flex; }
 
 /* ── Cuerpo ─────────────────────────────────────── */
 .ch-body {
@@ -220,12 +261,8 @@ $chatUsuario = htmlspecialchars($_SESSION['usuario'] ?? 'Anónimo', ENT_QUOTES);
 .ch-messages::-webkit-scrollbar { width: 4px; }
 .ch-messages::-webkit-scrollbar-thumb { background: #ccc; border-radius: 4px; }
 
-/* Burbujas */
-.ch-bubble-wrap {
-    display: flex;
-    flex-direction: column;
-}
-.ch-bubble-wrap.me  { align-items: flex-end; }
+.ch-bubble-wrap { display: flex; flex-direction: column; }
+.ch-bubble-wrap.me    { align-items: flex-end; }
 .ch-bubble-wrap.other { align-items: flex-start; }
 
 .ch-sender-name {
@@ -242,25 +279,10 @@ $chatUsuario = htmlspecialchars($_SESSION['usuario'] ?? 'Anónimo', ENT_QUOTES);
     font-size: .84rem;
     line-height: 1.4;
     word-break: break-word;
-    position: relative;
 }
-.ch-bubble-wrap.me .ch-bubble {
-    background: var(--primary);
-    color: #fff;
-    border-bottom-right-radius: 3px;
-}
-.ch-bubble-wrap.other .ch-bubble {
-    background: #fff;
-    color: #111;
-    border-bottom-left-radius: 3px;
-    box-shadow: 0 1px 2px rgba(0,0,0,.1);
-}
-.ch-bubble-time {
-    font-size: .65rem;
-    opacity: .6;
-    margin-top: 2px;
-    padding: 0 4px;
-}
+.ch-bubble-wrap.me    .ch-bubble { background: var(--primary); color: #fff; border-bottom-right-radius: 3px; }
+.ch-bubble-wrap.other .ch-bubble { background: #fff; color: #111; border-bottom-left-radius: 3px; box-shadow: 0 1px 2px rgba(0,0,0,.1); }
+.ch-bubble-time { font-size: .65rem; opacity: .6; margin-top: 2px; padding: 0 4px; }
 
 .ch-system-msg {
     text-align: center;
@@ -273,7 +295,6 @@ $chatUsuario = htmlspecialchars($_SESSION['usuario'] ?? 'Anónimo', ENT_QUOTES);
     margin: 4px 0;
 }
 
-/* Input */
 .ch-input-wrap {
     display: flex;
     align-items: center;
@@ -306,10 +327,9 @@ $chatUsuario = htmlspecialchars($_SESSION['usuario'] ?? 'Anónimo', ENT_QUOTES);
     flex-shrink: 0;
     transition: background .15s;
 }
-.ch-send-btn:hover  { background: #2751a3; }
+.ch-send-btn:hover    { background: #2751a3; }
 .ch-send-btn:disabled { background: #aaa; cursor: default; }
 
-/* Estado vacío */
 .ch-empty {
     flex: 1;
     display: flex;
@@ -322,7 +342,6 @@ $chatUsuario = htmlspecialchars($_SESSION['usuario'] ?? 'Anónimo', ENT_QUOTES);
 .ch-empty i { font-size: 3rem; opacity: .3; }
 .ch-empty p { font-size: .85rem; }
 
-/* Responsive */
 @media (max-width: 800px) {
     #chatPanel { width: calc(100vw - 20px); right: 10px; left: 10px; }
     .ch-contacts { width: 200px; }
@@ -355,6 +374,20 @@ $chatUsuario = htmlspecialchars($_SESSION['usuario'] ?? 'Anónimo', ENT_QUOTES);
         <button class="ch-close" onclick="chatToggle()" title="Cerrar">&#x2715;</button>
     </div>
 
+    <?php if ($esAdmin): ?>
+    <!-- Tab bar — solo admin -->
+    <div class="ch-tab-bar">
+        <button id="chTab-internos" class="ch-tab-btn active" onclick="chCambiarTab('internos')">
+            <i class="bi bi-people-fill"></i> Internos
+            <span class="ch-tab-badge" id="chTabBadge-internos"></span>
+        </button>
+        <button id="chTab-clientes" class="ch-tab-btn" onclick="chCambiarTab('clientes')">
+            <i class="bi bi-person-badge-fill"></i> Clientes
+            <span class="ch-tab-badge" id="chTabBadge-clientes"></span>
+        </button>
+    </div>
+    <?php endif; ?>
+
     <!-- Cuerpo -->
     <div class="ch-body">
 
@@ -368,20 +401,12 @@ $chatUsuario = htmlspecialchars($_SESSION['usuario'] ?? 'Anónimo', ENT_QUOTES);
 
         <!-- Columna derecha -->
         <div class="ch-right" id="chRight">
-
-            <!-- Header del chat activo -->
             <div class="ch-msg-header" id="chMsgHeader" style="display:none;"></div>
-
-            <!-- Estado vacío inicial -->
             <div class="ch-empty" id="chEmpty">
                 <i class="bi bi-chat-square-dots"></i>
                 <p>Selecciona un chat para comenzar</p>
             </div>
-
-            <!-- Mensajes -->
             <div class="ch-messages" id="chMessages" style="display:none;"></div>
-
-            <!-- Input -->
             <div class="ch-input-wrap" id="chInputWrap" style="display:none;">
                 <input id="chInput" type="text" placeholder="Escribe un mensaje..." maxlength="500"
                        onkeydown="if(event.key==='Enter')chEnviar()">
@@ -395,24 +420,38 @@ $chatUsuario = htmlspecialchars($_SESSION['usuario'] ?? 'Anónimo', ENT_QUOTES);
 
 <script>
 (function () {
-    /* ── Constantes ── */
-    const MI_USUARIO  = <?php echo json_encode($chatUsuario); ?>;
-    const WS_URL      = 'ws://' + window.location.hostname + ':2346';
-    const TODOS       = '★ Todos';
+    const MI_USUARIO = <?php echo json_encode($chatUsuario); ?>;
+    const MI_CANAL   = <?php echo json_encode($chatCanal); ?>;   // 'admin'|'internos'
+    const ES_ADMIN   = <?php echo $esAdmin ? 'true' : 'false'; ?>;
+    const WS_URL     = 'ws://' + window.location.hostname + ':2346';
 
-    /* ── Estado ── */
-    let ws             = null;
-    let conectado      = false;
-    let chatActivo     = TODOS;
-    let historiales    = {};   // { chat: [{tipo,de,texto,hora}] }
-    let noLeidos       = {};   // { chat: number }
-    let contactos      = [];   // ['★ Todos', 'usuario1', ...]
-    let abierto        = false;
-    let histCargado    = {};   // { chat: bool } — evita recargar si ya se cargó
+    // Claves de "Todos" por canal
+    const TODOS_INT = '★ Todos';
+    const TODOS_CLI = '★ Clientes';
 
-    historiales[TODOS] = [];
-    noLeidos[TODOS]    = 0;
-    contactos          = [TODOS];
+    let ws          = null;
+    let conectado   = false;
+    let tabActivo   = 'internos';   // 'internos' | 'clientes'
+    let chatActivo  = TODOS_INT;
+    let abierto     = false;
+
+    // Listas de contactos por canal
+    let contactosInt = [TODOS_INT];
+    let contactosCli = [TODOS_CLI];
+
+    // Para saber a qué canal pertenece cada contacto privado
+    let contactCanal = {};
+    contactCanal[TODOS_INT] = 'internos';
+    contactCanal[TODOS_CLI] = 'clientes';
+
+    let historiales = {};
+    let noLeidos    = {};
+    let histCargado = {};
+
+    historiales[TODOS_INT] = [];
+    historiales[TODOS_CLI] = [];
+    noLeidos[TODOS_INT]    = 0;
+    noLeidos[TODOS_CLI]    = 0;
 
     /* ── Toggle del panel ── */
     window.chatToggle = function () {
@@ -423,9 +462,23 @@ $chatUsuario = htmlspecialchars($_SESSION['usuario'] ?? 'Anónimo', ENT_QUOTES);
             noLeidos[chatActivo] = 0;
             chRenderContactos();
             actualizarBadgeGlobal();
-            // Cargar historial de Todos al abrir por primera vez
-            if (!histCargado[TODOS]) chFetchHistorial(TODOS);
+            if (!histCargado[chatActivo]) chFetchHistorial(chatActivo);
         }
+    };
+
+    /* ── Cambiar tab (solo admin) ── */
+    window.chCambiarTab = function (tab) {
+        tabActivo = tab;
+        document.querySelectorAll('.ch-tab-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById('chTab-' + tab).classList.add('active');
+
+        // Cambiar chatActivo al "Todos" del tab
+        chatActivo = (tab === 'clientes') ? TODOS_CLI : TODOS_INT;
+        noLeidos[chatActivo] = 0;
+        chRenderContactos();
+        actualizarBadgeGlobal();
+        chMostrarChat(chatActivo);
+        if (!histCargado[chatActivo]) chFetchHistorial(chatActivo);
     };
 
     /* ── Conexión WebSocket ── */
@@ -434,7 +487,7 @@ $chatUsuario = htmlspecialchars($_SESSION['usuario'] ?? 'Anónimo', ENT_QUOTES);
 
         ws.onopen = function () {
             conectado = true;
-            ws.send(MI_USUARIO);
+            ws.send(JSON.stringify({ nombre: MI_USUARIO, canal: MI_CANAL }));
             document.getElementById('chDot').classList.add('online');
             document.getElementById('chDot').title = 'Conectado';
             document.getElementById('chSendBtn').disabled = false;
@@ -442,10 +495,7 @@ $chatUsuario = htmlspecialchars($_SESSION['usuario'] ?? 'Anónimo', ENT_QUOTES);
         };
 
         ws.onmessage = function (e) {
-            try {
-                const msg = JSON.parse(e.data);
-                chProcesar(msg);
-            } catch (_) {}
+            try { chProcesar(JSON.parse(e.data)); } catch (_) {}
         };
 
         ws.onclose = function () {
@@ -454,7 +504,6 @@ $chatUsuario = htmlspecialchars($_SESSION['usuario'] ?? 'Anónimo', ENT_QUOTES);
             document.getElementById('chDot').title = 'Sin conexión';
             document.getElementById('chSendBtn').disabled = true;
             document.getElementById('chInput').placeholder = 'Sin conexión...';
-            // Reconectar en 4s
             setTimeout(() => { if (abierto) chConectar(); }, 4000);
         };
 
@@ -466,10 +515,24 @@ $chatUsuario = htmlspecialchars($_SESSION['usuario'] ?? 'Anónimo', ENT_QUOTES);
         switch (msg.tipo) {
 
             case 'usuarios':
-                contactos = [TODOS];
-                (msg.lista || []).forEach(n => {
+                // Actualizar listas
+                const prevInt = contactosInt.slice(1);
+                const prevCli = contactosCli.slice(1);
+
+                contactosInt = [TODOS_INT];
+                (msg.internos || []).forEach(n => {
                     if (n !== MI_USUARIO) {
-                        contactos.push(n);
+                        contactosInt.push(n);
+                        contactCanal[n] = 'internos';
+                        if (!historiales[n]) historiales[n] = [];
+                        if (noLeidos[n] === undefined) noLeidos[n] = 0;
+                    }
+                });
+                contactosCli = [TODOS_CLI];
+                (msg.clientes || []).forEach(n => {
+                    if (n !== MI_USUARIO) {
+                        contactosCli.push(n);
+                        contactCanal[n] = 'clientes';
                         if (!historiales[n]) historiales[n] = [];
                         if (noLeidos[n] === undefined) noLeidos[n] = 0;
                     }
@@ -477,31 +540,60 @@ $chatUsuario = htmlspecialchars($_SESSION['usuario'] ?? 'Anónimo', ENT_QUOTES);
                 chRenderContactos();
                 break;
 
-            case 'mensaje':
-                chAgregarMensaje(TODOS, {
+            case 'mensaje': {
+                const canal   = msg.canal || 'internos';
+                const todosKey = (canal === 'clientes') ? TODOS_CLI : TODOS_INT;
+                chAgregarMensaje(todosKey, {
                     tipo:  msg.de === MI_USUARIO ? 'yo' : 'otro',
                     de:    msg.de,
                     texto: msg.texto,
                     hora:  ahora()
                 }, msg.de !== MI_USUARIO);
+                // Badge de tab si no es la tab activa
+                if (ES_ADMIN && canal !== tabActivo) {
+                    actualizarBadgeTab(canal);
+                }
                 break;
+            }
 
-            case 'sistema':
-                chAgregarMensaje(TODOS, { tipo: 'sistema', texto: msg.texto, hora: ahora() });
+            case 'sistema': {
+                const canal    = msg.canal || 'internos';
+                const todosKey = (canal === 'clientes') ? TODOS_CLI : TODOS_INT;
+                chAgregarMensaje(todosKey, { tipo: 'sistema', texto: msg.texto, hora: ahora() });
                 break;
+            }
 
-            case 'privado':
+            case 'privado': {
+                const canal = msg.canal || 'internos';
                 if (!historiales[msg.de]) historiales[msg.de] = [];
                 if (noLeidos[msg.de] === undefined) noLeidos[msg.de] = 0;
-                if (!contactos.includes(msg.de)) { contactos.push(msg.de); }
+                contactCanal[msg.de] = canal;
+                const lista = (canal === 'clientes') ? contactosCli : contactosInt;
+                if (!lista.includes(msg.de)) lista.push(msg.de);
                 chAgregarMensaje(msg.de, { tipo: 'otro', de: msg.de, texto: msg.texto, hora: ahora() });
+                if (ES_ADMIN && canal !== tabActivo) actualizarBadgeTab(canal);
                 break;
+            }
 
-            case 'privado_enviado':
+            case 'privado_enviado': {
+                const canal = msg.canal || 'internos';
                 if (!historiales[msg.para]) historiales[msg.para] = [];
                 chAgregarMensaje(msg.para, { tipo: 'yo', texto: msg.texto, hora: ahora() }, false);
                 break;
+            }
         }
+    }
+
+    /* ── Badge por tab ── */
+    function actualizarBadgeTab(canal) {
+        if (!ES_ADMIN) return;
+        const badge = document.getElementById('chTabBadge-' + canal);
+        if (!badge) return;
+        const lista = (canal === 'clientes') ? contactosCli : contactosInt;
+        let total = 0;
+        lista.forEach(c => { total += noLeidos[c] || 0; });
+        badge.textContent = total > 99 ? '99+' : total;
+        badge.classList.toggle('visible', total > 0);
     }
 
     /* ── Agregar mensaje al historial ── */
@@ -524,6 +616,7 @@ $chatUsuario = htmlspecialchars($_SESSION['usuario'] ?? 'Anónimo', ENT_QUOTES);
     function chRenderBurbuja(entry) {
         const area = document.getElementById('chMessages');
         const wrap = document.createElement('div');
+        const esTodos = (chatActivo === TODOS_INT || chatActivo === TODOS_CLI);
 
         if (entry.tipo === 'sistema') {
             wrap.className = 'ch-system-msg';
@@ -532,7 +625,7 @@ $chatUsuario = htmlspecialchars($_SESSION['usuario'] ?? 'Anónimo', ENT_QUOTES);
             const esYo = entry.tipo === 'yo' || entry.de === MI_USUARIO;
             wrap.className = 'ch-bubble-wrap ' + (esYo ? 'me' : 'other');
 
-            if (entry.de && chatActivo === TODOS) {
+            if (entry.de && esTodos) {
                 const name = document.createElement('div');
                 name.className = 'ch-sender-name';
                 name.textContent = esYo ? 'Tú' : entry.de;
@@ -561,30 +654,33 @@ $chatUsuario = htmlspecialchars($_SESSION['usuario'] ?? 'Anónimo', ENT_QUOTES);
         chScrollAbajo();
     }
 
+    /* ── Mostrar área de mensajes para un chat ── */
+    function chMostrarChat(chat) {
+        const isTodos = (chat === TODOS_INT || chat === TODOS_CLI);
+        const header  = document.getElementById('chMsgHeader');
+        header.style.display = 'flex';
+        const color   = avatarColor(chat);
+        const inicial = (chat === TODOS_INT || chat === TODOS_CLI) ? '★' : chat.charAt(0).toUpperCase();
+        header.innerHTML = `
+            <div class="ch-avatar" style="background:${color};width:36px;height:36px;font-size:.85rem;">${inicial}</div>
+            <div>
+                <div class="ch-msg-header-name">${chat}</div>
+                <div class="ch-msg-header-sub">${isTodos ? 'Chat grupal' : 'Mensaje privado'}</div>
+            </div>`;
+
+        document.getElementById('chEmpty').style.display     = 'none';
+        document.getElementById('chMessages').style.display  = 'flex';
+        document.getElementById('chInputWrap').style.display = 'flex';
+    }
+
     /* ── Cambiar chat activo ── */
     function chCambiar(chat) {
         chatActivo = chat;
         noLeidos[chat] = 0;
         chRenderContactos();
         actualizarBadgeGlobal();
-
-        // Header
-        const header = document.getElementById('chMsgHeader');
-        header.style.display = 'flex';
-        const color = avatarColor(chat);
-        const inicial = chat === TODOS ? '★' : chat.charAt(0).toUpperCase();
-        header.innerHTML = `
-            <div class="ch-avatar" style="background:${color};width:36px;height:36px;font-size:.85rem;">${inicial}</div>
-            <div>
-                <div class="ch-msg-header-name">${chat}</div>
-                <div class="ch-msg-header-sub">${chat === TODOS ? 'Chat grupal' : 'Mensaje privado'}</div>
-            </div>`;
-
-        // Mostrar mensajes
-        document.getElementById('chEmpty').style.display    = 'none';
-        document.getElementById('chMessages').style.display = 'flex';
-        document.getElementById('chInputWrap').style.display = 'flex';
-
+        if (ES_ADMIN) actualizarBadgeTab(tabActivo);
+        chMostrarChat(chat);
         if (!histCargado[chat]) {
             chFetchHistorial(chat);
         } else {
@@ -594,43 +690,48 @@ $chatUsuario = htmlspecialchars($_SESSION['usuario'] ?? 'Anónimo', ENT_QUOTES);
 
     /* ── Fetch historial desde BD ── */
     function chFetchHistorial(chat) {
-        const canal = chat === TODOS ? 'todos' : chat;
-        const area  = document.getElementById('chMessages');
-        area.innerHTML = '<div class="ch-system-msg" style="margin:auto;">Cargando historial...</div>';
+        const esTodos = (chat === TODOS_INT || chat === TODOS_CLI);
+        const canal   = (chat === TODOS_CLI) ? 'clientes' : 'internos';
+        const chatParam = esTodos ? 'todos' : chat;
+        const area    = document.getElementById('chMessages');
+        if (chatActivo === chat) {
+            area.innerHTML = '<div class="ch-system-msg" style="margin:auto;">Cargando historial...</div>';
+        }
 
-        fetch(`/admin/chat_historial.php?chat=${encodeURIComponent(canal)}`)
+        fetch(`chat_historial.php?chat=${encodeURIComponent(chatParam)}&canal=${canal}`)
             .then(r => r.json())
             .then(mensajes => {
                 if (!historiales[chat]) historiales[chat] = [];
-                // Prepend: historial BD + mensajes de sesión actuales
                 const sesion = historiales[chat];
                 historiales[chat] = mensajes.concat(sesion);
                 histCargado[chat] = true;
-                chCargarHistorial();
+                if (chatActivo === chat) chCargarHistorial();
             })
             .catch(() => {
                 histCargado[chat] = true;
-                chCargarHistorial();
+                if (chatActivo === chat) chCargarHistorial();
             });
     }
 
-    /* ── Renderizar lista de contactos ── */
-    window.chFiltrar = function (q) {
-        chRenderContactos(q.toLowerCase());
-    };
+    /* ── Renderizar lista de contactos del tab activo ── */
+    window.chFiltrar = function (q) { chRenderContactos(q.toLowerCase()); };
 
     function chRenderContactos(filtro = '') {
-        const lista = document.getElementById('chContactList');
-        lista.innerHTML = '';
+        const lista      = document.getElementById('chContactList');
+        const contactos  = (tabActivo === 'clientes') ? contactosCli : contactosInt;
+        lista.innerHTML  = '';
+
         contactos.forEach(chat => {
             if (filtro && !chat.toLowerCase().includes(filtro)) return;
             const unread  = noLeidos[chat] || 0;
             const hist    = historiales[chat] || [];
             const ultimo  = hist.length ? hist[hist.length - 1] : null;
             const preview = ultimo ? (ultimo.tipo === 'sistema' ? ultimo.texto
-                : (ultimo.tipo === 'yo' ? 'Tú: ' + ultimo.texto : (ultimo.de ? ultimo.de + ': ' : '') + ultimo.texto)) : 'Sin mensajes';
+                : (ultimo.tipo === 'yo' ? 'Tú: ' + ultimo.texto
+                : (ultimo.de ? ultimo.de + ': ' : '') + ultimo.texto)) : 'Sin mensajes';
             const color   = avatarColor(chat);
-            const inicial = chat === TODOS ? '★' : chat.charAt(0).toUpperCase();
+            const isTodos = (chat === TODOS_INT || chat === TODOS_CLI);
+            const inicial = isTodos ? '★' : chat.charAt(0).toUpperCase();
 
             const item = document.createElement('div');
             item.className = 'ch-contact-item' + (chat === chatActivo ? ' active' : '');
@@ -638,7 +739,7 @@ $chatUsuario = htmlspecialchars($_SESSION['usuario'] ?? 'Anónimo', ENT_QUOTES);
                 <div class="ch-avatar" style="background:${color};">${inicial}</div>
                 <div class="ch-contact-info">
                     <div class="ch-contact-name">${chat}</div>
-                    <div class="ch-contact-prev">${escHtml(preview.length > 35 ? preview.slice(0, 32) + '…' : preview)}</div>
+                    <div class="ch-contact-prev">${escHtml(preview.length > 35 ? preview.slice(0,32) + '…' : preview)}</div>
                 </div>
                 <span class="ch-unread ${unread > 0 ? 'visible' : ''}">${unread > 99 ? '99+' : unread}</span>`;
             item.onclick = () => chCambiar(chat);
@@ -653,52 +754,48 @@ $chatUsuario = htmlspecialchars($_SESSION['usuario'] ?? 'Anónimo', ENT_QUOTES);
         const txt   = input.value.trim();
         if (!txt) return;
 
-        if (chatActivo === TODOS) {
-            ws.send(txt);
-            // El servidor hace eco del mensaje → lo recibimos en case 'mensaje' como tipo 'yo'
+        const canal    = (chatActivo === TODOS_CLI || contactCanal[chatActivo] === 'clientes') ? 'clientes' : 'internos';
+        const esTodos  = (chatActivo === TODOS_INT || chatActivo === TODOS_CLI);
+
+        if (esTodos) {
+            ws.send(JSON.stringify({ texto: txt, canal: canal }));
         } else {
-            ws.send('@' + chatActivo + ': ' + txt);
-            // privado_enviado lo maneja onmessage
+            ws.send(JSON.stringify({ para: chatActivo, texto: txt, canal: canal }));
         }
         input.value = '';
         input.focus();
     };
 
-    /* ── Badge global (botón flotante) ── */
+    /* ── Badge global ── */
     function actualizarBadgeGlobal() {
-        const total  = Object.values(noLeidos).reduce((a, b) => a + b, 0);
-        const badge  = document.getElementById('chatGlobalBadge');
+        const total = Object.values(noLeidos).reduce((a, b) => a + b, 0);
+        const badge = document.getElementById('chatGlobalBadge');
         badge.textContent = total > 99 ? '99+' : total;
         badge.classList.toggle('visible', total > 0);
     }
 
-    /* ── Scroll al fondo ── */
     function chScrollAbajo() {
         const area = document.getElementById('chMessages');
         area.scrollTop = area.scrollHeight;
     }
 
-    /* ── Hora actual ── */
     function ahora() {
         return new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
     }
 
-    /* ── Color de avatar según nombre ── */
     function avatarColor(name) {
-        if (name === TODOS) return '#1d7a35';
+        if (name === TODOS_INT) return '#1d7a35';
+        if (name === TODOS_CLI) return '#b45309';
         let h = 0;
         for (let i = 0; i < name.length; i++) h = name.charCodeAt(i) + ((h << 5) - h);
         const paleta = ['#1B3A6B','#0d6efd','#198754','#fd7e14','#6f42c1','#d63384','#0dcaf0','#20c997'];
         return paleta[Math.abs(h) % paleta.length];
     }
 
-    /* ── Escapar HTML ── */
     function escHtml(s) {
         return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
     }
 
-    /* Inicializar lista con "Todos" */
     chRenderContactos();
-
 })();
 </script>

@@ -153,7 +153,7 @@
 </div>
 
 <script>
-const API = '/api/almacen.php';
+const API = '../api/almacen.php';
 let stockData    = [];
 let consolidado  = [];
 let filtrados    = [];

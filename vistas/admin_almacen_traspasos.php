@@ -129,7 +129,7 @@
 </div>
 
 <script>
-const API = '/api/almacen.php';
+const API = '../api/almacen.php';
 const PROD_OPTIONS = `<?php foreach ($productos as $p): ?><option value="<?php echo (int)$p['id_producto']; ?>"><?php echo htmlspecialchars($p['nombre'], ENT_QUOTES); ?></option><?php endforeach; ?>`;
 
 function cargarTraspasos() {

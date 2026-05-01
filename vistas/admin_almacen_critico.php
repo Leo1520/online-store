@@ -105,7 +105,7 @@
 </div>
 
 <script>
-const API = '/api/almacen.php';
+const API = '../api/almacen.php';
 
 function cargarCritico() {
     const umbral = parseInt(document.getElementById('umbralCritico').value) || 5;

@@ -31,7 +31,7 @@ class VentaControlador {
         $id        = (int)($_GET['id'] ?? 0);
 
         if ($id <= 0) {
-            header('Location: /admin/index.php?page=ventas'); exit();
+            header('Location: index.php?page=ventas'); exit();
         }
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['accion'] ?? '') === 'cambiar_estado') {
@@ -42,7 +42,7 @@ class VentaControlador {
                 $notaModel->actualizarEstado($nro, $estado);
             }
             $from = trim($_POST['from'] ?? 'ventas');
-            header('Location: /admin/index.php?page=ventas_detalle&id=' . $id . '&from=' . urlencode($from) . '&msg=' . urlencode('Estado actualizado.'));
+            header('Location: index.php?page=ventas_detalle&id=' . $id . '&from=' . urlencode($from) . '&msg=' . urlencode('Estado actualizado.'));
             exit();
         }
 
@@ -53,7 +53,7 @@ class VentaControlador {
         }
 
         if (!$venta) {
-            header('Location: /admin/index.php?page=ventas&msg=' . urlencode('Pedido no encontrado.'));
+            header('Location: index.php?page=ventas&msg=' . urlencode('Pedido no encontrado.'));
             exit();
         }
 
