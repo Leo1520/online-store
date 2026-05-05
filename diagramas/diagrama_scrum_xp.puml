@@ -1,0 +1,258 @@
+@startuml Diagrama_SCRUM_XP_Development
+
+!define SPRINT_COLOR #C8E6C9
+!define BACKLOG_COLOR #FFECB3
+!define REVIEW_COLOR #BBDEFB
+!define RELEASE_COLOR #F8BBD0
+
+skinparam backgroundColor #FAFAFA
+skinparam stateFontColor #000000
+
+' PRODUCT BACKLOG
+state "PRODUCT BACKLOG\n(Total: 144 Story Points)" as ProductBacklog {
+    state "Epic 1: Plataforma Compra\n34 pts" as Epic1 {
+        state "US1: Ver catálogo (13 pts)" as US1
+        state "US2: Agregar carrito (8 pts)" as US2
+        state "US3: Procesar pago (5 pts)" as US3
+        state "US4: Historial (5 pts)" as US4
+        state "US5: Gestionar perfil (3 pts)" as US5
+    }
+    
+    state "Epic 2: Panel Admin\n55 pts" as Epic2 {
+        state "US6: Gestionar productos (21 pts)" as US6
+        state "US7: Gestionar clientes (13 pts)" as US7
+        state "US8: Ver reportes (8 pts)" as US8
+        state "US9: Gestionar sucursales (8 pts)" as US9
+        state "US10: Gestionar usuarios (5 pts)" as US10
+    }
+    
+    state "Epic 3: Gestión Inventario\n34 pts" as Epic3 {
+        state "US11: Ver stock (13 pts)" as US11
+        state "US12: Registrar traspasos (13 pts)" as US12
+        state "US13: Alertas críticas (5 pts)" as US13
+        state "US14: Ver kardex (3 pts)" as US14
+    }
+    
+    state "Epic 4: Sistema Seguridad\n21 pts" as Epic4 {
+        state "US15: Gestionar roles (8 pts)" as US15
+        state "US16: Autenticación segura (8 pts)" as US16
+        state "US17: Auditoría (5 pts)" as US17
+    }
+}
+
+' SPRINT PLANNING
+state "SPRINT PLANNING\n(Duración: 2-4 horas)" as SprintPlanning {
+    state "Revisar Product Backlog" as ReviewBacklog
+    state "Estimar story points" as EstimatePoints
+    state "Seleccionar user stories" as SelectStories
+    state "Definir objetivos sprint" as SprintGoals
+    state "Crear Sprint Backlog" as CreateSprintBacklog
+}
+
+' SPRINTS
+state "SPRINT 1-2\n(Semanas 1-2)\nAnálisis y Diseño\n34 pts" as Sprint1 {
+    state "Documentar requerimientos" as S1T1
+    state "Crear diagramas UML" as S1T2
+    state "Diseñar modelo datos" as S1T3
+    state "Code review diseño" as S1T4
+}
+
+state "SPRINT 3-4\n(Semanas 3-5)\nDesarrollo Cliente Fase 1\n34 pts" as Sprint2 {
+    state "Implementar catálogo" as S2T1
+    state "Implementar carrito" as S2T2
+    state "Implementar búsqueda" as S2T3
+    state "Testing unitario" as S2T4
+    state "Code review" as S2T5
+}
+
+state "SPRINT 5-6\n(Semanas 6-10)\nDesarrollo Admin\n55 pts" as Sprint3 {
+    state "CRUD productos" as S3T1
+    state "CRUD clientes" as S3T2
+    state "Dashboard métricas" as S3T3
+    state "Reportes básicos" as S3T4
+    state "Gestión usuarios" as S3T5
+    state "Testing integración" as S3T6
+}
+
+state "SPRINT 7\n(Semanas 11-12)\nTesting y Optimización\n20 pts" as Sprint4 {
+    state "Testing funcional" as S4T1
+    state "Testing seguridad" as S4T2
+    state "Optimizar queries" as S4T3
+    state "Performance testing" as S4T4
+    state "Documentación API" as S4T5
+}
+
+' DAILY STANDUP
+state "DAILY STANDUP\n(15 minutos - Diarios)" as DailyStandup {
+    state "¿Qué hice ayer?" as Q1
+    state "¿Qué haré hoy?" as Q2
+    state "¿Hay impedimentos?" as Q3
+}
+
+' SPRINT REVIEW
+state "SPRINT REVIEW\n(Duración: 1-2 horas)" as SprintReview {
+    state "Demostración funcionalidades" as Demo
+    state "Validación PO" as POValidation
+    state "Feedback stakeholders" as Feedback
+    state "Aceptación user stories" as Acceptance
+}
+
+' SPRINT RETROSPECTIVE
+state "SPRINT RETROSPECTIVE\n(Duración: 1-1.5 horas)" as Retrospective {
+    state "¿Qué salió bien?" as Good
+    state "¿Qué mejorar?" as Improve
+    state "Acciones mejora" as Actions
+    state "Compromisos siguientes" as Commitments
+}
+
+' INCREMENTO
+state "INCREMENTO\n(Producto Funcional)" as Increment {
+    state "v0.1: Base datos + API" as V01
+    state "v0.2: Frontend catálogo" as V02
+    state "v0.3: Carrito y pago" as V03
+    state "v0.4: Panel admin" as V04
+    state "v0.5: Sistema inventario" as V05
+    state "v1.0: Sistema completo" as V10
+}
+
+' RELEASE / DEPLOYMENT
+state "DEPLOYMENT\n(Producción)" as Deployment {
+    state "Preparar ambiente" as PrepEnv
+    state "Ejecutar migrations" as RunMigrations
+    state "Cargar datos iniciales" as LoadData
+    state "Testing en producción" as ProdTest
+    state "Go Live!" as GoLive
+    state "Monitoreo" as Monitoring
+}
+
+' TRANSICIONES - Flujo principal
+ProductBacklog --> SprintPlanning: Priorizar
+
+SprintPlanning --> Sprint1: Sprint 1 inicia
+Sprint1 --> DailyStandup: Actividad diaria
+DailyStandup --> Sprint1
+Sprint1 --> SprintReview: Fin Sprint 1
+SprintReview --> Retrospective: Análisis Sprint
+
+Retrospective --> SprintPlanning: Mejoras aplicadas\nPrepara Sprint 2
+
+SprintPlanning --> Sprint2: Sprint 2-3 inicia
+Sprint2 --> DailyStandup
+DailyStandup --> Sprint2
+Sprint2 --> SprintReview
+SprintReview --> Retrospective
+
+Retrospective --> SprintPlanning: Prepara Sprint 5-6
+
+SprintPlanning --> Sprint3: Sprint 5-6 inicia
+Sprint3 --> DailyStandup
+DailyStandup --> Sprint3
+Sprint3 --> SprintReview
+SprintReview --> Retrospective
+
+Retrospective --> SprintPlanning: Prepara Sprint 7
+
+SprintPlanning --> Sprint4: Sprint 7 inicia
+Sprint4 --> DailyStandup
+DailyStandup --> Sprint4
+Sprint4 --> SprintReview
+SprintReview --> Retrospective
+
+Retrospective --> Increment: Validación final
+
+Sprint1 --> Increment: Entrega v0.1
+Sprint2 --> Increment: Entrega v0.2, v0.3
+Sprint3 --> Increment: Entrega v0.4, v0.5
+Sprint4 --> Increment: Entrega v1.0
+
+Increment --> Deployment: Ready for production
+Deployment --> GoLive
+GoLive --> Monitoring
+
+' Notas SCRUM
+note right of ProductBacklog
+    **PRIORIZACIÓN:**
+    1. Seguridad
+    2. Catálogo
+    3. Carrito/Pago
+    4. Admin
+    5. Inventario
+end note
+
+note right of SprintPlanning
+    **PARTICIPANTES:**
+    • Product Owner
+    • Scrum Master
+    • Development Team
+    
+    **OUTPUT:**
+    • Sprint Backlog
+    • Sprint Goal
+    • Estimaciones
+end note
+
+note right of DailyStandup
+    **EQUIPO:**
+    Max 5 desarrolladores
+    **HORARIO:**
+    09:00 AM diarios
+    **LUGAR:**
+    Stand-up room
+end note
+
+note right of SprintReview
+    **DEMOSTRACIÓN:**
+    ✓ Funcionalidades completadas
+    ✓ User stories aceptadas
+    ✓ Criterios cumplidos
+    
+    **RECHAZO:**
+    ✗ Code review fallido
+    ✗ Tests no pasan
+end note
+
+note right of Retrospective
+    **MÉTRICAS SPRINT:**
+    • Velocity: pts/sprint
+    • Burndown rate
+    • Test coverage
+    • Code quality
+    
+    **MEJORAS:**
+    • Proceso
+    • Comunicación
+    • Herramientas
+end note
+
+note right of Increment
+    **DEFINICIÓN DONE:**
+    ✓ Código escrito
+    ✓ Tested (unit + integration)
+    ✓ Code reviewed
+    ✓ Documentado
+    ✓ Aceptado PO
+    ✓ Listo producción
+end note
+
+note right of Deployment
+    **CHECKLIST:**
+    ☐ Backups base datos
+    ☐ Verificar permisos
+    ☐ Cargar assets
+    ☐ Configurar .env
+    ☐ Testing smoke
+    ☐ Alertar usuarios
+    ☐ Monitoreo 24h
+end note
+
+' Estadísticas
+note top of ProductBacklog
+    **ESTADÍSTICAS PROYECTO:**
+    • Total Duration: 13 semanas
+    • Story Points Total: 144
+    • Sprints: 7
+    • Team Size: 5 personas
+    • Expected Velocity: 20 pts/sprint
+end note
+
+@enduml

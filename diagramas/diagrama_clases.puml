@@ -1,0 +1,367 @@
+@startuml Diagrama_de_Clases_ElectroHogar
+
+!define ABSTRACTCOLOR #DDDDDD
+!define CLASSCOLOR #E1F5FE
+!define INTERFACECOLOR #FFF9C4
+
+skinparam backgroundColor #FAFAFA
+skinparam classBackgroundColor CLASSCOLOR
+skinparam classBorderColor #01579B
+skinparam arrowColor #01579B
+
+package "Modelos" {
+    class Cuenta {
+        -idCuenta: int
+        -usuario: string
+        -contraseña: string (hashed)
+        -email: string
+        -rol: Rol
+        -estado: bool
+        -fecha_creacion: datetime
+        --
+        +login(): bool
+        +registrar(): bool
+        +logout(): void
+        +verificarCredenciales(): bool
+    }
+
+    class Cliente {
+        -ciCliente: string
+        -idCuenta: int (FK)
+        -nombres: string
+        -apPaterno: string
+        -apMaterno: string
+        -email: string
+        -telefono: string
+        -fecha_registro: datetime
+        --
+        +obtener(): Cliente
+        +actualizar(): bool
+        +eliminar(): bool
+        +obtenerPerfil(): array
+    }
+
+    class Producto {
+        -idProducto: int
+        -nombre: string
+        -descripcion: text
+        -precio: decimal
+        -imagen: string
+        -codCategoria: int (FK)
+        -codMarca: int (FK)
+        -codIndustria: int (FK)
+        -estado: bool
+        --
+        +obtener(): Producto
+        +crear(): bool
+        +actualizar(): bool
+        +eliminar(): bool
+        +obtenerPrecio(): decimal
+    }
+
+    class Categoria {
+        -codCategoria: int
+        -nombre: string
+        -descripcion: text
+        --
+        +obtener(): Categoria
+        +actualizar(): bool
+        +obtenerProductos(): array
+    }
+
+    class Marca {
+        -codMarca: int
+        -nombre: string
+        -descripcion: text
+        --
+        +obtener(): Marca
+        +actualizar(): bool
+        +obtenerProductos(): array
+    }
+
+    class Industria {
+        -codIndustria: int
+        -nombre: string
+        -descripcion: text
+        --
+        +obtener(): Industria
+        +obtenerProductos(): array
+    }
+
+    class NotaVenta {
+        -nroNotaVenta: int
+        -ciCliente: string (FK)
+        -codSucursal: int (FK)
+        -fecha: datetime
+        -total: decimal
+        -estado: string
+        --
+        +crear(): bool
+        +obtener(): NotaVenta
+        +actualizar(): bool
+        +obtenerDetalles(): array
+        +obtenerTotal(): decimal
+        +obtenerEstado(): string
+    }
+
+    class DetalleNotaVenta {
+        -idDetalle: int
+        -nroNotaVenta: int (FK)
+        -idProducto: int (FK)
+        -cantidad: int
+        -precioUnitario: decimal
+        -subtotal: decimal
+        --
+        +calcularSubtotal(): decimal
+        +obtener(): DetalleNotaVenta
+        +actualizar(): bool
+    }
+
+    class Sucursal {
+        -codSucursal: int
+        -nombre: string
+        -direccion: string
+        -nroTelefono: string
+        -estado: bool
+        --
+        +obtener(): Sucursal
+        +actualizar(): bool
+        +obtenerStock(): array
+    }
+
+    class DetalleProductoSucursal {
+        -idDetalle: int
+        -codProducto: int (FK)
+        -codSucursal: int (FK)
+        -stock: int
+        -fecha_ultima_actualizacion: datetime
+        --
+        +obtenerStock(): int
+        +actualizarStock(cantidad): bool
+        +verificarDisponibilidad(): bool
+    }
+
+    class Rol {
+        -codRol: int
+        -nombre: string
+        -descripcion: text
+        --
+        +obtener(): Rol
+        +obtenerPermisos(): array
+        +verificarPermiso(permiso): bool
+    }
+
+    class Permiso {
+        -codPermiso: int
+        -nombre: string
+        -modulo: string
+        -descripcion: text
+        --
+        +obtener(): Permiso
+        +verificarAcceso(): bool
+    }
+
+    class MovimientoStock {
+        -idMovimiento: int
+        -codProducto: int (FK)
+        -codSucursal: int (FK)
+        -tipo: enum
+        -cantidad: int
+        -fecha: datetime
+        -descripcion: text
+        --
+        +registrar(): bool
+        +obtener(): MovimientoStock
+        +obtenerKardex(): array
+    }
+
+    class Vendedor {
+        -codVendedor: int
+        -idCuenta: int (FK)
+        -nombres: string
+        -apellidos: string
+        -comision: decimal
+        -estado: bool
+        --
+        +obtener(): Vendedor
+        +actualizar(): bool
+        +obtenerVentas(): array
+    }
+
+    class Empleado {
+        -codEmpleado: int
+        -idCuenta: int (FK)
+        -nombres: string
+        -apellidos: string
+        -puesto: string
+        -salario: decimal
+        -estado: bool
+        --
+        +obtener(): Empleado
+        +actualizar(): bool
+    }
+}
+
+package "Controladores" {
+    class AutenticacionControlador {
+        +login(): void
+        +registrar(): void
+        +logout(): void
+        +verificarSesion(): bool
+    }
+
+    class ProductoControlador {
+        +listar(): array
+        +obtener(id): Producto
+        +crear(datos): bool
+        +actualizar(id, datos): bool
+        +eliminar(id): bool
+        +buscar(texto): array
+        +filtrar(filtros): array
+    }
+
+    class CarritoControlador {
+        +agregar(producto, cantidad): bool
+        +ver(): array
+        +actualizar(id, cantidad): bool
+        +eliminar(id): bool
+        +limpiar(): bool
+        +obtenerTotal(): decimal
+    }
+
+    class PagoControlador {
+        +procesarPago(datos): bool
+        +validarTransaccion(): bool
+        +generarRecibo(): string
+        +registrarVenta(): bool
+    }
+
+    class ClienteControlador {
+        +registrar(): bool
+        +obtenerPerfil(): array
+        +actualizar(datos): bool
+        +obtenerHistorial(): array
+        +obtenerFavoritos(): array
+    }
+
+    class VendedorControlador {
+        +obtenerPanel(): array
+        +obtenerVentas(): array
+        +registrarVenta(): bool
+        +obtenerComisiones(): decimal
+    }
+
+    class FacturaControlador {
+        +generar(nroVenta): string
+        +descargar(id): void
+        +enviarEmail(id): bool
+        +obtenerHistorial(): array
+    }
+
+    class MiCuentaControlador {
+        +obtenerDatos(): array
+        +actualizar(datos): bool
+        +cambiarContraseña(actual, nueva): bool
+        +obtenerPedidos(): array
+    }
+
+    class InicioControlador {
+        +cargar(): void
+        +obtenerProductosDestacados(): array
+        +obtenerCategoriasPopulares(): array
+    }
+}
+
+package "Controladores Admin" {
+    class DashboardControlador {
+        +cargar(): void
+        +obtenerMetricas(): array
+        +obtenerGraficos(): array
+        +obtenerUltimosRegistros(): array
+    }
+
+    class AdminProductoControlador {
+        +listar(): array
+        +crear(datos): bool
+        +actualizar(id, datos): bool
+        +eliminar(id): bool
+        +cambiarEstado(id): bool
+    }
+
+    class AdminClienteControlador {
+        +listar(): array
+        +obtener(id): Cliente
+        +actualizar(id, datos): bool
+        +eliminarCuenta(id): bool
+        +verHistorial(id): array
+    }
+
+    class AlmacenControlador {
+        +verStock(): array
+        +registrarTraspaso(datos): bool
+        +verMovimientos(): array
+        +alertaCritica(): array
+        +generarKardex(): string
+    }
+
+    class RolControlador {
+        +listar(): array
+        +crear(datos): bool
+        +actualizar(id, datos): bool
+        +asignarPermisos(rolId, permisos): bool
+        +eliminar(id): bool
+    }
+
+    class CatalogoControlador {
+        +listar(): array
+        +crear(datos): bool
+        +actualizar(id, datos): bool
+        +eliminar(id): bool
+    }
+}
+
+' Relaciones
+Cuenta "1" -- "0..*" Cliente
+Cuenta "1" -- "0..*" Empleado
+Cuenta "1" -- "0..*" Vendedor
+Cuenta "1" -- "1" Rol
+
+Producto "*" -- "1" Categoria
+Producto "*" -- "1" Marca
+Producto "*" -- "1" Industria
+
+NotaVenta "1" -- "*" DetalleNotaVenta
+NotaVenta "*" -- "1" Cliente
+NotaVenta "*" -- "1" Sucursal
+
+DetalleNotaVenta "*" -- "1" Producto
+
+Sucursal "1" -- "*" DetalleProductoSucursal
+DetalleProductoSucursal "*" -- "1" Producto
+
+Rol "1" -- "*" Permiso
+
+MovimientoStock "*" -- "1" Producto
+MovimientoStock "*" -- "1" Sucursal
+
+Vendedor "1" -- "*" NotaVenta
+
+AutenticacionControlador --> Cuenta
+ProductoControlador --> Producto
+CarritoControlador --> NotaVenta
+CarritoControlador --> DetalleNotaVenta
+PagoControlador --> NotaVenta
+ClienteControlador --> Cliente
+VendedorControlador --> Vendedor
+FacturaControlador --> NotaVenta
+MiCuentaControlador --> Cliente
+
+DashboardControlador --> NotaVenta
+AdminProductoControlador --> Producto
+AdminClienteControlador --> Cliente
+AlmacenControlador --> MovimientoStock
+AlmacenControlador --> DetalleProductoSucursal
+RolControlador --> Rol
+CatalogoControlador --> Categoria
+
+@enduml

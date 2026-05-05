@@ -1,0 +1,132 @@
+@startuml Diagrama_de_Navegacion_ElectroHogar
+
+skinparam backgroundColor #FAFAFA
+skinparam arrowColor #01579B
+skinparam stateFontSize 12
+
+' MODULO PUBLICO
+state Inicio
+state Catalogo
+state DetalleProducto
+state Carrito
+state Pago
+state PagoExitoso
+state LoginCliente
+state Registro
+state MiCuenta
+state MisCompras
+state PanelVendedor
+
+' MODULO ADMIN
+state AdminInicio
+state GestionProductos
+state GestionCategorias
+state GestionMarcas
+state GestionClientes
+state GestionVendedores
+state GestionVentas
+state GestionAlmacen
+state GestionSucursales
+state GestionIndustrias
+state GestionRoles
+state GestionPermisos
+state GestionUsuarios
+state Reportes
+
+' COMPARTIDAS
+state Login
+state Logout
+state Error404
+state Error403
+
+
+' FLUJO CLIENTE - COMPRA
+Inicio --> Catalogo
+Inicio --> LoginCliente
+Catalogo --> DetalleProducto
+DetalleProducto --> Carrito
+DetalleProducto --> Catalogo
+Carrito --> Pago
+Carrito --> Catalogo
+Pago --> PagoExitoso
+PagoExitoso --> Inicio
+PagoExitoso --> MisCompras
+
+' FLUJO CLIENTE - CUENTA
+LoginCliente --> MiCuenta
+LoginCliente --> Registro
+Registro --> LoginCliente
+MiCuenta --> MisCompras
+MisCompras --> DetalleProducto
+
+' FLUJO VENDEDOR
+PanelVendedor --> GestionVentas
+
+' FLUJO ADMIN - DASHBOARD
+AdminInicio --> GestionProductos
+AdminInicio --> GestionClientes
+AdminInicio --> GestionVentas
+AdminInicio --> GestionAlmacen
+AdminInicio --> Reportes
+AdminInicio --> GestionRoles
+
+' FLUJO ADMIN - PRODUCTOS
+GestionProductos --> GestionCategorias
+GestionProductos --> GestionMarcas
+GestionProductos --> GestionIndustrias
+
+' FLUJO ADMIN - OTROS
+GestionClientes --> MisCompras
+GestionVentas --> GestionAlmacen
+GestionAlmacen --> GestionSucursales
+GestionRoles --> GestionPermisos
+GestionRoles --> GestionUsuarios
+Reportes --> AdminInicio
+
+' AUTENTICACION
+LoginCliente --> Login
+PanelVendedor --> Login
+AdminInicio --> Login
+
+' LOGOUT
+Inicio --> Logout
+MiCuenta --> Logout
+AdminInicio --> Logout
+PanelVendedor --> Logout
+Logout --> Inicio
+
+' ERRORES
+Catalogo --> Error404
+Catalogo --> Error403
+Error404 --> Inicio
+Error403 --> Inicio
+
+note right of Inicio
+  ZONA PUBLICA
+  Entrada principal
+  Productos destacados
+  Nuevo usuario
+end note
+
+note right of AdminInicio
+  ZONA ADMINISTRATIVA
+  Solo rol ADMIN
+  Control completo
+  Dashboard
+end note
+
+note right of PanelVendedor
+  PANEL VENDEDOR
+  Rol VENDEDOR
+  Propias ventas
+  Comisiones
+end note
+
+note right of Login
+  VALIDACION
+  Credenciales
+  Hash seguro
+  Sesion activa
+end note
+
+@enduml

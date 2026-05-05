@@ -1,0 +1,154 @@
+@startuml Diagrama_de_Secuencia_Proceso_Compra
+
+!define ACTOR_COLOR #E3F2FD
+!define PARTICIPANT_COLOR #F3E5F5
+!define DB_COLOR #FFF3E0
+
+skinparam backgroundColor #FAFAFA
+skinparam sequenceActorBackgroundColor ACTOR_COLOR
+skinparam sequenceParticipantBackgroundColor PARTICIPANT_COLOR
+skinparam databaseBackgroundColor DB_COLOR
+skinparam arrowColor #01579B
+
+actor Cliente
+participant "Navegador\n(Frontend)" as Frontend
+participant "CarritoControlador" as CarritoCtrl
+participant "ProductoControlador" as ProdCtrl
+participant "PagoControlador" as PagoCtrl
+participant "NotaVentaModelo" as NotaVenta
+database "MySQL\n(Base de Datos)" as BD
+
+== 1. Búsqueda y Visualización de Productos ==
+
+Cliente -> Frontend: Accede a catálogo
+Frontend -> ProdCtrl: GET /productos
+ProdCtrl -> BD: SELECT * FROM Producto
+BD -->> ProdCtrl: Resultados productos
+ProdCtrl -->> Frontend: JSON productos
+Frontend -->> Cliente: Muestra catálogo
+
+== 2. Filtrado y Búsqueda ==
+
+Cliente -> Frontend: Selecciona filtros\n(categoría, marca)
+Frontend -> ProdCtrl: GET /productos?categoria=1&marca=2
+ProdCtrl -> BD: SELECT * FROM Producto\nWHERE categoria=1 AND marca=2
+BD -->> ProdCtrl: Productos filtrados
+ProdCtrl -->> Frontend: JSON resultados
+Frontend -->> Cliente: Muestra productos filtrados
+
+== 3. Ver Detalle de Producto ==
+
+Cliente -> Frontend: Click en producto
+Frontend -> ProdCtrl: GET /productos/id=123
+ProdCtrl -> BD: SELECT * FROM Producto\nWHERE idProducto=123
+BD -->> ProdCtrl: Datos producto
+ProdCtrl -> BD: SELECT stock FROM DetalleProductoSucursal\nWHERE idProducto=123
+BD -->> ProdCtrl: Stock disponible
+ProdCtrl -->> Frontend: JSON detalle
+Frontend -->> Cliente: Muestra detalle producto
+
+== 4. Agregar al Carrito ==
+
+Cliente -> Frontend: Click "Agregar al carrito"\nSelecciona cantidad (2)
+Frontend -> CarritoCtrl: POST /carrito\n{producto_id: 123, cantidad: 2}
+CarritoCtrl -> BD: SELECT * FROM Producto\nWHERE idProducto=123
+BD -->> CarritoCtrl: Datos producto
+CarritoCtrl -> BD: SELECT stock FROM DetalleProductoSucursal\nWHERE idProducto=123
+BD -->> CarritoCtrl: Stock actual (50)
+note right of CarritoCtrl
+  Validar: cantidad (2) <= stock (50)
+  Validar: producto activo
+  Calcular subtotal
+end note
+CarritoCtrl -> Frontend: Sesión carrito actualizada
+Frontend -->> Cliente: Confirma "Producto agregado"
+Frontend -> Frontend: Actualiza icono carrito (cantidad: 1)
+
+== 5. Modificar Carrito ==
+
+Cliente -> Frontend: Abre carrito lateral
+Frontend -> CarritoCtrl: GET /carrito
+CarritoCtrl -->> Frontend: Items del carrito
+Frontend -->> Cliente: Muestra 2 ítems\n- Producto A: $99.99 x 2 = $199.98\n- Producto B: $149.99 x 1 = $149.99\nTotal: $349.97
+
+Cliente -> Frontend: Modifica cantidad\nProducto A: 2 -> 3
+Frontend -> CarritoCtrl: PUT /carrito/123\n{cantidad: 3}
+CarritoCtrl -> CarritoCtrl: Recalcula subtotal\n$99.99 x 3 = $299.97
+CarritoCtrl -> CarritoCtrl: Recalcula total\n$299.97 + $149.99 = $449.96
+CarritoCtrl -->> Frontend: Carrito actualizado
+Frontend -->> Cliente: Muestra nuevo total: $449.96
+
+== 6. Proceder al Pago ==
+
+Cliente -> Frontend: Click "Proceder al pago"
+Frontend -> PagoCtrl: POST /pago\n{carrito, cliente_id}
+PagoCtrl -> BD: SELECT * FROM Cliente\nWHERE ciCliente=?
+BD -->> PagoCtrl: Datos cliente
+PagoCtrl -->> Frontend: Formulario pago
+Frontend -->> Cliente: Muestra form pago\n(nombre, tarjeta, CVV, etc.)
+
+== 7. Validar Datos de Pago ==
+
+Cliente -> Frontend: Completa formulario\ny hace click "Pagar"
+Frontend -> PagoCtrl: POST /procesar-pago\n{datos_tarjeta, monto: $449.96}
+PagoCtrl -> PagoCtrl: Validar campos requeridos
+PagoCtrl -> PagoCtrl: Validar CVV
+PagoCtrl -> PagoCtrl: Validar monto
+note right of PagoCtrl
+  VALIDACIONES:
+  ✓ Campos completos
+  ✓ CVV válido (3-4 dígitos)
+  ✓ Monto > 0
+  ✓ Cliente existente
+end note
+PagoCtrl -> PagoCtrl: Hashear datos sensibles
+
+== 8. Registrar Venta ==
+
+PagoCtrl -> BD: INSERT INTO NotaVenta\n(ciCliente, fecha, total, estado)
+BD -->> PagoCtrl: nroNotaVenta = 1001
+PagoCtrl -> NotaVenta: nroNotaVenta = 1001
+
+loop Para cada item del carrito
+    PagoCtrl -> BD: INSERT INTO DetalleNotaVenta\n(nroNotaVenta, idProducto,\ncantidad, precioUnitario)
+    BD -->> PagoCtrl: idDetalle registrado
+    PagoCtrl -> BD: UPDATE DetalleProductoSucursal\nSET stock = stock - cantidad\nWHERE idProducto=?
+    BD -->> PagoCtrl: Stock actualizado
+end
+
+== 9. Registrar Movimiento de Stock ==
+
+loop Para cada item vendido
+    PagoCtrl -> BD: INSERT INTO MovimientoStock\n(codProducto, tipo='VENTA',\ncantidad, fecha)
+    BD -->> PagoCtrl: Movimiento registrado
+end
+
+== 10. Generar Recibo ==
+
+PagoCtrl -> PagoCtrl: Generar número recibo
+PagoCtrl -> BD: UPDATE NotaVenta\nSET estado = 'COMPLETADA'\nWHERE nroNotaVenta = 1001
+BD -->> PagoCtrl: Venta completada
+PagoCtrl -->> Frontend: {"estado": "exito",\n"nroVenta": 1001,\n"total": 449.96}
+
+== 11. Mostrar Confirmación ==
+
+Frontend -->> Cliente: Pantalla pago exitoso\nMuestra:\n✓ Número venta: 1001\n✓ Monto: $449.96\n✓ Fecha: 2026-05-05\n✓ Opción descargar recibo
+
+Cliente -> Frontend: Click "Descargar Recibo"
+Frontend -> PagoCtrl: GET /factura/1001
+PagoCtrl -> BD: SELECT * FROM NotaVenta\nWHERE nroNotaVenta = 1001
+BD -->> PagoCtrl: Datos venta
+PagoCtrl -> BD: SELECT * FROM DetalleNotaVenta\nWHERE nroNotaVenta = 1001
+BD -->> PagoCtrl: Detalles venta
+PagoCtrl -> PagoCtrl: Generar PDF
+PagoCtrl -->> Frontend: PDF factura
+Frontend -->> Cliente: Descarga recibo.pdf
+
+== 12. Actualizar Historial ==
+
+PagoCtrl -> BD: SELECT * FROM NotaVenta\nWHERE ciCliente = ?\nORDER BY fecha DESC
+BD -->> PagoCtrl: Historial compras
+PagoCtrl -->> Frontend: Datos actualizados
+Frontend -->> Cliente: Perfil muestra\nÚltima compra: $449.96
+
+@enduml

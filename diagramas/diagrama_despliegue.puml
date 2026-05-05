@@ -1,0 +1,199 @@
+@startuml Diagrama_de_Despliegue_ElectroHogar
+
+!define SERVER_COLOR #E0E0E0
+!define CLIENT_COLOR #B3E5FC
+!define DB_COLOR #FFE0B2
+!define EXTERNAL_COLOR #F8BBD0
+
+skinparam backgroundColor #FAFAFA
+skinparam componentBackgroundColor #F5F5F5
+skinparam componentBorderColor #616161
+
+' Definir nodos de despliegue
+node "Cliente Final" as ClientFinal {
+    artifact "Navegador Web\n(Chrome, Firefox,\nSafari, Edge)" as Browser <<device>>
+    artifact "JavaScript\nBootstrap 4\nCSS3" as Frontend <<artifact>>
+}
+
+node "Internet / HTTP(S)" as Internet {
+    note right
+        Protocolo: HTTPS
+        Puerto: 443 (SSL/TLS)
+        Compresión: GZIP
+    end note
+}
+
+node "Servidor Web\n(Laragon/Apache)" as WebServer {
+    artifact "Apache 2.4" as Apache <<device>>
+    artifact "HTML\nCSS\nImágenes\nAssets" as StaticFiles <<artifact>>
+    note bottom
+        Puerto HTTP: 80
+        Puerto HTTPS: 443
+        Timeout: 300 segundos
+    end note
+}
+
+node "Servidor de Aplicación\n(PHP)" as AppServer {
+    artifact "PHP 7.4+" as PHP <<device>>
+    
+    component "Controladores\nCliente" as ContClientPublic {
+        artifact "ProductoControlador" as ProdCtrl
+        artifact "CarritoControlador" as CartCtrl
+        artifact "PagoControlador" as PayCtrl
+        artifact "ClienteControlador" as CliCtrl
+        artifact "AutenticacionControlador" as AuthCtrl
+    }
+    
+    component "Controladores\nAdmin" as ContAdmin {
+        artifact "DashboardControlador" as DashCtrl
+        artifact "AdminProductoControlador" as AdminProdCtrl
+        artifact "AdminClienteControlador" as AdminCliCtrl
+        artifact "AlmacenControlador" as StorageCtrl
+        artifact "RolControlador" as RoleCtrl
+    }
+    
+    component "Modelos\n(Lógica Negocio)" as Models {
+        artifact "Producto" as ProdModel
+        artifact "Cliente" as CliModel
+        artifact "Cuenta" as AccModel
+        artifact "NotaVenta" as SalesModel
+        artifact "Rol" as RolModel
+        artifact "Permiso" as PermModel
+    }
+    
+    component "Servicios" as Services {
+        artifact "Validación" as Validation
+        artifact "Hashing" as Hashing
+        artifact "Seguridad" as Security
+        artifact "Email" as EmailService
+    }
+    
+    note bottom
+        CPU: 4 cores
+        RAM: 8 GB
+        Conectado a MySQL
+        Ejecución PHP-FPM
+        Máximo 100 procesos
+    end note
+}
+
+node "Base de Datos\n(MySQL Server)" as DBServer {
+    database "MySQL 5.7+" as MySQL
+    artifact "Base de Datos: mydb" as DBinstance
+    artifact "Backups Automáticos" as Backups
+}
+
+node "Almacenamiento\nde Archivos" as Storage {
+    artifact "Directorio /Recursos" as ResourceDir {
+        folder "imagenes/" as ImagesFolder {
+            artifact "productos/*.jpg" as ProductImages
+            artifact "categorias/*.png" as CategoryImages
+        }
+        folder "documentos/" as DocsFolder {
+            artifact "facturas/*.pdf" as Invoices
+        }
+    }
+    note bottom
+        Capacidad: 100 GB
+        Backup: Redundancia RAID-1
+        Acceso: Lectura/Escritura
+    end note
+}
+
+node "Servicios Externos" as ExternalServices {
+    artifact "API Email\n(Para notificaciones)" as EmailAPI
+    artifact "Hosting Web\n(Laragon/XAMPP)" as Hosting
+    artifact "Sistema de Logs\n(Archivos)" as Logs
+}
+
+' Conexiones
+ClientFinal --> Internet: Request HTTP/HTTPS
+Internet --> WebServer: Recibe solicitud
+WebServer --> AppServer: Procesa PHP
+AppServer --> DBServer: Query SQL\n(PDO Connection)
+AppServer --> Storage: Carga/Descarga\narquivos
+AppServer --> ExternalServices: Servicios\nextensibles
+
+ContClientPublic --> Models: Utiliza
+ContAdmin --> Models: Utiliza
+Models --> Services: Utiliza
+Services --> Security: Valida
+
+DBServer --> Backups: Backup automático
+
+AppServer --> Logs: Registra eventos\ny errores
+
+note right of DBServer
+    **CONFIGURACIÓN MYSQL:**
+    Puerto: 3306
+    Charset: UTF-8
+    Conexión: PDO
+    Connection pool: 50
+    Backup: Diario 2 AM
+    
+    **TABLAS PRINCIPALES:**
+    • Cuenta (usuarios)
+    • Cliente
+    • Producto
+    • Categoria
+    • Marca
+    • NotaVenta
+    • DetalleNotaVenta
+    • Sucursal
+    • DetalleProductoSucursal
+    • Rol
+    • Permiso
+    • MovimientoStock
+    • Vendedor
+    • Empleado
+end note
+
+Browser --> Frontend: Renderiza
+Frontend --> WebServer: Solicita recursos\nstáticos
+
+' Notas de seguridad
+note right of WebServer
+    **SEGURIDAD CAPA 1**
+    ✓ HTTPS con certificado SSL
+    ✓ Validación de peticiones
+    ✓ Rate limiting
+    ✓ Compresión GZIP
+end note
+
+note right of AppServer
+    **SEGURIDAD CAPA 2**
+    ✓ Validación de entrada
+    ✓ Sanitización XSS
+    ✓ Protección SQL Injection
+    ✓ CSRF tokens
+    ✓ Sessions seguras
+end note
+
+note right of DBServer
+    **SEGURIDAD CAPA 3**
+    ✓ Contraseñas hasheadas
+    ✓ Índices para performance
+    ✓ Foreign Keys
+    ✓ Constraints
+    ✓ Backups encriptados
+end note
+
+' Especificaciones de flujo de datos
+note top of Internet
+    **FLUJO DATOS:**
+    Cliente → Servidor Web
+    Servidor Web → App Server
+    App Server → Base de Datos
+    Respuesta inversa encriptada
+end note
+
+' Estadísticas del sistema
+note left of ClientFinal
+    **CARGA ESPERADA:**
+    • Usuarios simultáneos: 500
+    • Transacciones/hora: 100
+    • Tamaño BD: ~5 GB
+    • Tiempo respuesta: <2s
+end note
+
+@enduml
