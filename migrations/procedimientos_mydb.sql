@@ -150,9 +150,11 @@ CREATE PROCEDURE sp_listar_productos_con_stock_total()
 BEGIN
     SELECT
         p.`cod` AS id_producto,
+        p.`codigo`,
         p.`nombre`,
         p.`descripcion`,
-        p.`precio`,
+        p.`precioVigente`,
+        p.`precioPropuesto`,
         p.`imagen`,
         p.`estado`,
         p.`codMarca`,
@@ -167,7 +169,7 @@ BEGIN
     LEFT JOIN `Marca` m ON m.`cod` = p.`codMarca`
     LEFT JOIN `Categoria` c ON c.`cod` = p.`codCategoria`
     LEFT JOIN `Industria` i ON i.`cod` = p.`codIndustria`
-    GROUP BY p.`cod`, p.`nombre`, p.`descripcion`, p.`precio`, p.`imagen`, p.`estado`, p.`codMarca`, p.`codIndustria`, p.`codCategoria`, m.`nombre`, c.`nombre`, i.`nombre`
+    GROUP BY p.`cod`, p.`codigo`, p.`nombre`, p.`descripcion`, p.`precioVigente`, p.`precioPropuesto`, p.`imagen`, p.`estado`, p.`codMarca`, p.`codIndustria`, p.`codCategoria`, m.`nombre`, c.`nombre`, i.`nombre`
     ORDER BY p.`cod` DESC;
 END//
 
@@ -176,9 +178,11 @@ CREATE PROCEDURE sp_obtener_producto_por_id(IN p_cod_producto INT)
 BEGIN
     SELECT
         p.`cod` AS id_producto,
+        p.`codigo`,
         p.`nombre`,
         p.`descripcion`,
-        p.`precio`,
+        p.`precioVigente`,
+        p.`precioPropuesto`,
         p.`imagen`,
         p.`estado`,
         p.`codMarca`,
@@ -194,14 +198,16 @@ BEGIN
     LEFT JOIN `Categoria` c ON c.`cod` = p.`codCategoria`
     LEFT JOIN `Industria` i ON i.`cod` = p.`codIndustria`
     WHERE p.`cod` = p_cod_producto
-    GROUP BY p.`cod`, p.`nombre`, p.`descripcion`, p.`precio`, p.`imagen`, p.`estado`, p.`codMarca`, p.`codIndustria`, p.`codCategoria`, m.`nombre`, c.`nombre`, i.`nombre`;
+    GROUP BY p.`cod`, p.`codigo`, p.`nombre`, p.`descripcion`, p.`precioVigente`, p.`precioPropuesto`, p.`imagen`, p.`estado`, p.`codMarca`, p.`codIndustria`, p.`codCategoria`, m.`nombre`, c.`nombre`, i.`nombre`;
 END//
 
 DROP PROCEDURE IF EXISTS sp_crear_producto//
 CREATE PROCEDURE sp_crear_producto(
+    IN p_codigo VARCHAR(50),
     IN p_nombre VARCHAR(50),
     IN p_descripcion VARCHAR(200),
-    IN p_precio FLOAT,
+    IN p_precio_vigente FLOAT,
+    IN p_precio_propuesto FLOAT,
     IN p_imagen VARCHAR(200),
     IN p_estado VARCHAR(20),
     IN p_cod_marca INT,
@@ -209,16 +215,18 @@ CREATE PROCEDURE sp_crear_producto(
     IN p_cod_categoria INT
 )
 BEGIN
-    INSERT INTO `Producto` (`nombre`, `descripcion`, `precio`, `imagen`, `estado`, `codMarca`, `codIndustria`, `codCategoria`)
-    VALUES (p_nombre, p_descripcion, p_precio, p_imagen, p_estado, p_cod_marca, p_cod_industria, p_cod_categoria);
+    INSERT INTO `Producto` (`codigo`, `nombre`, `descripcion`, `precioVigente`, `precioPropuesto`, `imagen`, `estado`, `codMarca`, `codIndustria`, `codCategoria`)
+    VALUES (p_codigo, p_nombre, p_descripcion, p_precio_vigente, p_precio_propuesto, p_imagen, p_estado, p_cod_marca, p_cod_industria, p_cod_categoria);
 END//
 
 DROP PROCEDURE IF EXISTS sp_actualizar_producto//
 CREATE PROCEDURE sp_actualizar_producto(
     IN p_cod_producto INT,
+    IN p_codigo VARCHAR(50),
     IN p_nombre VARCHAR(50),
     IN p_descripcion VARCHAR(200),
-    IN p_precio FLOAT,
+    IN p_precio_vigente FLOAT,
+    IN p_precio_propuesto FLOAT,
     IN p_imagen VARCHAR(200),
     IN p_estado VARCHAR(20),
     IN p_cod_marca INT,
@@ -227,9 +235,11 @@ CREATE PROCEDURE sp_actualizar_producto(
 )
 BEGIN
     UPDATE `Producto`
-    SET `nombre` = p_nombre,
+    SET `codigo` = p_codigo,
+        `nombre` = p_nombre,
         `descripcion` = p_descripcion,
-        `precio` = p_precio,
+        `precioVigente` = p_precio_vigente,
+        `precioPropuesto` = p_precio_propuesto,
         `imagen` = p_imagen,
         `estado` = p_estado,
         `codMarca` = p_cod_marca,
@@ -250,8 +260,8 @@ CREATE PROCEDURE sp_resumen_ventas()
 BEGIN
     SELECT nv.`nro`, nv.`fechaHora`, nv.`ciCliente`, nv.`estado`,
            CONCAT(cl.`nombres`, ' ', cl.`apPaterno`, ' ', cl.`apMaterno`) AS cliente,
-           COALESCE(SUM(dnv.`cant`), 0)             AS totalItems,
-           COALESCE(SUM(dnv.`cant` * p.`precio`), 0) AS totalMonto
+           COALESCE(SUM(dnv.`cant`), 0)                      AS totalItems,
+           COALESCE(SUM(dnv.`cant` * p.`precioVigente`), 0) AS totalMonto
     FROM `NotaVenta` nv
     INNER JOIN `Cliente` cl ON cl.`ci` = nv.`ciCliente`
     LEFT  JOIN `DetalleNotaVenta` dnv ON dnv.`nroNotaVenta` = nv.`nro`
@@ -264,7 +274,7 @@ END//
 DROP PROCEDURE IF EXISTS sp_detalle_venta//
 CREATE PROCEDURE sp_detalle_venta(IN p_nro_venta INT)
 BEGIN
-    SELECT dnv.`nroNotaVenta`, dnv.`item`, dnv.`cant`, dnv.`codProducto`, p.`nombre` AS producto, p.`precio`
+    SELECT dnv.`nroNotaVenta`, dnv.`item`, dnv.`cant`, dnv.`codProducto`, p.`nombre` AS producto, p.`precioVigente` AS precio
     FROM `DetalleNotaVenta` dnv
     INNER JOIN `Producto` p ON p.`cod` = dnv.`codProducto`
     WHERE dnv.`nroNotaVenta` = p_nro_venta
@@ -577,13 +587,16 @@ END//
 DROP PROCEDURE IF EXISTS sp_descontar_stock_producto//
 CREATE PROCEDURE sp_descontar_stock_producto(
     IN p_cod_producto INT,
-    IN p_cantidad     INT
+    IN p_cantidad     INT,
+    IN p_nro_venta    INT,
+    IN p_usuario      VARCHAR(40)
 )
 BEGIN
     DECLARE v_stock_total  INT DEFAULT 0;
     DECLARE v_restante     INT DEFAULT p_cantidad;
     DECLARE v_cod_sucursal INT;
     DECLARE v_stock_actual INT;
+    DECLARE v_descontado   INT;
     DECLARE done           INT DEFAULT FALSE;
 
     DECLARE cur CURSOR FOR
@@ -595,7 +608,6 @@ BEGIN
 
     DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
 
-    -- Verificar stock total disponible
     SELECT COALESCE(SUM(CAST(`stock` AS UNSIGNED)), 0)
     INTO v_stock_total
     FROM `DetalleProductoSucursal`
@@ -606,7 +618,6 @@ BEGIN
             SET MESSAGE_TEXT = 'Stock insuficiente para completar la compra';
     END IF;
 
-    -- Descontar secuencialmente por sucursal
     OPEN cur;
     descuento_loop: LOOP
         FETCH cur INTO v_cod_sucursal, v_stock_actual;
@@ -615,18 +626,27 @@ BEGIN
         END IF;
 
         IF v_stock_actual >= v_restante THEN
+            SET v_descontado = v_restante;
             UPDATE `DetalleProductoSucursal`
             SET `stock` = CAST(CAST(`stock` AS UNSIGNED) - v_restante AS CHAR)
-            WHERE `codProducto` = p_cod_producto
-              AND `codSucursal`  = v_cod_sucursal;
+            WHERE `codProducto` = p_cod_producto AND `codSucursal` = v_cod_sucursal;
             SET v_restante = 0;
         ELSE
+            SET v_descontado = v_stock_actual;
             UPDATE `DetalleProductoSucursal`
             SET `stock` = '0'
-            WHERE `codProducto` = p_cod_producto
-              AND `codSucursal`  = v_cod_sucursal;
+            WHERE `codProducto` = p_cod_producto AND `codSucursal` = v_cod_sucursal;
             SET v_restante = v_restante - v_stock_actual;
         END IF;
+
+        INSERT INTO `MovimientoStock`
+            (fechaHora, codProducto, codSucursal, tipo, cantidad, stockAntes, stockDespues, referencia, observacion, usuarioCuenta)
+        VALUES
+            (NOW(), p_cod_producto, v_cod_sucursal, 'venta', v_descontado,
+             v_stock_actual, v_stock_actual - v_descontado,
+             CONCAT('NV-', LPAD(p_nro_venta, 6, '0')),
+             'Salida por venta', p_usuario);
+
     END LOOP;
     CLOSE cur;
 END//
@@ -645,9 +665,11 @@ CREATE PROCEDURE sp_buscar_productos(
 BEGIN
     SELECT
         p.`cod`          AS id_producto,
+        p.`codigo`,
         p.`nombre`,
         p.`descripcion`,
-        p.`precio`,
+        p.`precioVigente`,
+        p.`precioPropuesto`,
         p.`imagen`,
         p.`estado`,
         p.`codMarca`,
@@ -663,11 +685,11 @@ BEGIN
     LEFT JOIN `Categoria` c ON c.`cod` = p.`codCategoria`
     LEFT JOIN `Industria` i ON i.`cod` = p.`codIndustria`
     WHERE p.`estado` = 'activo'
-      AND (p_nombre        = ''  OR p.`nombre`       LIKE CONCAT('%', p_nombre, '%'))
-      AND (p_cod_categoria  = 0   OR p.`codCategoria` = p_cod_categoria)
-      AND (p_precio_min     = 0   OR p.`precio`       >= p_precio_min)
-      AND (p_precio_max     = 0   OR p.`precio`       <= p_precio_max)
-    GROUP BY p.`cod`, p.`nombre`, p.`descripcion`, p.`precio`, p.`imagen`, p.`estado`,
+      AND (p_nombre        = ''  OR p.`nombre`          LIKE CONCAT('%', p_nombre, '%'))
+      AND (p_cod_categoria  = 0   OR p.`codCategoria`    = p_cod_categoria)
+      AND (p_precio_min     = 0   OR p.`precioVigente`   >= p_precio_min)
+      AND (p_precio_max     = 0   OR p.`precioVigente`   <= p_precio_max)
+    GROUP BY p.`cod`, p.`codigo`, p.`nombre`, p.`descripcion`, p.`precioVigente`, p.`precioPropuesto`, p.`imagen`, p.`estado`,
              p.`codMarca`, p.`codIndustria`, p.`codCategoria`,
              m.`nombre`, c.`nombre`, i.`nombre`
     ORDER BY p.`cod` DESC;
@@ -914,7 +936,7 @@ CREATE PROCEDURE sp_historial_compras_cliente(IN p_usuario VARCHAR(40))
 BEGIN
     SELECT nv.`nro`, nv.`fechaHora`, nv.`estado`,
            COALESCE(SUM(dnv.`cant`), 0)              AS totalItems,
-           COALESCE(SUM(dnv.`cant` * p.`precio`), 0) AS totalMonto
+           COALESCE(SUM(dnv.`cant` * p.`precioVigente`), 0) AS totalMonto
     FROM `NotaVenta` nv
     INNER JOIN `Cliente` cl ON cl.`ci` = nv.`ciCliente` AND cl.`usuarioCuenta` = p_usuario
     LEFT  JOIN `DetalleNotaVenta` dnv ON dnv.`nroNotaVenta` = nv.`nro`
@@ -970,12 +992,12 @@ BEGIN
          WHERE `fechaHora` >= DATE_SUB(NOW(), INTERVAL 7 DAY))                              AS ventasSemana,
         (SELECT COUNT(*) FROM `NotaVenta`
          WHERE MONTH(`fechaHora`) = MONTH(NOW()) AND YEAR(`fechaHora`) = YEAR(NOW()))       AS ventasMes,
-        (SELECT COALESCE(SUM(dnv.`cant` * p.`precio`), 0)
+        (SELECT COALESCE(SUM(dnv.`cant` * p.`precioVigente`), 0)
          FROM `DetalleNotaVenta` dnv
          INNER JOIN `Producto`  p  ON p.`cod`  = dnv.`codProducto`
          INNER JOIN `NotaVenta` nv ON nv.`nro` = dnv.`nroNotaVenta`
          WHERE MONTH(nv.`fechaHora`) = MONTH(NOW()) AND YEAR(nv.`fechaHora`) = YEAR(NOW())) AS ingresosMes,
-        (SELECT COALESCE(SUM(dnv.`cant` * p.`precio`), 0)
+        (SELECT COALESCE(SUM(dnv.`cant` * p.`precioVigente`), 0)
          FROM `DetalleNotaVenta` dnv
          INNER JOIN `Producto` p ON p.`cod` = dnv.`codProducto`)                           AS ingresosTotal;
 END//
@@ -984,8 +1006,8 @@ DROP PROCEDURE IF EXISTS sp_productos_mas_vendidos//
 CREATE PROCEDURE sp_productos_mas_vendidos(IN p_limite INT)
 BEGIN
     SELECT p.`nombre`,
-           SUM(dnv.`cant`)              AS totalVendido,
-           SUM(dnv.`cant` * p.`precio`) AS totalIngresos
+           SUM(dnv.`cant`)                       AS totalVendido,
+           SUM(dnv.`cant` * p.`precioVigente`) AS totalIngresos
     FROM `DetalleNotaVenta` dnv
     INNER JOIN `Producto` p ON p.`cod` = dnv.`codProducto`
     GROUP BY p.`cod`, p.`nombre`

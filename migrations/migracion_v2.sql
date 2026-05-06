@@ -1,4 +1,4 @@
--- =============================================
+﻿-- =============================================
 -- MIGRACIÓN v2: rol en Cuenta + nuevos SPs
 -- =============================================
 
@@ -96,7 +96,7 @@ CREATE PROCEDURE sp_historial_compras_cliente(IN p_usuario VARCHAR(40))
 BEGIN
     SELECT nv.`nro`, nv.`fechaHora`,
            COALESCE(SUM(dnv.`cant`), 0)               AS totalItems,
-           COALESCE(SUM(dnv.`cant` * p.`precio`), 0)  AS totalMonto
+           COALESCE(SUM(dnv.`cant` * p.`precioVigente`), 0)  AS totalMonto
     FROM `NotaVenta` nv
     INNER JOIN `Cliente` cl ON cl.`ci` = nv.`ciCliente` AND cl.`usuarioCuenta` = p_usuario
     LEFT  JOIN `DetalleNotaVenta` dnv ON dnv.`nroNotaVenta` = nv.`nro`
@@ -129,7 +129,7 @@ BEGIN
     SELECT nv.`nro`, nv.`fechaHora`, nv.`ciCliente`,
            CONCAT(cl.`nombres`, ' ', cl.`apPaterno`, ' ', cl.`apMaterno`) AS cliente,
            COALESCE(SUM(dnv.`cant`), 0)               AS totalItems,
-           COALESCE(SUM(dnv.`cant` * p.`precio`), 0)  AS totalMonto
+           COALESCE(SUM(dnv.`cant` * p.`precioVigente`), 0)  AS totalMonto
     FROM `NotaVenta` nv
     INNER JOIN `Cliente` cl ON cl.`ci` = nv.`ciCliente`
     LEFT  JOIN `DetalleNotaVenta` dnv ON dnv.`nroNotaVenta` = nv.`nro`
@@ -149,12 +149,12 @@ BEGIN
          WHERE `fechaHora` >= DATE_SUB(NOW(), INTERVAL 7 DAY))                               AS ventasSemana,
         (SELECT COUNT(*) FROM `NotaVenta`
          WHERE MONTH(`fechaHora`) = MONTH(NOW()) AND YEAR(`fechaHora`) = YEAR(NOW()))        AS ventasMes,
-        (SELECT COALESCE(SUM(dnv.`cant` * p.`precio`), 0)
+        (SELECT COALESCE(SUM(dnv.`cant` * p.`precioVigente`), 0)
          FROM `DetalleNotaVenta` dnv
          INNER JOIN `Producto`  p  ON p.`cod`  = dnv.`codProducto`
          INNER JOIN `NotaVenta` nv ON nv.`nro` = dnv.`nroNotaVenta`
          WHERE MONTH(nv.`fechaHora`) = MONTH(NOW()) AND YEAR(nv.`fechaHora`) = YEAR(NOW()))  AS ingresosMes,
-        (SELECT COALESCE(SUM(dnv.`cant` * p.`precio`), 0)
+        (SELECT COALESCE(SUM(dnv.`cant` * p.`precioVigente`), 0)
          FROM `DetalleNotaVenta` dnv
          INNER JOIN `Producto` p ON p.`cod` = dnv.`codProducto`)                            AS ingresosTotal;
 END//
@@ -165,7 +165,7 @@ CREATE PROCEDURE sp_productos_mas_vendidos(IN p_limite INT)
 BEGIN
     SELECT p.`nombre`,
            SUM(dnv.`cant`)               AS totalVendido,
-           SUM(dnv.`cant` * p.`precio`)  AS totalIngresos
+           SUM(dnv.`cant` * p.`precioVigente`)  AS totalIngresos
     FROM `DetalleNotaVenta` dnv
     INNER JOIN `Producto` p ON p.`cod` = dnv.`codProducto`
     GROUP BY p.`cod`, p.`nombre`
