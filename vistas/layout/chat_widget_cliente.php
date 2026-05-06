@@ -232,6 +232,45 @@ $chatClienteUsuario = htmlspecialchars($chatClienteUsuario, ENT_QUOTES);
 .cli-send-btn:hover    { background: #2751a3; }
 .cli-send-btn:disabled { background: #aaa; cursor: default; }
 
+/* ── Menú tres puntos ───────────────────────────── */
+.cli-menu-wrap {
+    position: relative; flex-shrink: 0; margin-left: auto;
+}
+.cli-menu-btn {
+    background: none; border: none;
+    color: #555; font-size: 1.4rem; line-height: 1;
+    cursor: pointer; padding: 4px 8px; border-radius: 6px;
+    transition: background .12s;
+}
+.cli-menu-btn:hover { background: #e0e3e8; color: #111; }
+.cli-dropdown {
+    position: absolute; top: calc(100% + 4px); right: 0;
+    background: #fff; border-radius: 10px;
+    box-shadow: 0 4px 20px rgba(0,0,0,.18);
+    min-width: 185px; z-index: 300;
+    overflow: hidden; border: 1px solid #eee;
+    display: none;
+}
+.cli-dropdown.open { display: block; }
+.cli-dropdown-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 16px; font-size: .84rem; color: #333;
+    cursor: pointer; transition: background .1s;
+    border-bottom: 1px solid #f5f5f5;
+}
+.cli-dropdown-item:last-child { border-bottom: none; }
+.cli-dropdown-item:hover { background: #f5f7fa; }
+.cli-dropdown-item i { font-size: .9rem; width: 16px; text-align: center; }
+.cli-item-danger       { color: #dc3545; }
+.cli-item-danger:hover { background: #fff0f0; }
+.cli-block-badge {
+    display: inline-block;
+    background: #dc3545; color: #fff;
+    font-size: .58rem; padding: 1px 6px;
+    border-radius: 10px; margin-left: 5px;
+    vertical-align: middle; font-weight: 600;
+}
+
 /* ── Responsive ─────────────────────────────────── */
 @media (max-width: 760px) {
     #cliChatPanel { width: calc(100vw - 20px); right: 10px; left: 10px; }
@@ -399,6 +438,8 @@ $chatClienteUsuario = htmlspecialchars($chatClienteUsuario, ENT_QUOTES);
 
             case 'privado': {
                 if (msg.canal && msg.canal !== 'clientes') return;
+                // Silenciar mensajes de usuarios bloqueados
+                if (!ES_INVITADO && cliEstaBlockeado(msg.de)) return;
                 if (!historiales[msg.de]) historiales[msg.de] = [];
                 if (noLeidos[msg.de] === undefined) noLeidos[msg.de] = 0;
                 if (!contactos.includes(msg.de)) contactos.push(msg.de);
@@ -475,18 +516,40 @@ $chatClienteUsuario = htmlspecialchars($chatClienteUsuario, ENT_QUOTES);
 
     /* ── Mostrar área de mensajes ── */
     function cliMostrarChat(chat) {
-        const isTodos = (chat === TODOS_KEY);
-        const header  = document.getElementById('cliMsgHeader');
-        const color   = avatarColor(chat);
-        const inicial = isTodos ? '★' : chat.charAt(0).toUpperCase();
+        const isTodos  = (chat === TODOS_KEY);
+        const header   = document.getElementById('cliMsgHeader');
+        const color    = avatarColor(chat);
+        const inicial  = isTodos ? '★' : chat.charAt(0).toUpperCase();
+        const blocked  = !ES_INVITADO && !isTodos && cliEstaBlockeado(chat);
+
+        const menuHtml = (!ES_INVITADO && !isTodos) ? `
+            <div class="cli-menu-wrap">
+                <button class="cli-menu-btn" onclick="cliToggleMenu(event)" title="Opciones">&#8942;</button>
+                <div class="cli-dropdown" id="cliDropdown">
+                    <div class="cli-dropdown-item" onclick="cliBloquear()">
+                        <i class="bi ${blocked ? 'bi-slash-circle-fill' : 'bi-slash-circle'}"></i>
+                        ${blocked ? 'Desbloquear usuario' : 'Bloquear usuario'}
+                    </div>
+                    <div class="cli-dropdown-item" onclick="cliBorrarChat()">
+                        <i class="bi bi-trash3"></i> Borrar historial
+                    </div>
+                    <div class="cli-dropdown-item cli-item-danger" onclick="cliEliminarContacto()">
+                        <i class="bi bi-person-x-fill"></i> Eliminar contacto
+                    </div>
+                </div>
+            </div>` : '';
 
         header.style.display = 'flex';
         header.innerHTML = `
             <div class="cli-avatar" style="background:${color};width:36px;height:36px;font-size:.85rem;">${inicial}</div>
-            <div>
-                <div class="cli-msg-header-name">${escHtml(chat)}</div>
+            <div style="flex:1;min-width:0;">
+                <div class="cli-msg-header-name">
+                    ${escHtml(chat)}
+                    ${blocked ? '<span class="cli-block-badge">Bloqueado</span>' : ''}
+                </div>
                 <div class="cli-msg-header-sub">${isTodos ? 'Chat grupal' : 'Mensaje privado'}</div>
-            </div>`;
+            </div>
+            ${menuHtml}`;
 
         document.getElementById('cliEmpty').style.display    = 'none';
         document.getElementById('cliMessages').style.display = 'flex';
@@ -558,13 +621,19 @@ $chatClienteUsuario = htmlspecialchars($chatClienteUsuario, ENT_QUOTES);
             const isTodos = (chat === TODOS_KEY);
             const inicial = isTodos ? '★' : chat.charAt(0).toUpperCase();
 
+            const blocked = !ES_INVITADO && !isTodos && cliEstaBlockeado(chat);
             const item = document.createElement('div');
             item.className = 'cli-contact-item' + (chat === chatActivo ? ' active' : '');
             item.innerHTML = `
-                <div class="cli-avatar" style="background:${color};">${inicial}</div>
+                <div class="cli-avatar" style="background:${color};${blocked ? 'opacity:.5;' : ''}">${inicial}</div>
                 <div class="cli-contact-info">
-                    <div class="cli-contact-name">${escHtml(isTodos ? '★ Todos' : chat)}</div>
-                    <div class="cli-contact-prev">${escHtml(preview.length > 35 ? preview.slice(0,32) + '…' : preview)}</div>
+                    <div class="cli-contact-name">
+                        ${escHtml(isTodos ? '★ Todos' : chat)}
+                        ${blocked ? '<span class="cli-block-badge">Bloq.</span>' : ''}
+                    </div>
+                    <div class="cli-contact-prev" style="${blocked ? 'color:#dc3545;' : ''}">
+                        ${blocked ? '🚫 Bloqueado' : escHtml(preview.length > 35 ? preview.slice(0,32) + '…' : preview)}
+                    </div>
                 </div>
                 <span class="cli-unread ${unread > 0 ? 'visible' : ''}">${unread > 99 ? '99+' : unread}</span>`;
             item.onclick = () => cliCambiar(chat);
@@ -616,6 +685,71 @@ $chatClienteUsuario = htmlspecialchars($chatClienteUsuario, ENT_QUOTES);
     function escHtml(s) {
         return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
     }
+
+    /* ── Bloqueo: lista guardada en localStorage ── */
+    function cliBlockedList() {
+        try { return JSON.parse(localStorage.getItem('cliBlocked_' + MI_USUARIO) || '[]'); }
+        catch (_) { return []; }
+    }
+    function cliEstaBlockeado(user) {
+        return cliBlockedList().includes(user);
+    }
+
+    /* ── Toggle dropdown ── */
+    window.cliToggleMenu = function (e) {
+        e.stopPropagation();
+        const d = document.getElementById('cliDropdown');
+        if (d) d.classList.toggle('open');
+    };
+    document.addEventListener('click', function () {
+        const d = document.getElementById('cliDropdown');
+        if (d) d.classList.remove('open');
+    });
+
+    /* ── Bloquear / Desbloquear ── */
+    window.cliBloquear = function () {
+        const user = chatActivo;
+        const list = cliBlockedList();
+        const idx  = list.indexOf(user);
+        const texto = idx === -1
+            ? `Has bloqueado a ${user}. Ya no recibirás sus mensajes privados.`
+            : `Has desbloqueado a ${user}.`;
+        if (idx === -1) list.push(user); else list.splice(idx, 1);
+        localStorage.setItem('cliBlocked_' + MI_USUARIO, JSON.stringify(list));
+        cliAgregarMensaje(user, { tipo: 'sistema', texto }, false);
+        cliMostrarChat(user);
+        cliRenderContactos();
+        const d = document.getElementById('cliDropdown');
+        if (d) d.classList.remove('open');
+    };
+
+    /* ── Borrar historial del chat activo ── */
+    window.cliBorrarChat = function () {
+        if (!confirm('¿Borrar el historial de este chat? Esta acción no se puede deshacer.')) return;
+        historiales[chatActivo]  = [];
+        histCargado[chatActivo]  = true;
+        document.getElementById('cliMessages').innerHTML = '';
+        const d = document.getElementById('cliDropdown');
+        if (d) d.classList.remove('open');
+    };
+
+    /* ── Eliminar contacto y volver al grupo ── */
+    window.cliEliminarContacto = function () {
+        const user = chatActivo;
+        if (!confirm(`¿Eliminar a ${user} de tus contactos?`)) return;
+        const idx = contactos.indexOf(user);
+        if (idx !== -1) contactos.splice(idx, 1);
+        delete historiales[user];
+        delete noLeidos[user];
+        delete histCargado[user];
+        chatActivo = TODOS_KEY;
+        document.getElementById('cliMsgHeader').style.display  = 'none';
+        document.getElementById('cliEmpty').style.display      = 'flex';
+        document.getElementById('cliMessages').style.display   = 'none';
+        document.getElementById('cliInputWrap').style.display  = 'none';
+        cliRenderContactos();
+        actualizarBadge();
+    };
 
     // Renderizar contactos iniciales (solo "★ Todos" hasta que conecte)
     cliRenderContactos();
