@@ -7,14 +7,14 @@
 session_start();
 header('Content-Type: application/json; charset=utf-8');
 
-if (!isset($_SESSION['usuario']) || !empty($_SESSION['es_admin'])) {
+// Aceptar usuario logueado o invitado de sesión; rechazar admins y sin sesión
+$yo = $_SESSION['usuario'] ?? $_SESSION['chat_guest'] ?? '';
+if (empty($yo) || !empty($_SESSION['es_admin'])) {
     http_response_code(401);
     exit(json_encode([]));
 }
 
 require_once __DIR__ . '/../config/database.php';
-
-$yo     = $_SESSION['usuario'];
 $chat   = trim($_GET['chat'] ?? 'todos');
 $limite = 60;
 $db     = Database::conectar();

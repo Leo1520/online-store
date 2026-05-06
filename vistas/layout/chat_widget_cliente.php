@@ -1,6 +1,25 @@
 <?php
-$chatClienteUsuario = htmlspecialchars($_SESSION['usuario'] ?? '', ENT_QUOTES);
-if (!$chatClienteUsuario) return;
+if (session_status() === PHP_SESSION_NONE) session_start();
+
+$chatClienteUsuario = $_SESSION['usuario'] ?? '';
+$esInvitado = false;
+
+if (empty($chatClienteUsuario)) {
+    // Generar nombre de invitado basado en IP + session_id (único por sesión)
+    $ip = trim(explode(',', $_SERVER['HTTP_X_FORWARDED_FOR']
+        ?? $_SERVER['HTTP_X_REAL_IP']
+        ?? $_SERVER['REMOTE_ADDR']
+        ?? '0.0.0.0')[0]);
+    if (!filter_var($ip, FILTER_VALIDATE_IP)) $ip = '0.0.0.0';
+
+    if (empty($_SESSION['chat_guest'])) {
+        $_SESSION['chat_guest'] = 'Invitado_' . substr(md5($ip . session_id()), 0, 6);
+    }
+    $chatClienteUsuario = $_SESSION['chat_guest'];
+    $esInvitado = true;
+}
+
+$chatClienteUsuario = htmlspecialchars($chatClienteUsuario, ENT_QUOTES);
 ?>
 <!-- ══════════════════════════════════════════════════════════
      CHAT WIDGET — Tienda / Clientes  (panel con contactos)
@@ -240,7 +259,13 @@ if (!$chatClienteUsuario) return;
         <div class="cli-header-ico"><i class="bi bi-chat-dots-fill"></i></div>
         <div class="cli-header-info">
             <div class="cli-header-title">Chat Clientes</div>
-            <div class="cli-header-sub">Conectado como <strong><?php echo $chatClienteUsuario; ?></strong></div>
+            <div class="cli-header-sub">
+                <?php if ($esInvitado): ?>
+                    Modo invitado &mdash; <strong><?php echo $chatClienteUsuario; ?></strong>
+                <?php else: ?>
+                    Conectado como <strong><?php echo $chatClienteUsuario; ?></strong>
+                <?php endif; ?>
+            </div>
         </div>
         <span class="cli-dot" id="cliDot" title="Sin conexión"></span>
         <button class="cli-close" onclick="cliToggle()" title="Cerrar">&#x2715;</button>
@@ -278,9 +303,10 @@ if (!$chatClienteUsuario) return;
 
 <script>
 (function () {
-    const MI_USUARIO = <?php echo json_encode($chatClienteUsuario); ?>;
-    const WS_URL     = 'ws://' + window.location.hostname + ':2346';
-    const TODOS_KEY  = '★ Todos';
+    const MI_USUARIO  = <?php echo json_encode($chatClienteUsuario); ?>;
+    const ES_INVITADO = <?php echo $esInvitado ? 'true' : 'false'; ?>;
+    const WS_URL      = 'ws://' + window.location.hostname + ':2346';
+    const TODOS_KEY   = '★ Todos';
 
     let ws          = null;
     let conectado   = false;
@@ -483,6 +509,13 @@ if (!$chatClienteUsuario) return;
 
     /* ── Fetch historial desde BD ── */
     function cliFetchHistorial(chat) {
+        // Invitados: sin historial persistente (su nombre cambia entre sesiones)
+        if (ES_INVITADO) {
+            histCargado[chat] = true;
+            if (chatActivo === chat) cliCargarHistorial();
+            return;
+        }
+
         const chatParam = (chat === TODOS_KEY) ? 'todos' : chat;
         const area = document.getElementById('cliMessages');
         if (chatActivo === chat) {
