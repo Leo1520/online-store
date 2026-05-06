@@ -271,6 +271,46 @@ $chatClienteUsuario = htmlspecialchars($chatClienteUsuario, ENT_QUOTES);
     vertical-align: middle; font-weight: 600;
 }
 
+/* ── Estado bloqueado ───────────────────────────── */
+.cli-blocked-bar {
+    background: #fff3cd; border-bottom: 1px solid #ffc107;
+    color: #7d4e00; font-size: .78rem;
+    padding: 7px 14px; display: none; align-items: center;
+    gap: 8px; flex-shrink: 0;
+}
+.cli-blocked-bar.visible { display: flex; }
+.cli-blocked-bar button {
+    margin-left: auto; background: none; cursor: pointer;
+    border: 1px solid #7d4e00; color: #7d4e00;
+    border-radius: 4px; padding: 2px 9px; font-size: .73rem;
+}
+.cli-bloqueado-por-bar {
+    background: #f8d7da; border-bottom: 1px solid #f5c6cb;
+    color: #721c24; font-size: .78rem;
+    padding: 7px 14px; display: none; align-items: center;
+    gap: 8px; flex-shrink: 0;
+}
+.cli-bloqueado-por-bar.visible { display: flex; }
+.cli-blocked-input-notice {
+    display: none; align-items: center; justify-content: center;
+    gap: 8px; padding: 10px 14px;
+    background: #fff3cd; border-top: 1px solid #ffc107;
+    font-size: .8rem; color: #7d4e00; flex-shrink: 0;
+}
+.cli-blocked-input-notice.visible { display: flex; }
+.cli-bloqueado-por-input {
+    display: none; align-items: center; justify-content: center;
+    gap: 8px; padding: 10px 14px;
+    background: #f8d7da; border-top: 1px solid #f5c6cb;
+    font-size: .8rem; color: #721c24; flex-shrink: 0;
+}
+.cli-bloqueado-por-input.visible { display: flex; }
+.cli-bubble-wrap.me.yo-bloqueado .cli-bubble { background: #6c757d; opacity: .85; }
+.cli-msg-blocked-status {
+    font-size: .65rem; color: #dc3545;
+    margin-top: 2px; padding: 0 4px; text-align: right;
+}
+
 /* ── Responsive ─────────────────────────────────── */
 @media (max-width: 760px) {
     #cliChatPanel { width: calc(100vw - 20px); right: 10px; left: 10px; }
@@ -324,6 +364,15 @@ $chatClienteUsuario = htmlspecialchars($chatClienteUsuario, ENT_QUOTES);
         <!-- Columna derecha: mensajes -->
         <div class="cli-right" id="cliRight">
             <div class="cli-msg-header" id="cliMsgHeader"></div>
+            <div class="cli-blocked-bar" id="cliBlockedBar">
+                <i class="bi bi-slash-circle-fill"></i>
+                Has bloqueado a este usuario.
+                <button onclick="cliBloquear()">Desbloquear</button>
+            </div>
+            <div class="cli-bloqueado-por-bar" id="cliBloqueadoPorBar">
+                <i class="bi bi-x-circle-fill"></i>
+                <span id="cliBloqueadoPorText">Este usuario te ha bloqueado.</span>
+            </div>
             <div class="cli-empty" id="cliEmpty">
                 <i class="bi bi-chat-square-dots"></i>
                 <p>Selecciona un chat para comenzar</p>
@@ -335,6 +384,12 @@ $chatClienteUsuario = htmlspecialchars($chatClienteUsuario, ENT_QUOTES);
                 <button class="cli-send-btn" id="cliSendBtn" onclick="cliEnviar()" disabled title="Enviar">
                     <i class="bi bi-send-fill"></i>
                 </button>
+            </div>
+            <div class="cli-blocked-input-notice" id="cliBlockedInputNotice">
+                <i class="bi bi-slash-circle"></i> Has bloqueado a este usuario. No puedes enviarle mensajes.
+            </div>
+            <div class="cli-bloqueado-por-input" id="cliBloqueadoPorInputNotice">
+                <i class="bi bi-x-circle"></i> No puedes enviar mensajes — te han bloqueado.
             </div>
         </div>
     </div>
@@ -352,10 +407,11 @@ $chatClienteUsuario = htmlspecialchars($chatClienteUsuario, ENT_QUOTES);
     let abierto     = false;
     let chatActivo  = TODOS_KEY;
 
-    let contactos   = [TODOS_KEY];  // "★ Todos" + usuarios conectados
-    let historiales = {};
-    let noLeidos    = {};
-    let histCargado = {};
+    let contactos       = [TODOS_KEY];  // "★ Todos" + usuarios conectados
+    let historiales     = {};
+    let noLeidos        = {};
+    let histCargado     = {};
+    let bloqueadoPorSet = new Set();  // usuarios que ME bloquearon
 
     historiales[TODOS_KEY] = [];
     noLeidos[TODOS_KEY]    = 0;
@@ -380,6 +436,12 @@ $chatClienteUsuario = htmlspecialchars($chatClienteUsuario, ENT_QUOTES);
         ws.onopen = function () {
             conectado = true;
             ws.send(JSON.stringify({ nombre: MI_USUARIO, canal: 'clientes' }));
+            // Re-enviar bloqueos al servidor tras (re)conexión
+            if (!ES_INVITADO) {
+                cliBlockedList().forEach(function (user) {
+                    ws.send(JSON.stringify({ tipo: 'bloquear', usuario: user }));
+                });
+            }
             document.getElementById('cliDot').classList.add('online');
             document.getElementById('cliDot').title = 'Conectado';
             document.getElementById('cliSendBtn').disabled = false;
@@ -421,6 +483,8 @@ $chatClienteUsuario = htmlspecialchars($chatClienteUsuario, ENT_QUOTES);
 
             case 'mensaje': {
                 if (msg.canal && msg.canal !== 'clientes') return;
+                // Silenciar en Todos mensajes de usuarios bloqueados
+                if (!ES_INVITADO && msg.de && msg.de !== MI_USUARIO && cliEstaBlockeado(msg.de)) return;
                 cliAgregarMensaje(TODOS_KEY, {
                     tipo:  msg.de === MI_USUARIO ? 'yo' : 'otro',
                     de:    msg.de,
@@ -453,6 +517,27 @@ $chatClienteUsuario = htmlspecialchars($chatClienteUsuario, ENT_QUOTES);
                 cliAgregarMensaje(msg.para, { tipo: 'yo', texto: msg.texto, hora: ahora() }, false);
                 break;
             }
+
+            case 'privado_bloqueado': {
+                if (msg.canal && msg.canal !== 'clientes') return;
+                if (!historiales[msg.para]) historiales[msg.para] = [];
+                cliAgregarMensaje(msg.para, { tipo: 'yo_bloqueado', texto: msg.texto, hora: ahora() }, false);
+                break;
+            }
+
+            case 'bloqueado_por': {
+                bloqueadoPorSet.add(msg.usuario);
+                cliRenderContactos();
+                if (chatActivo === msg.usuario) cliMostrarChat(msg.usuario);
+                break;
+            }
+
+            case 'desbloqueado_por': {
+                bloqueadoPorSet.delete(msg.usuario);
+                cliRenderContactos();
+                if (chatActivo === msg.usuario) cliMostrarChat(msg.usuario);
+                break;
+            }
         }
     }
 
@@ -474,13 +559,29 @@ $chatClienteUsuario = htmlspecialchars($chatClienteUsuario, ENT_QUOTES);
 
     /* ── Renderizar una burbuja ── */
     function cliRenderBurbuja(entry) {
-        const area   = document.getElementById('cliMessages');
-        const wrap   = document.createElement('div');
+        const area    = document.getElementById('cliMessages');
+        const wrap    = document.createElement('div');
         const esTodos = (chatActivo === TODOS_KEY);
 
         if (entry.tipo === 'sistema') {
             wrap.className   = 'cli-system-msg';
             wrap.textContent = entry.texto;
+
+        } else if (entry.tipo === 'yo_bloqueado') {
+            wrap.className = 'cli-bubble-wrap me yo-bloqueado';
+            const burbuja = document.createElement('div');
+            burbuja.className   = 'cli-bubble';
+            burbuja.textContent = entry.texto;
+            wrap.appendChild(burbuja);
+            const status = document.createElement('div');
+            status.className   = 'cli-msg-blocked-status';
+            status.textContent = '🚫 No enviado — bloqueado';
+            wrap.appendChild(status);
+            const time = document.createElement('div');
+            time.className   = 'cli-bubble-time';
+            time.textContent = entry.hora || '';
+            wrap.appendChild(time);
+
         } else {
             const esYo = entry.tipo === 'yo' || entry.de === MI_USUARIO;
             wrap.className = 'cli-bubble-wrap ' + (esYo ? 'me' : 'other');
@@ -516,19 +617,20 @@ $chatClienteUsuario = htmlspecialchars($chatClienteUsuario, ENT_QUOTES);
 
     /* ── Mostrar área de mensajes ── */
     function cliMostrarChat(chat) {
-        const isTodos  = (chat === TODOS_KEY);
-        const header   = document.getElementById('cliMsgHeader');
-        const color    = avatarColor(chat);
-        const inicial  = isTodos ? '★' : chat.charAt(0).toUpperCase();
-        const blocked  = !ES_INVITADO && !isTodos && cliEstaBlockeado(chat);
+        const isTodos     = (chat === TODOS_KEY);
+        const header      = document.getElementById('cliMsgHeader');
+        const color       = avatarColor(chat);
+        const inicial     = isTodos ? '★' : chat.charAt(0).toUpperCase();
+        const iBlocked    = !ES_INVITADO && !isTodos && cliEstaBlockeado(chat);
+        const theyBlocked = !ES_INVITADO && !isTodos && bloqueadoPorSet.has(chat);
 
         const menuHtml = (!ES_INVITADO && !isTodos) ? `
             <div class="cli-menu-wrap">
                 <button class="cli-menu-btn" onclick="cliToggleMenu(event)" title="Opciones">&#8942;</button>
                 <div class="cli-dropdown" id="cliDropdown">
                     <div class="cli-dropdown-item" onclick="cliBloquear()">
-                        <i class="bi ${blocked ? 'bi-slash-circle-fill' : 'bi-slash-circle'}"></i>
-                        ${blocked ? 'Desbloquear usuario' : 'Bloquear usuario'}
+                        <i class="bi ${iBlocked ? 'bi-slash-circle-fill' : 'bi-slash-circle'}"></i>
+                        ${iBlocked ? 'Desbloquear usuario' : 'Bloquear usuario'}
                     </div>
                     <div class="cli-dropdown-item" onclick="cliBorrarChat()">
                         <i class="bi bi-trash3"></i> Borrar historial
@@ -545,15 +647,42 @@ $chatClienteUsuario = htmlspecialchars($chatClienteUsuario, ENT_QUOTES);
             <div style="flex:1;min-width:0;">
                 <div class="cli-msg-header-name">
                     ${escHtml(chat)}
-                    ${blocked ? '<span class="cli-block-badge">Bloqueado</span>' : ''}
+                    ${iBlocked    ? '<span class="cli-block-badge">Bloqueado</span>' : ''}
+                    ${theyBlocked ? '<span class="cli-block-badge" style="background:#721c24;">Te bloqueó</span>' : ''}
                 </div>
                 <div class="cli-msg-header-sub">${isTodos ? 'Chat grupal' : 'Mensaje privado'}</div>
             </div>
             ${menuHtml}`;
 
+        // Barras de estado y controles de entrada
+        const blockedBar      = document.getElementById('cliBlockedBar');
+        const bloqueadoPorBar = document.getElementById('cliBloqueadoPorBar');
+        const inputWrap       = document.getElementById('cliInputWrap');
+        const blockedNotice   = document.getElementById('cliBlockedInputNotice');
+        const blockedByNotice = document.getElementById('cliBloqueadoPorInputNotice');
+
+        blockedBar.classList.remove('visible');
+        bloqueadoPorBar.classList.remove('visible');
+        blockedNotice.classList.remove('visible');
+        blockedByNotice.classList.remove('visible');
+        inputWrap.style.display = 'flex';
+
+        if (!isTodos) {
+            if (iBlocked) {
+                blockedBar.classList.add('visible');
+                inputWrap.style.display = 'none';
+                blockedNotice.classList.add('visible');
+            } else if (theyBlocked) {
+                bloqueadoPorBar.classList.add('visible');
+                document.getElementById('cliBloqueadoPorText').textContent =
+                    chat + ' te ha bloqueado. No puedes enviarle mensajes.';
+                inputWrap.style.display = 'none';
+                blockedByNotice.classList.add('visible');
+            }
+        }
+
         document.getElementById('cliEmpty').style.display    = 'none';
         document.getElementById('cliMessages').style.display = 'flex';
-        document.getElementById('cliInputWrap').style.display = 'flex';
     }
 
     /* ── Cambiar chat activo ── */
@@ -621,7 +750,8 @@ $chatClienteUsuario = htmlspecialchars($chatClienteUsuario, ENT_QUOTES);
             const isTodos = (chat === TODOS_KEY);
             const inicial = isTodos ? '★' : chat.charAt(0).toUpperCase();
 
-            const blocked = !ES_INVITADO && !isTodos && cliEstaBlockeado(chat);
+            const blocked     = !ES_INVITADO && !isTodos && cliEstaBlockeado(chat);
+            const theyBlocked = !ES_INVITADO && !isTodos && bloqueadoPorSet.has(chat);
             const item = document.createElement('div');
             item.className = 'cli-contact-item' + (chat === chatActivo ? ' active' : '');
             item.innerHTML = `
@@ -629,10 +759,11 @@ $chatClienteUsuario = htmlspecialchars($chatClienteUsuario, ENT_QUOTES);
                 <div class="cli-contact-info">
                     <div class="cli-contact-name">
                         ${escHtml(isTodos ? '★ Todos' : chat)}
-                        ${blocked ? '<span class="cli-block-badge">Bloq.</span>' : ''}
+                        ${blocked     ? '<span class="cli-block-badge">Bloq.</span>' : ''}
+                        ${theyBlocked ? '<span class="cli-block-badge" style="background:#721c24;">Te bloqueó</span>' : ''}
                     </div>
-                    <div class="cli-contact-prev" style="${blocked ? 'color:#dc3545;' : ''}">
-                        ${blocked ? '🚫 Bloqueado' : escHtml(preview.length > 35 ? preview.slice(0,32) + '…' : preview)}
+                    <div class="cli-contact-prev" style="${blocked ? 'color:#dc3545;' : theyBlocked ? 'color:#721c24;' : ''}">
+                        ${blocked ? '🚫 Bloqueado' : theyBlocked ? '🔴 Te ha bloqueado' : escHtml(preview.length > 35 ? preview.slice(0,32) + '…' : preview)}
                     </div>
                 </div>
                 <span class="cli-unread ${unread > 0 ? 'visible' : ''}">${unread > 99 ? '99+' : unread}</span>`;
@@ -647,6 +778,13 @@ $chatClienteUsuario = htmlspecialchars($chatClienteUsuario, ENT_QUOTES);
         const input = document.getElementById('cliInput');
         const txt   = input.value.trim();
         if (!txt) return;
+
+        // Si el destinatario me bloqueó: mostrar mensaje fallido localmente
+        if (!ES_INVITADO && chatActivo !== TODOS_KEY && bloqueadoPorSet.has(chatActivo)) {
+            cliAgregarMensaje(chatActivo, { tipo: 'yo_bloqueado', texto: txt, hora: ahora() }, false);
+            input.value = '';
+            return;
+        }
 
         if (chatActivo === TODOS_KEY) {
             ws.send(JSON.stringify({ texto: txt, canal: 'clientes' }));
@@ -711,9 +849,16 @@ $chatClienteUsuario = htmlspecialchars($chatClienteUsuario, ENT_QUOTES);
         const user = chatActivo;
         const list = cliBlockedList();
         const idx  = list.indexOf(user);
-        const texto = idx === -1
+        const accion = idx === -1 ? 'bloquear' : 'desbloquear';
+        const texto  = idx === -1
             ? `Has bloqueado a ${user}. Ya no recibirás sus mensajes privados.`
             : `Has desbloqueado a ${user}.`;
+
+        // Notificar servidor para que avise al otro usuario
+        if (conectado && ws && !ES_INVITADO) {
+            ws.send(JSON.stringify({ tipo: accion, usuario: user }));
+        }
+
         if (idx === -1) list.push(user); else list.splice(idx, 1);
         localStorage.setItem('cliBlocked_' + MI_USUARIO, JSON.stringify(list));
         cliAgregarMensaje(user, { tipo: 'sistema', texto }, false);
