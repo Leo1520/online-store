@@ -33,7 +33,9 @@ CREATE TABLE IF NOT EXISTS `Empleado` (
 
 -- Stored Procedures para Empleado
 
-DROP PROCEDURE IF EXISTS `sp_listar_empleados`;
+DELIMITER //
+
+DROP PROCEDURE IF EXISTS `sp_listar_empleados`//
 CREATE PROCEDURE `sp_listar_empleados`()
 BEGIN
     SELECT e.ci, e.nombres, e.apPaterno, e.apMaterno,
@@ -42,9 +44,9 @@ BEGIN
     FROM Empleado e
     INNER JOIN Cuenta c ON c.usuario = e.usuarioCuenta
     ORDER BY e.apPaterno ASC, e.nombres ASC;
-END;
+END//
 
-DROP PROCEDURE IF EXISTS `sp_crear_empleado_con_cuenta`;
+DROP PROCEDURE IF EXISTS `sp_crear_empleado_con_cuenta`//
 CREATE PROCEDURE `sp_crear_empleado_con_cuenta`(
     IN p_usuario    VARCHAR(40),
     IN p_password   VARCHAR(255),
@@ -69,9 +71,9 @@ BEGIN
     INSERT INTO `Empleado` (`ci`, `nombres`, `apPaterno`, `apMaterno`, `correo`, `nroCelular`, `cargo`, `usuarioCuenta`)
         VALUES (p_ci, p_nombres, p_apPaterno, p_apMaterno, p_correo, p_nroCelular, p_cargo, p_usuario);
     COMMIT;
-END;
+END//
 
-DROP PROCEDURE IF EXISTS `sp_obtener_empleado_por_usuario`;
+DROP PROCEDURE IF EXISTS `sp_obtener_empleado_por_usuario`//
 CREATE PROCEDURE `sp_obtener_empleado_por_usuario`(IN p_usuario VARCHAR(40))
 BEGIN
     SELECT e.ci, e.nombres, e.apPaterno, e.apMaterno,
@@ -81,9 +83,9 @@ BEGIN
     INNER JOIN Cuenta c ON c.usuario = e.usuarioCuenta
     WHERE e.usuarioCuenta = p_usuario
     LIMIT 1;
-END;
+END//
 
-DROP PROCEDURE IF EXISTS `sp_actualizar_empleado`;
+DROP PROCEDURE IF EXISTS `sp_actualizar_empleado`//
 CREATE PROCEDURE `sp_actualizar_empleado`(
     IN p_usuario    VARCHAR(40),
     IN p_ci         VARCHAR(20),
@@ -102,15 +104,15 @@ BEGIN
            nroCelular = p_nroCelular, cargo = p_cargo
      WHERE usuarioCuenta = p_usuario;
     UPDATE `Cuenta` SET rol = p_rol WHERE usuario = p_usuario;
-END;
+END//
 
-DROP PROCEDURE IF EXISTS `sp_actualizar_password_empleado`;
+DROP PROCEDURE IF EXISTS `sp_actualizar_password_empleado`//
 CREATE PROCEDURE `sp_actualizar_password_empleado`(IN p_usuario VARCHAR(40), IN p_password VARCHAR(255))
 BEGIN
     UPDATE `Cuenta` SET password = p_password WHERE usuario = p_usuario;
-END;
+END//
 
-DROP PROCEDURE IF EXISTS `sp_eliminar_empleado_y_cuenta`;
+DROP PROCEDURE IF EXISTS `sp_eliminar_empleado_y_cuenta`//
 CREATE PROCEDURE `sp_eliminar_empleado_y_cuenta`(IN p_usuario VARCHAR(40))
 BEGIN
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
@@ -125,10 +127,10 @@ BEGIN
     DELETE FROM `Empleado` WHERE usuarioCuenta = p_usuario;
     DELETE FROM `Cuenta`   WHERE usuario = p_usuario;
     COMMIT;
-END;
+END//
 
 -- Vista unificada de todos los usuarios internos (no clientes)
-DROP PROCEDURE IF EXISTS `sp_listar_usuarios_internos`;
+DROP PROCEDURE IF EXISTS `sp_listar_usuarios_internos`//
 CREATE PROCEDURE `sp_listar_usuarios_internos`()
 BEGIN
     SELECT
@@ -151,4 +153,6 @@ BEGIN
     LEFT JOIN Vendedor v  ON v.usuarioCuenta  = c.usuario
     WHERE c.rol != 'cliente'
     ORDER BY c.rol ASC, c.usuario ASC;
-END;
+END//
+
+DELIMITER ;

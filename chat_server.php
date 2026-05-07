@@ -13,16 +13,16 @@ $ws        = new Worker('websocket://0.0.0.0:2346');
 $ws->count = 1;
 $ws->name  = 'ChatElectroHogar';
 
-$nombres = [];  // [connId => nombre]
-$canales = [];  // [connId => 'internos'|'clientes'|'admin']
-$db      = null;
+$nombres    = [];  // [connId => nombre]
+$canales    = [];  // [connId => 'internos'|'clientes'|'admin']
+$bloqueados = [];  // ['usuario' => ['bloqueado1', ...]] — quién bloqueó a quién
+$db         = null;
 
 /* ── DB helpers ─────────────────────────────────────────────── */
 function dbConectar(): ?mysqli {
     $conn = new mysqli('localhost', 'root', '', 'mydb');
     if ($conn->connect_error) return null;
     $conn->set_charset('utf8mb4');
-    // Migración automática: agregar columna canal si no existe
     $conn->query("ALTER TABLE chat_mensajes ADD COLUMN IF NOT EXISTS canal VARCHAR(20) NOT NULL DEFAULT 'internos'");
     return $conn;
 }
@@ -45,7 +45,7 @@ $ws->onConnect = function ($conn) use (&$nombres, &$canales) {
 };
 
 /* ── Mensaje recibido ───────────────────────────────────────── */
-$ws->onMessage = function ($conn, $data) use ($ws, &$nombres, &$canales) {
+$ws->onMessage = function ($conn, $data) use ($ws, &$nombres, &$canales, &$bloqueados) {
     $data = trim($data);
 
     /* Primera vez: registrar — acepta JSON {"nombre":"...","canal":"..."} */
@@ -65,6 +65,15 @@ $ws->onMessage = function ($conn, $data) use ($ws, &$nombres, &$canales) {
         $canalMensaje = ($canal === 'admin') ? 'internos' : $canal;
         _broadcastCanal($ws, $canales, $canalMensaje, _sistema("✔ {$nombre} se unió", $canalMensaje));
         _enviarUsuarios($ws, $nombres, $canales);
+
+        // Notificar al nuevo usuario quiénes lo tienen bloqueado
+        foreach ($bloqueados as $bloqueador => $lista) {
+            foreach ($lista as $bloqueado) {
+                if (strtolower($bloqueado) === strtolower($nombre)) {
+                    $conn->send(_encode(['tipo' => 'bloqueado_por', 'usuario' => $bloqueador]));
+                }
+            }
+        }
         return;
     }
 
@@ -76,8 +85,37 @@ $ws->onMessage = function ($conn, $data) use ($ws, &$nombres, &$canales) {
     $miNombre = $nombres[$conn->id];
     $miCanal  = $canales[$conn->id];
 
-    /* Mensaje JSON: {"texto":"...","canal":"..."} o {"para":"...","texto":"...","canal":"..."} */
     $json = json_decode($data, true);
+
+    /* ── Comandos de bloqueo / desbloqueo ── */
+    if ($json && isset($json['tipo'])) {
+        if ($json['tipo'] === 'bloquear' && isset($json['usuario'])) {
+            $objetivo = $json['usuario'];
+            if (!isset($bloqueados[$miNombre])) $bloqueados[$miNombre] = [];
+            $yaExiste = false;
+            foreach ($bloqueados[$miNombre] as $u) {
+                if (strtolower($u) === strtolower($objetivo)) { $yaExiste = true; break; }
+            }
+            if (!$yaExiste) $bloqueados[$miNombre][] = $objetivo;
+            _notificarUsuario($ws, $nombres, $objetivo, _encode(['tipo' => 'bloqueado_por', 'usuario' => $miNombre]));
+            return;
+        }
+
+        if ($json['tipo'] === 'desbloquear' && isset($json['usuario'])) {
+            $objetivo = $json['usuario'];
+            if (isset($bloqueados[$miNombre])) {
+                $nueva = [];
+                foreach ($bloqueados[$miNombre] as $u) {
+                    if (strtolower($u) !== strtolower($objetivo)) $nueva[] = $u;
+                }
+                $bloqueados[$miNombre] = $nueva;
+            }
+            _notificarUsuario($ws, $nombres, $objetivo, _encode(['tipo' => 'desbloqueado_por', 'usuario' => $miNombre]));
+            return;
+        }
+    }
+
+    /* ── Mensaje JSON: {"texto":"...","canal":"..."} o {"para":"...","texto":"...","canal":"..."} ── */
     if ($json && isset($json['texto'])) {
         $txt   = trim($json['texto']);
         $canal = $json['canal'] ?? (($miCanal === 'admin') ? 'internos' : $miCanal);
@@ -85,7 +123,16 @@ $ws->onMessage = function ($conn, $data) use ($ws, &$nombres, &$canales) {
 
         if (isset($json['para'])) {
             $dest = $json['para'];
-            $ok   = _privadoCanal($ws, $nombres, $dest, $miNombre, $txt, $canal);
+            // Si el destinatario bloqueó al remitente → rechazar mensaje
+            if (isset($bloqueados[$dest])) {
+                foreach ($bloqueados[$dest] as $u) {
+                    if (strtolower($u) === strtolower($miNombre)) {
+                        $conn->send(_encode(['tipo' => 'privado_bloqueado', 'para' => $dest, 'texto' => $txt, 'canal' => $canal]));
+                        return;
+                    }
+                }
+            }
+            $ok = _privadoCanal($ws, $nombres, $dest, $miNombre, $txt, $canal);
             if ($ok) {
                 $conn->send(_encode(['tipo' => 'privado_enviado', 'para' => $dest, 'texto' => $txt, 'canal' => $canal]));
                 dbGuardar('privado', $miNombre, $dest, $txt, $canal);
@@ -99,7 +146,7 @@ $ws->onMessage = function ($conn, $data) use ($ws, &$nombres, &$canales) {
         return;
     }
 
-    /* Texto plano (compatibilidad) — canal determinado por el del usuario */
+    /* ── Texto plano (compatibilidad) ── */
     $canal = ($miCanal === 'admin') ? 'internos' : $miCanal;
 
     if (str_starts_with($data, '@')) {
@@ -107,7 +154,16 @@ $ws->onMessage = function ($conn, $data) use ($ws, &$nombres, &$canales) {
         if ($sep > 1) {
             $dest = trim(substr($data, 1, $sep - 1));
             $txt  = trim(substr($data, $sep + 1));
-            $ok   = _privadoCanal($ws, $nombres, $dest, $miNombre, $txt, $canal);
+            // Si el destinatario bloqueó al remitente → rechazar
+            if (isset($bloqueados[$dest])) {
+                foreach ($bloqueados[$dest] as $u) {
+                    if (strtolower($u) === strtolower($miNombre)) {
+                        $conn->send(_encode(['tipo' => 'privado_bloqueado', 'para' => $dest, 'texto' => $txt, 'canal' => $canal]));
+                        return;
+                    }
+                }
+            }
+            $ok = _privadoCanal($ws, $nombres, $dest, $miNombre, $txt, $canal);
             if ($ok) {
                 $conn->send(_encode(['tipo' => 'privado_enviado', 'para' => $dest, 'texto' => $txt, 'canal' => $canal]));
                 dbGuardar('privado', $miNombre, $dest, $txt, $canal);
@@ -150,7 +206,6 @@ function _mensaje(string $de, string $texto, string $canal = 'internos'): string
     return _encode(['tipo' => 'mensaje', 'de' => $de, 'texto' => $texto, 'canal' => $canal]);
 }
 
-/* Envía a conexiones del mismo canal + admin (que recibe todo) */
 function _broadcastCanal(Worker $ws, array $canales, string $canal, string $msg): void {
     foreach ($ws->connections as $c) {
         $cCanal = $canales[$c->id] ?? 'internos';
@@ -170,7 +225,15 @@ function _privadoCanal(Worker $ws, array $nombres, string $dest, string $de, str
     return false;
 }
 
-/* Lista separada por canal; admin aparece en "internos" */
+function _notificarUsuario(Worker $ws, array $nombres, string $dest, string $msg): void {
+    foreach ($ws->connections as $c) {
+        if (isset($nombres[$c->id]) && strtolower($nombres[$c->id]) === strtolower($dest)) {
+            $c->send($msg);
+            return;
+        }
+    }
+}
+
 function _enviarUsuarios(Worker $ws, array $nombres, array $canales): void {
     $internos = [];
     $clientes = [];

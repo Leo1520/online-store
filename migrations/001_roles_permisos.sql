@@ -49,28 +49,30 @@ INSERT IGNORE INTO `Permiso` (`nombre`, `descripcion`, `modulo`) VALUES
 
 -- Stored Procedures
 
-DROP PROCEDURE IF EXISTS `sp_listar_roles`;
+DELIMITER //
+
+DROP PROCEDURE IF EXISTS `sp_listar_roles`//
 CREATE PROCEDURE `sp_listar_roles`()
 BEGIN
     SELECT r.cod, r.nombre, r.descripcion,
         (SELECT COUNT(*) FROM RolPermiso rp WHERE rp.codRol = r.cod) AS total_permisos,
         (SELECT COUNT(*) FROM Cuenta c WHERE c.rol = r.nombre)       AS total_cuentas
     FROM Rol r ORDER BY r.cod ASC;
-END;
+END//
 
-DROP PROCEDURE IF EXISTS `sp_crear_rol`;
+DROP PROCEDURE IF EXISTS `sp_crear_rol`//
 CREATE PROCEDURE `sp_crear_rol`(IN p_nombre VARCHAR(30), IN p_descripcion VARCHAR(150))
 BEGIN
     INSERT INTO Rol (nombre, descripcion) VALUES (p_nombre, p_descripcion);
-END;
+END//
 
-DROP PROCEDURE IF EXISTS `sp_actualizar_rol`;
+DROP PROCEDURE IF EXISTS `sp_actualizar_rol`//
 CREATE PROCEDURE `sp_actualizar_rol`(IN p_cod INT, IN p_nombre VARCHAR(30), IN p_descripcion VARCHAR(150))
 BEGIN
     UPDATE Rol SET nombre = p_nombre, descripcion = p_descripcion WHERE cod = p_cod;
-END;
+END//
 
-DROP PROCEDURE IF EXISTS `sp_eliminar_rol`;
+DROP PROCEDURE IF EXISTS `sp_eliminar_rol`//
 CREATE PROCEDURE `sp_eliminar_rol`(IN p_cod INT)
 BEGIN
     DECLARE cant INT DEFAULT 0;
@@ -80,58 +82,60 @@ BEGIN
     ELSE
         DELETE FROM Rol WHERE cod = p_cod;
     END IF;
-END;
+END//
 
-DROP PROCEDURE IF EXISTS `sp_listar_permisos`;
+DROP PROCEDURE IF EXISTS `sp_listar_permisos`//
 CREATE PROCEDURE `sp_listar_permisos`()
 BEGIN
     SELECT cod, nombre, descripcion, modulo FROM Permiso ORDER BY modulo ASC, nombre ASC;
-END;
+END//
 
-DROP PROCEDURE IF EXISTS `sp_crear_permiso`;
+DROP PROCEDURE IF EXISTS `sp_crear_permiso`//
 CREATE PROCEDURE `sp_crear_permiso`(IN p_nombre VARCHAR(60), IN p_descripcion VARCHAR(150), IN p_modulo VARCHAR(40))
 BEGIN
     INSERT INTO Permiso (nombre, descripcion, modulo) VALUES (p_nombre, p_descripcion, p_modulo);
-END;
+END//
 
-DROP PROCEDURE IF EXISTS `sp_actualizar_permiso`;
+DROP PROCEDURE IF EXISTS `sp_actualizar_permiso`//
 CREATE PROCEDURE `sp_actualizar_permiso`(IN p_cod INT, IN p_nombre VARCHAR(60), IN p_descripcion VARCHAR(150), IN p_modulo VARCHAR(40))
 BEGIN
     UPDATE Permiso SET nombre = p_nombre, descripcion = p_descripcion, modulo = p_modulo WHERE cod = p_cod;
-END;
+END//
 
-DROP PROCEDURE IF EXISTS `sp_eliminar_permiso`;
+DROP PROCEDURE IF EXISTS `sp_eliminar_permiso`//
 CREATE PROCEDURE `sp_eliminar_permiso`(IN p_cod INT)
 BEGIN
     DELETE FROM Permiso WHERE cod = p_cod;
-END;
+END//
 
-DROP PROCEDURE IF EXISTS `sp_permisos_de_rol`;
+DROP PROCEDURE IF EXISTS `sp_permisos_de_rol`//
 CREATE PROCEDURE `sp_permisos_de_rol`(IN p_codRol INT)
 BEGIN
     SELECT codPermiso FROM RolPermiso WHERE codRol = p_codRol;
-END;
+END//
 
-DROP PROCEDURE IF EXISTS `sp_limpiar_permisos_rol`;
+DROP PROCEDURE IF EXISTS `sp_limpiar_permisos_rol`//
 CREATE PROCEDURE `sp_limpiar_permisos_rol`(IN p_codRol INT)
 BEGIN
     DELETE FROM RolPermiso WHERE codRol = p_codRol;
-END;
+END//
 
-DROP PROCEDURE IF EXISTS `sp_agregar_permiso_a_rol`;
+DROP PROCEDURE IF EXISTS `sp_agregar_permiso_a_rol`//
 CREATE PROCEDURE `sp_agregar_permiso_a_rol`(IN p_codRol INT, IN p_codPermiso INT)
 BEGIN
     INSERT IGNORE INTO RolPermiso (codRol, codPermiso) VALUES (p_codRol, p_codPermiso);
-END;
+END//
 
-DROP PROCEDURE IF EXISTS `sp_cambiar_rol_cuenta`;
+DROP PROCEDURE IF EXISTS `sp_cambiar_rol_cuenta`//
 CREATE PROCEDURE `sp_cambiar_rol_cuenta`(IN p_usuario VARCHAR(40), IN p_rol VARCHAR(30))
 BEGIN
     UPDATE Cuenta SET rol = p_rol WHERE usuario = p_usuario;
-END;
+END//
 
-DROP PROCEDURE IF EXISTS `sp_listar_cuentas_con_rol`;
+DROP PROCEDURE IF EXISTS `sp_listar_cuentas_con_rol`//
 CREATE PROCEDURE `sp_listar_cuentas_con_rol`()
 BEGIN
     SELECT usuario, rol FROM Cuenta ORDER BY rol ASC, usuario ASC;
-END;
+END//
+
+DELIMITER ;
